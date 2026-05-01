@@ -5,8 +5,139 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IMC Trading Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  /* ══════════════════════════════════════════════
+     CROSS-PLATFORM TYPOGRAPHY + VISUAL POLISH
+     Fixes Mac/Windows font rendering gap
+  ══════════════════════════════════════════════ */
+
+  /* Mac font smoothing fix — prevents thin rendering on Retina */
+  *{
+    box-sizing:border-box;margin:0;padding:0;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
+    -webkit-text-size-adjust:100%;
+  }
+
+  /* Force Inter with heavier fallback stack for Windows ClearType */
+  body{
+    font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+    font-size:15px!important;
+    font-weight:400;
+    letter-spacing:-0.005em;
+    line-height:1.6;
+  }
+
+  /* ── SETUP / INTRO SCREENS ── */
+  #setup,#intro,.intro-screen,.setup-screen{
+    max-width:740px;margin:0 auto;padding:52px 28px;
+  }
+  .setup-hero,.intro-hero{text-align:center;margin-bottom:40px;}
+
+  /* Tag line above title */
+  .setup-tag,.intro-tag{
+    font-size:0.65rem!important;font-weight:800!important;
+    letter-spacing:0.22em!important;text-transform:uppercase!important;
+    margin-bottom:12px!important;opacity:.85;
+  }
+
+  /* Main title — heavier on Mac, same visual weight as Windows */
+  .setup-title,.intro-title{
+    font-size:2.6rem!important;font-weight:900!important;
+    color:var(--bright)!important;
+    margin-bottom:10px!important;
+    letter-spacing:-0.03em!important;
+    line-height:1.1!important;
+  }
+
+  /* Subtitle */
+  .setup-sub,.intro-sub{
+    font-size:1rem!important;line-height:1.7!important;
+    color:var(--dim)!important;max-width:520px;margin:0 auto!important;
+  }
+
+  /* ── CARDS — polished with subtle gradient + shadow ── */
+  .rule-card,.info-card,.card,.intro-card,.role-card,
+  .feature-card,.theory-card{
+    background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%)!important;
+    border:1px solid var(--border)!important;
+    border-radius:12px!important;
+    padding:22px 26px!important;
+    margin-bottom:14px!important;
+    box-shadow:0 2px 12px var(--shadow),0 0 0 0px transparent!important;
+    transition:border-color .2s,box-shadow .2s,transform .15s!important;
+  }
+  .rule-card:hover,.info-card:hover,.card:hover,.intro-card:hover,
+  .role-card:hover,.feature-card:hover,.theory-card:hover{
+    border-color:var(--border2)!important;
+    box-shadow:0 4px 24px var(--shadow)!important;
+    transform:translateY(-1px)!important;
+  }
+
+  /* Card headings */
+  .rule-card h3,.info-card h3,.card h3,.card-title,.role-name,
+  .feature-title,.theory-card h3{
+    font-size:0.68rem!important;font-weight:800!important;
+    text-transform:uppercase!important;letter-spacing:0.15em!important;
+    color:var(--yellow)!important;margin-bottom:10px!important;
+  }
+
+  /* Card body text */
+  .rule-card p,.info-card p,.card p,.role-desc,.card-body,
+  .feature-desc,.theory-card p{
+    font-size:0.9rem!important;line-height:1.7!important;
+    color:var(--text)!important;font-weight:400!important;
+  }
+
+  /* ── CTA BUTTONS ── */
+  .btn-primary,.start-btn,.setup-start .btn,
+  button[onclick*="start"],button[onclick*="Start"]{
+    font-family:'Inter',sans-serif!important;
+    font-size:0.95rem!important;font-weight:700!important;
+    letter-spacing:0.02em!important;
+    padding:14px 44px!important;border-radius:9px!important;
+    transition:all .2s!important;
+  }
+
+  /* Flow steps in relay etc */
+  .flow-step{
+    font-size:0.7rem!important;font-weight:700!important;
+    letter-spacing:0.06em!important;
+    padding:6px 14px!important;border-radius:20px!important;
+  }
+  .flow-arr{font-size:1rem!important;opacity:.5;}
+
+  /* Role icons */
+  .role-icon{font-size:2.2rem!important;margin-bottom:12px!important;}
+
+  /* Section labels */
+  .section-label,.spec-section-title,.section-title{
+    font-size:0.65rem!important;font-weight:800!important;
+    text-transform:uppercase!important;letter-spacing:0.16em!important;
+    color:var(--dim)!important;margin-bottom:14px!important;
+  }
+
+  /* Number badges (rule-num style) */
+  .rule-num{
+    background:var(--bg4)!important;color:var(--yellow)!important;
+    font-family:'DM Mono',monospace!important;
+    font-size:0.72rem!important;font-weight:700!important;
+    width:24px!important;height:24px!important;border-radius:5px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    flex-shrink:0!important;margin-top:2px!important;
+  }
+
+  /* Two-column role-card grid */
+  .roles-grid,.role-grid{
+    display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important;
+  }
+  @media(max-width:600px){
+    .roles-grid,.role-grid{grid-template-columns:1fr!important;}
+    .setup-title,.intro-title{font-size:2rem!important;}
+  }
+
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#06090f;--bg2:#0b111c;--bg3:#101824;--bg4:#162030;
