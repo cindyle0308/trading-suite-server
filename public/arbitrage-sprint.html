@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Arbitrage Sprint | IMC Trading Race Prep</title>
+<title>Arbitrage Sprint | LeXie Trading Race Prep</title>
 <style>
   /* ══════════════════════════════════════════════
      CROSS-PLATFORM TYPOGRAPHY + VISUAL POLISH
@@ -371,7 +371,7 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:8px 18p
   <span class="sep">|</span>
 
   <span style="color:var(--dim);font-size:11px;">Trading:</span>
-  <a href="cmi-challenge.html">CMI</a>
+  <a href="cmi-challenge.html">Asset Mgr</a>
   <a href="price-war.html">Price War</a>
   <span class="cur">Arb Sprint</span>
   <span class="sep">|</span>
@@ -385,7 +385,7 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:8px 18p
   <span class="sep">|</span>
   <a href="basket-blitz.html">Basket</a>
   <a href="options-outcry.html">Outcry</a>
-  <a href="cmi-challenge.html">CMI</a>
+  <a href="cmi-challenge.html">Asset Mgr</a>
 <a href="https://lexie-marketmakerbaos.onrender.com" target="_blank">Market Maker</a>
 <span class="theme-nav-btns"><button class="tnb" data-t="light" onclick="setTheme('light',true)" title="Light">☀</button><button class="tnb" data-t="system" onclick="setTheme('system',true)" title="System">⊙</button><button class="tnb" data-t="dark" onclick="setTheme('dark',true)" title="Dark">☾</button></span>
 </nav>
@@ -393,9 +393,9 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:8px 18p
 <!-- SETUP -->
 <div id="setup">
   <div class="setup-hero">
-    <div class="setup-tag">IMC Prosperity · Manual Challenge Replica</div>
+    <div class="setup-tag">LeXie · Manual Challenge Replica</div>
     <div class="setup-title">🏁 Arbitrage Sprint</div>
-    <div class="setup-sub">5 escalating rounds · Speed bonus · Real IMC challenge formats</div>
+    <div class="setup-sub">5 escalating rounds · Speed bonus · Real LeXie challenge formats</div>
   </div>
   <div class="round-preview">
     <div class="rp-card"><div class="rp-num">R1</div><div class="rp-name">FX Arbitrage</div><div class="rp-time">3 min</div></div>
@@ -564,7 +564,7 @@ function timeoutRound() {
   if (G.roundDone[G.round]) return;
   G.roundDone[G.round] = true;
   if (G.round === 4) { finalizeR5(); return; }
-  showFeedback(false, 0, 'Time\'s up! No points for this round. Speed matters in the real IMC race.');
+  showFeedback(false, 0, 'Time\'s up! No points for this round. Speed matters in the real LeXie race.');
   document.getElementById('next-btn-wrap').classList.remove('hidden');
 }
 
@@ -590,7 +590,7 @@ function showResults() {
   G.totalScore = total;
   document.getElementById('res-total').textContent = total;
   let medal = '📊', title = 'Sprint Complete!', sub = 'Review your weak rounds and try again';
-  if (total >= 400) { medal = '🥇'; title = 'Elite Trader!'; sub = 'IMC would be impressed — top-tier performance'; }
+  if (total >= 400) { medal = '🥇'; title = 'Elite Trader!'; sub = 'LeXie would be impressed — top-tier performance'; }
   else if (total >= 280) { medal = '🥈'; title = 'Strong Performance!'; sub = 'Good fundamentals — polish the harder rounds'; }
   else if (total >= 160) { medal = '🥉'; title = 'Solid Foundation!'; sub = 'Core skills are there — speed needs work'; }
   document.getElementById('res-medal').textContent = medal;
