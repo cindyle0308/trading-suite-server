@@ -7,9 +7,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  /* ── Global typography upgrade ── */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif!important;font-size:15px!important;}
+  /* Setup / intro screen */
+  #setup,#intro,.intro-screen{max-width:720px;margin:0 auto;padding:48px 24px;}
+  .setup-hero,.intro-hero{text-align:center;margin-bottom:36px;}
+  .setup-tag,.intro-tag{font-size:0.68rem!important;font-weight:700!important;letter-spacing:0.18em!important;text-transform:uppercase!important;margin-bottom:10px!important;}
+  .setup-title,.intro-title{font-size:2.4rem!important;font-weight:800!important;color:var(--bright)!important;margin-bottom:8px!important;letter-spacing:-0.02em;}
+  .setup-sub,.intro-sub{font-size:0.95rem!important;line-height:1.65!important;color:var(--dim)!important;margin-bottom:0!important;}
+  /* Cards */
+  .rule-card,.info-card,.card,.intro-card,.role-card{background:var(--bg2)!important;border:1px solid var(--border)!important;border-radius:10px!important;padding:20px 24px!important;margin-bottom:14px!important;}
+  .rule-card h3,.info-card h3,.card h3,.card-title,.role-name{font-size:0.72rem!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:0.1em!important;color:var(--yellow)!important;margin-bottom:10px!important;}
+  .rule-card p,.info-card p,.card p,.role-desc,.card-body{font-size:0.875rem!important;line-height:1.65!important;color:var(--text)!important;}
+  /* Buttons */
+  .btn-primary,.start-btn,.setup-start .btn,.btn.btn-lg{font-size:0.95rem!important;font-weight:700!important;padding:14px 40px!important;border-radius:8px!important;}
+  /* Section labels */
+  .section-label,.spec-section-title,.section-title{font-size:0.68rem!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:0.14em!important;color:var(--dim)!important;margin-bottom:12px!important;}
+
 :root{--bg:#06090f;--bg2:#0b111c;--bg3:#101824;--bg4:#162030;--border:#1a2d46;--border2:#243d5a;--text:#b0c8e4;--dim:#4a6a8a;--bright:#e0eefa;--green:#00d888;--red:#ff3d5a;--yellow:#ffc840;--blue:#3a90ff;--purple:#9d60ff;--shadow:rgba(0,0,0,.45)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.5;overflow:hidden}
 .mono{font-family:'DM Mono',monospace}
 .dim{color:var(--dim)}
 .bright{color:var(--bright)}
