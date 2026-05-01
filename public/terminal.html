@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeXie Research Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+:root{
+  --bg:#07090f;--bg2:#0d1117;--bg3:#161b22;--bg4:#1c2333;
+  --border:#21262d;--border2:#30363d;
+  --text:#c9d1d9;--dim:#6e7681;--bright:#f0f6fc;
+  --yellow:#e3b341;--green:#3fb950;--blue:#58a6ff;
+  --purple:#bc8cff;--red:#f85149;--teal:#39d353;--orange:#fb8f44;
+  --shadow:rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:#f6f8fa;--bg2:#ffffff;--bg3:#f0f4f8;--bg4:#e8ecf0;
+  --border:#d0d7de;--border2:#b0bac4;
+  --text:#24292f;--dim:#57606a;--bright:#0d1117;
+  --shadow:rgba(0,0,0,.1);
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* ── TOP NAV ── */
+.topnav{height:42px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:100;}
+.logo{font-weight:900;font-size:13px;color:var(--bright);letter-spacing:-.02em;}
+.logo span{color:var(--yellow);}
+.nav-sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
+.nav-tab{font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;color:var(--dim);border:none;background:none;transition:all .15s;}
+.nav-tab:hover{color:var(--text);background:var(--bg3);}
+.nav-tab.active{color:var(--bright);background:var(--bg4);}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.theme-btn{background:none;border:1px solid var(--border);border-radius:5px;color:var(--dim);font-size:11px;cursor:pointer;padding:3px 8px;transition:all .15s;}
+.theme-btn:hover{border-color:var(--border2);color:var(--bright);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* ── MAIN LAYOUT ── */
+.workspace{flex:1;display:flex;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:200px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-section{padding:8px 0;border-bottom:1px solid var(--border);}
+.sidebar-label{font-size:8.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);padding:4px 12px 6px;}
+.sidebar-btn{display:flex;align-items:center;gap:7px;width:100%;padding:6px 12px;font-size:11px;font-weight:500;color:var(--dim);background:none;border:none;cursor:pointer;transition:all .12s;text-align:left;}
+.sidebar-btn:hover{background:var(--bg3);color:var(--text);}
+.sidebar-btn.active{background:var(--bg4);color:var(--bright);font-weight:600;}
+.sidebar-btn .icon{font-size:13px;width:16px;flex-shrink:0;}
+.sidebar-badge{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(88,166,255,.15);color:var(--blue);}
+
+/* ── EDITOR+CHART AREA ── */
+.editor-area{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.editor-topbar{height:36px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;}
+.editor-tab{font-size:11px;font-weight:600;padding:3px 10px;border-radius:5px;cursor:pointer;color:var(--dim);border:none;background:none;}
+.editor-tab.active{color:var(--bright);background:var(--bg4);}
+.run-btn{margin-left:auto;background:var(--green);color:#000;border:none;border-radius:6px;padding:4px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s;}
+.run-btn:hover{opacity:.85;}
+.run-btn:disabled{opacity:.4;cursor:not-allowed;}
+.bt-btn{background:var(--blue);color:#000;border:none;border-radius:6px;padding:4px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-left:4px;}
+.bt-btn:hover{opacity:.85;}
+
+/* Editor + Charts split */
+.editor-charts{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.editor-pane{flex:0 0 240px;border-bottom:1px solid var(--border);position:relative;background:var(--bg);}
+#monaco-container{position:absolute;inset:0;}
+.charts-pane{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:var(--border);min-height:0;overflow:hidden;}
+.chart-cell{background:var(--bg);position:relative;overflow:hidden;}
+.chart-cell canvas{position:absolute;inset:4px;}
+.chart-label{position:absolute;top:5px;left:8px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);z-index:2;pointer-events:none;}
+
+/* ── TEACH PANEL ── */
+.teach-panel{width:320px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.teach-topbar{height:36px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:6px;flex-shrink:0;}
+.teach-title{font-size:11px;font-weight:700;color:var(--bright);}
+.teach-progress{margin-left:auto;font-size:9px;color:var(--dim);}
+.teach-content{flex:1;overflow-y:auto;padding:14px;}
+.teach-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;}
+.teach-card-tag{font-size:8.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px;}
+.teach-card-title{font-size:13px;font-weight:700;color:var(--bright);margin-bottom:8px;}
+.teach-card-body{font-size:11.5px;color:var(--text);line-height:1.65;}
+.teach-card-body code{font-family:'DM Mono',monospace;font-size:10.5px;background:var(--bg4);color:var(--green);padding:1px 5px;border-radius:3px;}
+.teach-formula{background:var(--bg4);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;padding:8px 10px;margin:8px 0;font-family:'DM Mono',monospace;font-size:11px;color:var(--yellow);line-height:1.8;}
+.teach-quiz{background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-top:10px;}
+.teach-quiz-q{font-size:11.5px;font-weight:600;color:var(--bright);margin-bottom:8px;}
+.quiz-opt{display:block;width:100%;text-align:left;background:none;border:1px solid var(--border);border-radius:6px;padding:7px 10px;margin-bottom:5px;font-size:11px;color:var(--text);cursor:pointer;transition:all .15s;}
+.quiz-opt:hover{border-color:var(--border2);background:var(--bg3);}
+.quiz-opt.correct{border-color:var(--green);background:rgba(63,185,80,.1);color:var(--green);}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(248,81,73,.1);color:var(--red);}
+.teach-nav{display:flex;gap:8px;margin-top:10px;}
+.teach-nav-btn{flex:1;padding:7px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.teach-nav-btn:hover{border-color:var(--border2);color:var(--bright);}
+.teach-nav-btn.primary{background:var(--blue);border-color:var(--blue);color:#000;font-weight:700;}
+.try-btn{display:block;width:100%;margin-top:8px;padding:7px;border-radius:6px;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;}
+.try-btn:hover{background:rgba(88,166,255,.2);}
+
+/* ── CONSOLE ── */
+.console-bar{height:28px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:8px;flex-shrink:0;}
+.console-label{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);}
+.console-output{font-family:'DM Mono',monospace;font-size:10px;color:var(--teal);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.score-pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.25);}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <span class="logo">LeXie <span>Research Terminal</span></span>
+  <div class="nav-sep"></div>
+  <button class="nav-tab active" onclick="switchMode('terminal')">⌨ Terminal</button>
+  <button class="nav-tab" onclick="switchMode('explorer')">🔬 Data Explorer</button>
+  <button class="nav-tab" onclick="switchMode('composer')">🧩 Signal Composer</button>
+  <button class="nav-tab" onclick="window.location.href='index.html'">⌂ Hub</button>
+  <div class="nav-right">
+    <div class="status-dot" title="Market live"></div>
+    <span id="market-clock" style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);">T+0</span>
+    <span id="score-display" class="score-pill" style="display:none;"></span>
+    <button class="theme-btn" onclick="toggleTheme()">☀/☾</button>
+  </div>
+</nav>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Market</div>
+      <button class="sidebar-btn active" onclick="setScenario('trend')"><span class="icon">📈</span> Trending</button>
+      <button class="sidebar-btn" onclick="setScenario('mean_rev')"><span class="icon">⚖️</span> Mean-Rev</button>
+      <button class="sidebar-btn" onclick="setScenario('volatile')"><span class="icon">🌩</span> Volatile</button>
+      <button class="sidebar-btn" onclick="setScenario('regime')"><span class="icon">🌀</span> Regime-Switch</button>
+      <button class="sidebar-btn" onclick="setScenario('multi')"><span class="icon">🔗</span> Multi-Asset</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Signals</div>
+      <button class="sidebar-btn" onclick="loadSnippet('momentum')"><span class="icon">⚡</span> Momentum</button>
+      <button class="sidebar-btn" onclick="loadSnippet('mean_rev')"><span class="icon">⚖️</span> Mean Reversion</button>
+      <button class="sidebar-btn" onclick="loadSnippet('ofi')"><span class="icon">📊</span> Order Flow</button>
+      <button class="sidebar-btn" onclick="loadSnippet('pairs')"><span class="icon">🔗</span> Pairs Trade</button>
+      <button class="sidebar-btn" onclick="loadSnippet('regime_sig')"><span class="icon">🌀</span> Regime Filter</button>
+      <button class="sidebar-btn" onclick="loadSnippet('composite')"><span class="icon">🧩</span> Composite</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Learn</div>
+      <button class="sidebar-btn" onclick="setLesson(0)"><span class="icon">📖</span> Microstructure</button>
+      <button class="sidebar-btn" onclick="setLesson(1)"><span class="icon">📐</span> Signal IC</button>
+      <button class="sidebar-btn" onclick="setLesson(2)"><span class="icon">🔗</span> Correlations</button>
+      <button class="sidebar-btn" onclick="setLesson(3)"><span class="icon">🌀</span> Regime Detection</button>
+      <button class="sidebar-btn" onclick="setLesson(4)"><span class="icon">🎯</span> Alpha Decay</button>
+      <button class="sidebar-btn" onclick="setLesson(5)"><span class="icon">⚠️</span> False Discovery</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Compete</div>
+      <button class="sidebar-btn" onclick="submitSignal()"><span class="icon">🏆</span> Submit Signal <span class="sidebar-badge">Live</span></button>
+      <button class="sidebar-btn" onclick="window.location.href='quant-relay.html'"><span class="icon">🔬</span> Quant Relay</button>
+      <button class="sidebar-btn" onclick="window.location.href='alpha-factory.html'"><span class="icon">🏭</span> Alpha Factory</button>
+    </div>
+  </div>
+
+  <!-- EDITOR + CHARTS -->
+  <div class="editor-area">
+    <div class="editor-topbar">
+      <button class="editor-tab active" onclick="setEditorTab('strategy')">strategy.js</button>
+      <button class="editor-tab" onclick="setEditorTab('explore')">explore.js</button>
+      <button class="editor-tab" onclick="setEditorTab('notebook')">notebook.js</button>
+      <button class="run-btn" id="run-btn" onclick="runStrategy()">▶ Run</button>
+      <button class="bt-btn" onclick="runBacktest()">⏱ Backtest</button>
+    </div>
+    <div class="editor-charts">
+      <div class="editor-pane">
+        <div id="monaco-container"></div>
+      </div>
+      <div class="charts-pane">
+        <div class="chart-cell">
+          <div class="chart-label">Price + Signal</div>
+          <canvas id="chart-price"></canvas>
+        </div>
+        <div class="chart-cell">
+          <div class="chart-label">Equity Curve</div>
+          <canvas id="chart-equity"></canvas>
+        </div>
+        <div class="chart-cell">
+          <div class="chart-label">Signal IC Over Time</div>
+          <canvas id="chart-ic"></canvas>
+        </div>
+        <div class="chart-cell">
+          <div class="chart-label">Feature Distribution</div>
+          <canvas id="chart-dist"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="console-bar">
+      <span class="console-label">Console</span>
+      <span class="console-output" id="console-out">Ready. Press Run to execute strategy.</span>
+    </div>
+  </div>
+
+  <!-- TEACH PANEL -->
+  <div class="teach-panel">
+    <div class="teach-topbar">
+      <span style="font-size:14px;">📖</span>
+      <span class="teach-title" id="teach-title">Microstructure</span>
+      <span class="teach-progress" id="teach-progress">Module 1 of 6</span>
+    </div>
+    <div class="teach-content" id="teach-content"></div>
+  </div>
+
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, orderBy, query, limit }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const app = initializeApp({
+  apiKey:"AIzaSyDPNaHsWtignrwVrUI-0KcTc6HQzV9sck0",
+  authDomain:"market-maker-game-68184.firebaseapp.com",
+  projectId:"market-maker-game-68184"
+});
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+window._db = db;
+window._collection = collection;
+window._addDoc = addDoc;
+window._getDocs = getDocs;
+window._query = query;
+window._orderBy = orderBy;
+window._limit = limit;
+
+onAuthStateChanged(auth, user => { window._user = user; });
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  PRNG — Mulberry32, seeded by day for determinism
+// ═══════════════════════════════════════════════════
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const daySeed = Math.floor(Date.now() / 86400000);
+let rng = mulberry32(daySeed);
+
+function randNorm() {
+  let u = 0, v = 0;
+  while (!u) u = rng();
+  while (!v) v = rng();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// ═══════════════════════════════════════════════════
+//  MARKET SIMULATION ENGINE
+// ═══════════════════════════════════════════════════
+const SCENARIOS = {
+  trend:    { mu: 0.0008, sigma: 0.012, kappa: 0.0,  regime: 'trend' },
+  mean_rev: { mu: 0.0,    sigma: 0.010, kappa: 0.15, regime: 'mean_rev' },
+  volatile: { mu: 0.0002, sigma: 0.028, kappa: 0.0,  regime: 'volatile' },
+  regime:   { mu: 0.0,    sigma: 0.015, kappa: 0.05, regime: 'switching' },
+  multi:    { mu: 0.0003, sigma: 0.012, kappa: 0.08, regime: 'multi' },
+};
+
+let currentScenario = 'trend';
+let market = null;
+
+class MarketSim {
+  constructor(scenario) {
+    const cfg = SCENARIOS[scenario];
+    this.cfg = cfg;
+    this.price = 100;
+    this.prices = [];
+    this.volumes = [];
+    this.bids = [];
+    this.asks = [];
+    this.trades = [];
+    this.regimeHistory = [];
+    this.currentRegime = cfg.regime === 'switching' ? 'trend' : cfg.regime;
+    this.regimeDuration = 0;
+    this.correlatedPrices = [100, 100, 100]; // 3 correlated assets
+    this.corrMatrix = [[1,.72,.41],[.72,1,.65],[.41,.65,1]];
+    this.generate(300);
+  }
+  
+  step() {
+    const c = this.cfg;
+    // Regime switching
+    if (c.regime === 'switching') {
+      this.regimeDuration++;
+      if (this.regimeDuration > 40 + Math.floor(rng() * 60)) {
+        this.currentRegime = this.currentRegime === 'trend' ? 'mean_rev' : 'trend';
+        this.regimeDuration = 0;
+      }
+    }
+    
+    const mu = this.currentRegime === 'trend' ? c.mu : -c.kappa * (this.price - 100) / 100;
+    const dP = mu + c.sigma * randNorm();
+    
+    // Mean reversion pull
+    if (c.kappa > 0 && c.regime !== 'switching') {
+      this.price = this.price * (1 + dP - c.kappa * (this.price - 100) / 100);
+    } else {
+      this.price = this.price * (1 + dP);
+    }
+    
+    this.price = Math.max(this.price, 10);
+    const spread = 0.02 + Math.abs(randNorm()) * 0.01;
+    const bid = this.price * (1 - spread / 2);
+    const ask = this.price * (1 + spread / 2);
+    const vol = Math.floor(1000 + rng() * 9000);
+    
+    this.prices.push(+this.price.toFixed(4));
+    this.bids.push(+bid.toFixed(4));
+    this.asks.push(+ask.toFixed(4));
+    this.volumes.push(vol);
+    this.regimeHistory.push(this.currentRegime);
+    this.trades.push({
+      price: this.price,
+      size: Math.floor(100 + rng() * 900),
+      side: rng() > 0.5 ? 'buy' : 'sell',
+      t: this.prices.length - 1
+    });
+    
+    // Correlated assets
+    for (let i = 0; i < 3; i++) {
+      const rho = this.corrMatrix[0][i+1] ?? 0.5;
+      const noise = Math.sqrt(1 - rho*rho) * randNorm();
+      const corr_dP = rho * dP + noise * c.sigma;
+      this.correlatedPrices[i] = Math.max(10, this.correlatedPrices[i] * (1 + corr_dP));
+    }
+    
+    return {
+      t: this.prices.length - 1,
+      price: this.price,
+      bid, ask, vol,
+      regime: this.currentRegime,
+    };
+  }
+  
+  generate(n) {
+    for (let i = 0; i < n; i++) this.step();
+  }
+  
+  getOHLCV(n = 100, freq = 5) {
+    const prices = this.prices.slice(-n * freq);
+    const vols = this.volumes.slice(-n * freq);
+    const bars = [];
+    for (let i = 0; i < prices.length; i += freq) {
+      const chunk = prices.slice(i, i + freq);
+      if (!chunk.length) continue;
+      bars.push({
+        t: i / freq,
+        o: chunk[0], h: Math.max(...chunk),
+        l: Math.min(...chunk), c: chunk[chunk.length-1],
+        v: vols.slice(i, i+freq).reduce((a,b)=>a+b, 0)
+      });
+    }
+    return bars;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  FEATURE ENGINE — 20+ signals computed from market
+// ═══════════════════════════════════════════════════
+const FE = {
+  sma(arr, n) {
+    return arr.map((_, i) => {
+      if (i < n-1) return null;
+      return arr.slice(i-n+1, i+1).reduce((a,b)=>a+b,0)/n;
+    });
+  },
+  ema(arr, n) {
+    const k = 2/(n+1); let e = arr[0];
+    return arr.map(v => { e = v*k + e*(1-k); return e; });
+  },
+  rsi(arr, n=14) {
+    const out = Array(arr.length).fill(null);
+    for (let i = n; i < arr.length; i++) {
+      let gains=0,losses=0;
+      for (let j=i-n+1;j<=i;j++){
+        const d=arr[j]-arr[j-1];
+        if(d>0) gains+=d; else losses+=Math.abs(d);
+      }
+      const rs = gains/(losses||0.001);
+      out[i] = 100 - 100/(1+rs);
+    }
+    return out;
+  },
+  zscore(arr, n=20) {
+    return arr.map((v, i) => {
+      if (i < n-1) return 0;
+      const sl = arr.slice(i-n+1, i+1);
+      const mu = sl.reduce((a,b)=>a+b,0)/n;
+      const sigma = Math.sqrt(sl.reduce((a,b)=>a+(b-mu)**2,0)/n);
+      return sigma < 1e-9 ? 0 : (v-mu)/sigma;
+    });
+  },
+  bollinger(arr, n=20, k=2) {
+    return arr.map((v, i) => {
+      if (i < n-1) return {upper:v,lower:v,mid:v,pct:0.5};
+      const sl = arr.slice(i-n+1, i+1);
+      const mid = sl.reduce((a,b)=>a+b,0)/n;
+      const sigma = Math.sqrt(sl.reduce((a,b)=>a+(b-mid)**2,0)/n);
+      const upper = mid + k*sigma, lower = mid - k*sigma;
+      return {upper, lower, mid, pct: sigma<1e-9?0.5:(v-lower)/(upper-lower)};
+    });
+  },
+  momentum(arr, n=10) {
+    return arr.map((v, i) => i < n ? 0 : (v - arr[i-n]) / arr[i-n]);
+  },
+  ofi(trades, n=20) {
+    // Order Flow Imbalance
+    const out = [];
+    for (let i = 0; i < trades.length; i++) {
+      const sl = trades.slice(Math.max(0,i-n), i+1);
+      const buyVol  = sl.filter(t=>t.side==='buy').reduce((a,t)=>a+t.size,0);
+      const sellVol = sl.filter(t=>t.side==='sell').reduce((a,t)=>a+t.size,0);
+      const total = buyVol + sellVol;
+      out.push(total > 0 ? (buyVol - sellVol) / total : 0);
+    }
+    return out;
+  },
+  hurst(arr) {
+    // Simplified Hurst exponent estimate
+    if (arr.length < 20) return 0.5;
+    const n = Math.min(arr.length, 100);
+    const sl = arr.slice(-n);
+    const mean = sl.reduce((a,b)=>a+b,0)/n;
+    const dev = sl.map(v=>v-mean);
+    let cumDev = 0, R = 0, maxCum = -Infinity, minCum = Infinity;
+    for (const d of dev) {
+      cumDev += d;
+      if (cumDev > maxCum) maxCum = cumDev;
+      if (cumDev < minCum) minCum = cumDev;
+    }
+    R = maxCum - minCum;
+    const S = Math.sqrt(sl.reduce((a,v)=>a+(v-mean)**2,0)/n);
+    if (S < 1e-9) return 0.5;
+    return Math.log(R/S) / Math.log(n/2);
+  },
+  ic(signal, fwdReturns) {
+    // Spearman rank correlation (IC)
+    const n = Math.min(signal.length, fwdReturns.length);
+    const si = signal.slice(0,n).map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map((x,r)=>({...x,r})).sort((a,b)=>a.i-b.i).map(x=>x.r);
+    const fi = fwdReturns.slice(0,n).map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map((x,r)=>({...x,r})).sort((a,b)=>a.i-b.i).map(x=>x.r);
+    const d2 = si.reduce((a,_,i)=>a+(si[i]-fi[i])**2, 0);
+    return 1 - 6*d2/(n*(n*n-1));
+  },
+  rollingIC(signal, prices, horizon=5, window=30) {
+    const fwd = prices.map((_,i)=> i+horizon < prices.length ? (prices[i+horizon]-prices[i])/prices[i] : null).slice(0,-horizon);
+    const sig = signal.slice(0, fwd.length);
+    const out = [];
+    for (let i = window; i < sig.length; i++) {
+      const s = sig.slice(i-window, i), f = fwd.slice(i-window, i);
+      out.push(FE.ic(s, f));
+    }
+    return out;
+  },
+  halfLife(series) {
+    const n = series.length;
+    if (n < 10) return NaN;
+    const y = series.slice(1).map((v,i) => v - series[i]);
+    const x = series.slice(0,-1);
+    const mx = x.reduce((a,b)=>a+b,0)/x.length;
+    const my = y.reduce((a,b)=>a+b,0)/y.length;
+    const cov = x.reduce((a,v,i)=>a+(v-mx)*(y[i]-my),0);
+    const varx = x.reduce((a,v)=>a+(v-mx)**2,0);
+    const beta = varx<1e-12 ? 0 : cov/varx;
+    return beta < 0 ? Math.log(2)/Math.abs(beta) : NaN;
+  },
+};
+
+// ═══════════════════════════════════════════════════
+//  LeXie API — ctx object available in user strategies
+// ═══════════════════════════════════════════════════
+function buildCtx(m) {
+  const prices = m.prices;
+  const returns = prices.map((v,i) => i===0?0:(v-prices[i-1])/prices[i-1]);
+  return {
+    // Data access
+    ohlcv: (n=50, freq=5) => m.getOHLCV(n, freq),
+    ticks: (n=50) => m.trades.slice(-n),
+    orderbook: () => ({
+      bids: Array.from({length:5},(_,i)=>({price:m.price*(1-0.002*(i+1)),size:Math.floor(rng()*5000+500)})),
+      asks: Array.from({length:5},(_,i)=>({price:m.price*(1+0.002*(i+1)),size:Math.floor(rng()*5000+500)})),
+    }),
+    prices: () => [...prices],
+    returns: () => [...returns],
+    // Features
+    features: () => ({
+      momentum_5:  FE.momentum(prices, 5).at(-1),
+      momentum_20: FE.momentum(prices, 20).at(-1),
+      rsi_14:      FE.rsi(prices, 14).at(-1),
+      zscore_20:   FE.zscore(prices, 20).at(-1),
+      ofi:         FE.ofi(m.trades, 20).at(-1),
+      hurst:       FE.hurst(prices.slice(-80)),
+      spread:      (m.asks.at(-1) - m.bids.at(-1)) / m.price,
+      regime:      m.currentRegime,
+      vol_20:      Math.sqrt(returns.slice(-20).reduce((a,v)=>a+v**2,0)/20),
+    }),
+    // Computed series
+    sma:       (n=20) => FE.sma(prices, n),
+    ema:       (n=20) => FE.ema(prices, n),
+    rsi:       (n=14) => FE.rsi(prices, n),
+    zscore:    (n=20) => FE.zscore(prices, n),
+    bollinger: (n=20, k=2) => FE.bollinger(prices, n, k),
+    momentum:  (n=10) => FE.momentum(prices, n),
+    ofiSeries: (n=20) => FE.ofi(m.trades, n),
+    ic:        (signal, horizon=5) => {
+      const fwd = prices.map((_,i)=>i+horizon<prices.length?(prices[i+horizon]-prices[i])/prices[i]:0);
+      return FE.ic(signal, fwd);
+    },
+    rollingIC: (signal, horizon=5, window=30) => FE.rollingIC(signal, prices, horizon, window),
+    halfLife:  (series) => FE.halfLife(series || prices.slice(-60)),
+    hurst:     (n=80) => FE.hurst(prices.slice(-n)),
+    correlation: () => {
+      const all = [prices, ...m.correlatedPrices.map((_,i)=>[])];
+      return m.corrMatrix;
+    },
+    regime:    () => m.currentRegime,
+    // Plotting
+    plot: (series, opts={}) => plotUserSeries(series, opts),
+    scatter: (x, y, opts={}) => plotScatter(x, y, opts),
+    heatmap: (matrix, labels) => plotHeatmap(matrix, labels),
+    log: (...args) => consoleLog(args.map(a=>typeof a==='object'?JSON.stringify(a):a).join(' ')),
+    // Backtest helper (returns signal performance stats)
+    evalSignal: (signalArr, horizon=5, tc=0.001) => {
+      const fwd = prices.map((_,i)=>i+horizon<prices.length?(prices[i+horizon]-prices[i])/prices[i]:0);
+      const equity=[0]; let pnl=0;
+      for(let i=0;i<Math.min(signalArr.length,fwd.length);i++){
+        const ret = signalArr[i]*fwd[i] - Math.abs(signalArr[i])*tc;
+        pnl += ret;
+        equity.push(pnl);
+      }
+      const rets = equity.slice(1).map((v,i)=>v-equity[i]);
+      const mu = rets.reduce((a,b)=>a+b,0)/rets.length;
+      const sig = Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0)/rets.length);
+      const sharpe = sig<1e-9?0:mu/sig*Math.sqrt(252);
+      const ic = FE.ic(signalArr.slice(0,fwd.length), fwd);
+      const maxDD = equity.reduce(({peak,dd},v)=>({peak:Math.max(peak,v),dd:Math.min(dd,v-Math.max(peak,v))}),{peak:0,dd:0}).dd;
+      return {sharpe:+sharpe.toFixed(3), ic:+ic.toFixed(3), maxDD:+maxDD.toFixed(4), equity};
+    },
+  };
+}
+
+// ═══════════════════════════════════════════════════
+//  WEB WORKER SANDBOX — runs user strategy safely
+// ═══════════════════════════════════════════════════
+function runInWorker(code, ctxData) {
+  return new Promise((resolve, reject) => {
+    const workerCode = `
+      self.onmessage = function(e) {
+        const { code, ctxData } = e.data;
+        const _plots = []; const _logs = [];
+        const ctx = {
+          prices: () => ctxData.prices,
+          returns: () => ctxData.returns,
+          ohlcv: (n=50) => ctxData.ohlcv,
+          ticks: (n=50) => ctxData.ticks.slice(-n),
+          features: () => ctxData.features,
+          sma: (n=20) => ctxData.sma[n] || ctxData.sma[20] || [],
+          ema: (n=20) => ctxData.ema[n] || ctxData.ema[20] || [],
+          zscore: (n=20) => ctxData.zscore,
+          momentum: (n=10) => ctxData.momentum,
+          rsi: (n=14) => ctxData.rsi,
+          ofiSeries: () => ctxData.ofi,
+          regime: () => ctxData.regime,
+          ic: (sig, h=5) => {
+            const fwd = ctxData.fwdReturns;
+            const n = Math.min(sig.length, fwd.length);
+            const si = [...sig.slice(0,n)].map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map((x,r)=>({...x,r})).sort((a,b)=>a.i-b.i).map(x=>x.r);
+            const fi = [...fwd.slice(0,n)].map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map((x,r)=>({...x,r})).sort((a,b)=>a.i-b.i).map(x=>x.r);
+            const d2 = si.reduce((a,_,i)=>a+(si[i]-fi[i])**2,0);
+            return 1-6*d2/(n*(n*n-1));
+          },
+          halfLife: (series) => {
+            const arr = series || ctxData.prices;
+            const n = arr.length; if(n<10) return NaN;
+            const y=arr.slice(1).map((v,i)=>v-arr[i]);
+            const x=arr.slice(0,-1);
+            const mx=x.reduce((a,b)=>a+b,0)/x.length;
+            const my=y.reduce((a,b)=>a+b,0)/y.length;
+            const cov=x.reduce((a,v,i)=>a+(v-mx)*(y[i]-my),0);
+            const varx=x.reduce((a,v)=>a+(v-mx)**2,0);
+            const beta=varx<1e-12?0:cov/varx;
+            return beta<0?Math.log(2)/Math.abs(beta):NaN;
+          },
+          evalSignal: (sig, horizon=5, tc=0.001) => {
+            const fwd = ctxData.fwdReturns;
+            const equity=[0]; let pnl=0;
+            for(let i=0;i<Math.min(sig.length,fwd.length);i++){
+              pnl+=sig[i]*fwd[i]-Math.abs(sig[i])*tc; equity.push(pnl);
+            }
+            const rets=equity.slice(1).map((v,i)=>v-equity[i]);
+            const mu=rets.reduce((a,b)=>a+b,0)/rets.length;
+            const sigma=Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0)/rets.length);
+            const sharpe=sigma<1e-9?0:mu/sigma*Math.sqrt(252);
+            const ic=ctx.ic(sig,horizon);
+            const maxDD=equity.reduce(({peak,dd},v)=>({peak:Math.max(peak,v),dd:Math.min(dd,v-Math.max(peak,v))}),{peak:0,dd:0}).dd;
+            return {sharpe:+sharpe.toFixed(3),ic:+ic.toFixed(3),maxDD:+maxDD.toFixed(4),equity};
+          },
+          plot: (series, opts={}) => { _plots.push({series,opts}); },
+          log: (...args) => { _logs.push(args.join(' ')); },
+        };
+        try {
+          const fn = new Function('ctx', code);
+          const result = fn(ctx);
+          self.postMessage({ ok: true, plots: _plots, logs: _logs, result });
+        } catch(e) {
+          self.postMessage({ ok: false, error: e.message, logs: _logs });
+        }
+      };
+    `;
+    const blob = new Blob([workerCode], {type:'application/javascript'});
+    const url = URL.createObjectURL(blob);
+    const worker = new Worker(url);
+    
+    // Serialize ctx data for worker
+    const m = market;
+    const prices = m.prices;
+    const returns = prices.map((v,i)=>i===0?0:(v-prices[i-1])/prices[i-1]);
+    const fwdH = 5;
+    const fwdReturns = prices.map((_,i)=>i+fwdH<prices.length?(prices[i+fwdH]-prices[i])/prices[i]:0);
+    
+    const ctxData = {
+      prices, returns, fwdReturns,
+      ohlcv: m.getOHLCV(50),
+      ticks: m.trades.slice(-50),
+      features: buildCtx(m).features(),
+      sma: {10: FE.sma(prices,10), 20: FE.sma(prices,20), 50: FE.sma(prices,50)},
+      ema: {10: FE.ema(prices,10), 20: FE.ema(prices,20)},
+      zscore: FE.zscore(prices, 20),
+      momentum: FE.momentum(prices, 10),
+      rsi: FE.rsi(prices, 14),
+      ofi: FE.ofi(m.trades, 20),
+      regime: m.currentRegime,
+    };
+    
+    worker.onmessage = e => {
+      URL.revokeObjectURL(url);
+      worker.terminate();
+      resolve(e.data);
+    };
+    worker.onerror = e => {
+      URL.revokeObjectURL(url);
+      worker.terminate();
+      reject(e);
+    };
+    worker.postMessage({code, ctxData});
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  CHARTS
+// ═══════════════════════════════════════════════════
+let charts = {};
+const COLORS = {
+  price: '#58a6ff', signal: '#e3b341', green: '#3fb950',
+  red: '#f85149', purple: '#bc8cff', teal: '#39d353', dim: '#6e7681'
+};
+
+function isDark() { return document.documentElement.getAttribute('data-theme') !== 'light'; }
+function gridColor() { return isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'; }
+function textColor() { return isDark() ? '#6e7681' : '#57606a'; }
+
+const chartDefaults = {
+  responsive: true, maintainAspectRatio: false, animation: false,
+  plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+  scales: {
+    x: { display: false },
+    y: { grid: { color: gridColor() }, ticks: { color: textColor(), font: { size: 9 } } }
+  }
+};
+
+function initCharts() {
+  ['chart-price','chart-equity','chart-ic','chart-dist'].forEach(id => {
+    if (charts[id]) charts[id].destroy();
+  });
+  const m = market;
+  const prices = m.prices.slice(-150);
+  const labels = prices.map((_,i)=>i);
+
+  // Price chart
+  const sma20 = FE.sma(prices, 20);
+  charts['chart-price'] = new Chart(document.getElementById('chart-price'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Price', data:prices, borderColor:COLORS.price, borderWidth:1.5, pointRadius:0, fill:false, tension:0.1 },
+        { label:'SMA20', data:sma20, borderColor:COLORS.signal, borderWidth:1, pointRadius:0, fill:false, tension:0.2, borderDash:[4,2] },
+      ]
+    },
+    options: { ...chartDefaults }
+  });
+
+  // Equity — flat until backtest runs
+  charts['chart-equity'] = new Chart(document.getElementById('chart-equity'), {
+    type: 'line',
+    data: { labels:[0,1], datasets: [{label:'Equity',data:[0,0],borderColor:COLORS.green,borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:'rgba(63,185,80,.07)',tension:0.2}] },
+    options: { ...chartDefaults }
+  });
+
+  // IC chart
+  const ic = FE.rollingIC(FE.momentum(prices,10), prices, 5, 30);
+  charts['chart-ic'] = new Chart(document.getElementById('chart-ic'), {
+    type: 'line',
+    data: {
+      labels: ic.map((_,i)=>i),
+      datasets: [{
+        label:'Rolling IC',data:ic,
+        borderColor:COLORS.purple,borderWidth:1.5,pointRadius:0,fill:true,
+        backgroundColor:'rgba(188,140,255,.07)',tension:0.3
+      }]
+    },
+    options: {
+      ...chartDefaults,
+      scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, suggestedMin:-1,suggestedMax:1 } }
+    }
+  });
+
+  // Distribution chart
+  const rets = prices.map((v,i)=>i===0?0:(v-prices[i-1])/prices[i-1]).slice(1);
+  const bins = 20;
+  const min = Math.min(...rets), max = Math.max(...rets);
+  const binSize = (max-min)/bins;
+  const hist = Array(bins).fill(0);
+  rets.forEach(r => { const b = Math.min(Math.floor((r-min)/binSize), bins-1); hist[b]++; });
+  charts['chart-dist'] = new Chart(document.getElementById('chart-dist'), {
+    type: 'bar',
+    data: {
+      labels: hist.map((_,i)=>((min+i*binSize)*100).toFixed(2)+'%'),
+      datasets: [{label:'Return Distribution',data:hist,backgroundColor:'rgba(88,166,255,.5)',borderColor:COLORS.price,borderWidth:0.5}]
+    },
+    options: { ...chartDefaults, scales: { ...chartDefaults.scales, x: { display: true, ticks: { color: textColor(), font:{size:8}, maxRotation:45 } } } }
+  });
+}
+
+function plotUserSeries(series, opts={}) {
+  const chart = charts['chart-price'];
+  if (!chart) return;
+  // Add user signal overlay to price chart
+  const existing = chart.data.datasets.find(d=>d.label===opts.label);
+  if (existing) { existing.data = series; }
+  else {
+    chart.data.datasets.push({
+      label: opts.label || 'Signal',
+      data: series,
+      borderColor: opts.color || COLORS.signal,
+      borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.2,
+      yAxisID: opts.secondary ? 'y2' : 'y',
+      ...(opts.type === 'bar' ? {type:'bar',backgroundColor:opts.color||COLORS.signal,borderWidth:0} : {}),
+    });
+  }
+  chart.update();
+}
+
+function updateEquityChart(equity) {
+  const chart = charts['chart-equity'];
+  if (!chart) return;
+  chart.data.labels = equity.map((_,i)=>i);
+  chart.data.datasets[0].data = equity;
+  chart.update();
+}
+
+function plotScatter(x, y, opts={}) {
+  const chart = charts['chart-dist'];
+  if (!chart) return;
+  chart.destroy();
+  charts['chart-dist'] = new Chart(document.getElementById('chart-dist'), {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: opts.label || 'Signal vs Return',
+        data: x.slice(0,y.length).map((v,i)=>({x:v,y:y[i]})).filter(p=>p.x!=null&&p.y!=null),
+        backgroundColor: COLORS.blue + '88',
+        pointRadius: 3,
+      }]
+    },
+    options: { ...chartDefaults, scales: {
+      x: { display:true, grid:{color:gridColor()}, ticks:{color:textColor(),font:{size:8}} },
+      y: { display:true, grid:{color:gridColor()}, ticks:{color:textColor(),font:{size:8}} }
+    }}
+  });
+}
+
+function plotHeatmap(matrix, labels) {
+  // Simplified heatmap using chart-ic canvas
+  const n = matrix.length;
+  const canvas = document.getElementById('chart-ic');
+  const ctx2 = canvas.getContext('2d');
+  if (charts['chart-ic']) { charts['chart-ic'].destroy(); charts['chart-ic'] = null; }
+  const W = canvas.width, H = canvas.height;
+  const cellW = W/n, cellH = H/n;
+  ctx2.clearRect(0,0,W,H);
+  for (let i=0;i<n;i++) for (let j=0;j<n;j++) {
+    const v = matrix[i][j];
+    const r = v>0?0:255, g=v>0?Math.floor(63+v*192):63, b=v>0?80:Math.floor(73+Math.abs(v)*182);
+    ctx2.fillStyle = `rgb(${r},${g},${b})`;
+    ctx2.fillRect(j*cellW, i*cellH, cellW, cellH);
+    ctx2.fillStyle = '#fff';
+    ctx2.font = '9px monospace';
+    ctx2.fillText(v.toFixed(2), j*cellW+4, i*cellH+12);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  MONACO EDITOR
+// ═══════════════════════════════════════════════════
+let monacoEditor = null;
+const CODE_SNIPPETS = {
+  strategy: `// LeXie Research Terminal — Strategy Editor
+// ctx API: ctx.prices(), ctx.sma(n), ctx.ema(n), ctx.rsi(n),
+//          ctx.zscore(n), ctx.momentum(n), ctx.ofiSeries(),
+//          ctx.features(), ctx.ic(signal), ctx.evalSignal(signal)
+//          ctx.plot(series, {label, color}), ctx.log(...)
+
+const prices = ctx.prices();
+const sma_fast = ctx.sma(10);
+const sma_slow = ctx.sma(30);
+
+// Momentum signal: +1 when fast > slow, -1 otherwise
+const signal = prices.map((_, i) => {
+  if (sma_fast[i] == null || sma_slow[i] == null) return 0;
+  return sma_fast[i] > sma_slow[i] ? 1 : -1;
+});
+
+// Evaluate signal performance
+const stats = ctx.evalSignal(signal, 5, 0.001);
+ctx.log('Sharpe:', stats.sharpe, '| IC:', stats.ic, '| MaxDD:', stats.maxDD);
+
+// Plot your signal alongside price
+ctx.plot(sma_fast, { label: 'SMA(10)', color: '#e3b341' });
+ctx.plot(sma_slow, { label: 'SMA(30)', color: '#bc8cff' });
+
+return stats;`,
+  explore: `// Data Explorer — examine features and correlations
+const prices = ctx.prices();
+const features = ctx.features();
+
+// Log current feature snapshot
+ctx.log('Features:', JSON.stringify(features, null, 2));
+
+// Plot RSI
+const rsi = ctx.rsi(14);
+ctx.plot(rsi.map(v => v != null ? (v - 50) / 50 : null), 
+         { label: 'RSI(14) normalised', color: '#39d353' });
+
+// Compute IC of each feature
+const zscore = ctx.zscore(20);
+const momentum = ctx.momentum(10);
+const ofi = ctx.ofiSeries(20);
+
+const ic_z = ctx.ic(zscore, 5);
+const ic_m = ctx.ic(momentum, 5);
+const ic_o = ctx.ic(ofi, 5);
+
+ctx.log('IC Z-score:', ic_z.toFixed(3),
+        '| IC Momentum:', ic_m.toFixed(3),
+        '| IC OFI:', ic_o.toFixed(3));
+
+// Scatter: OFI vs 5-bar forward return
+const returns = ctx.returns();
+const fwd5 = prices.map((_, i) => 
+  i + 5 < prices.length ? (prices[i+5] - prices[i]) / prices[i] : null
+);
+ctx.scatter(ofi, fwd5, { label: 'OFI vs Fwd Return' });`,
+  notebook: `// Notebook — free exploration
+const prices = ctx.prices();
+const hl = ctx.halfLife();
+const hurst = ctx.features().hurst;
+
+ctx.log('Half-life (OU):', hl != null ? hl.toFixed(1) + ' bars' : 'not mean-reverting');
+ctx.log('Hurst exponent:', hurst.toFixed(3), 
+        hurst > 0.55 ? '→ trending' : hurst < 0.45 ? '→ mean-reverting' : '→ random walk');
+
+// Bollinger Band signal
+const bb = ctx.bollinger(20, 2);
+const bbSignal = bb.map(b => {
+  if (!b) return 0;
+  if (b.pct < 0.1) return 1;   // oversold → buy
+  if (b.pct > 0.9) return -1;  // overbought → sell
+  return 0;
+});
+
+const stats = ctx.evalSignal(bbSignal, 3, 0.0005);
+ctx.log('Bollinger signal — Sharpe:', stats.sharpe, '| IC:', stats.ic);
+ctx.plot(bb.map(b => b ? b.mid : null), { label: 'BB Mid', color: '#58a6ff' });`,
+  momentum: `const prices = ctx.prices();
+const mom = ctx.momentum(20);
+const signal = mom.map(m => Math.tanh(m * 10)); // soft-clipped
+const stats = ctx.evalSignal(signal, 5, 0.001);
+ctx.plot(ctx.sma(20), { label: 'SMA(20)', color: '#e3b341' });
+ctx.log('Momentum(20) → Sharpe:', stats.sharpe, '| IC:', stats.ic);
+return stats;`,
+  mean_rev: `const prices = ctx.prices();
+const z = ctx.zscore(20);
+// Enter long when Z < -1.5, short when Z > 1.5
+const signal = z.map(v => -Math.tanh(v));
+const stats = ctx.evalSignal(signal, 3, 0.0005);
+ctx.log('Z-score mean-rev → Sharpe:', stats.sharpe, '| IC:', stats.ic);
+ctx.log('Half-life:', ctx.halfLife().toFixed(1), 'bars');
+ctx.plot(z.map(v => prices[0] + v * 2), { label: 'Z-score scaled' });
+return stats;`,
+  ofi: `const ofi = ctx.ofiSeries(20);
+const prices = ctx.prices();
+// Order flow imbalance: buy pressure = long signal
+const signal = ofi.map(v => Math.tanh(v * 3));
+const stats = ctx.evalSignal(signal, 2, 0.0005);
+ctx.log('OFI signal → Sharpe:', stats.sharpe, '| IC:', stats.ic);
+const ic = ctx.ic(ofi, 3);
+ctx.log('Raw OFI IC (3-bar):', ic.toFixed(3));
+ctx.plot(ofi.map(v => prices[0] * (1 + v * 0.02)), { label: 'OFI proxy' });
+return stats;`,
+  pairs: `// Pairs / spread trading
+const prices = ctx.prices();
+const z = ctx.zscore(20);
+const hl = ctx.halfLife();
+ctx.log('Spread half-life:', hl ? hl.toFixed(1) + ' bars' : 'N/A');
+// Size inversely proportional to half-life
+const sizeFactor = hl && hl < 50 ? 1 / Math.sqrt(hl) : 0.5;
+const signal = z.map(v => -Math.sign(v) * sizeFactor * Math.min(Math.abs(v), 2));
+const stats = ctx.evalSignal(signal, Math.round(hl||10), 0.001);
+ctx.log('Pairs trade → Sharpe:', stats.sharpe, '| IC:', stats.ic);
+return stats;`,
+  regime_sig: `const prices = ctx.prices();
+const regime = ctx.regime();
+ctx.log('Current regime:', regime);
+// Momentum in trend, mean-reversion in range
+const mom = ctx.momentum(10);
+const z = ctx.zscore(20);
+const signal = prices.map((_, i) => {
+  if (i < 20) return 0;
+  return regime === 'trend' ? Math.tanh(mom[i] * 8) : -Math.tanh(z[i]);
+});
+const stats = ctx.evalSignal(signal, 5, 0.001);
+ctx.log('Regime-filtered → Sharpe:', stats.sharpe);
+return stats;`,
+  composite: `// Composite alpha: momentum + mean-reversion + OFI
+const prices = ctx.prices();
+const mom   = ctx.momentum(20).map(v => Math.tanh(v * 8));
+const z     = ctx.zscore(20).map(v => -Math.tanh(v));
+const ofi   = ctx.ofiSeries(20).map(v => Math.tanh(v * 3));
+// IC-weighted combination
+const ic_m = ctx.ic(mom, 5);
+const ic_z = ctx.ic(z, 3);
+const ic_o = ctx.ic(ofi, 2);
+const totalIC = Math.abs(ic_m) + Math.abs(ic_z) + Math.abs(ic_o) + 1e-6;
+const composite = prices.map((_, i) => (
+  ic_m/totalIC * (mom[i]||0) +
+  ic_z/totalIC * (z[i]||0) +
+  ic_o/totalIC * (ofi[i]||0)
+));
+const stats = ctx.evalSignal(composite, 5, 0.001);
+ctx.log('Composite alpha → Sharpe:', stats.sharpe, '| IC:', stats.ic);
+ctx.log('Weights — Mom:', (ic_m/totalIC).toFixed(2),
+        'MeanRev:', (ic_z/totalIC).toFixed(2),
+        'OFI:', (ic_o/totalIC).toFixed(2));
+return stats;`,
+};
+
+function initMonaco() {
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+  require(['vs/editor/editor.main'], () => {
+    // Register LeXie API type definitions
+    monaco.languages.typescript.javascriptDefaults.addExtraLib(`
+      declare const ctx: {
+        prices(): number[];
+        returns(): number[];
+        ohlcv(n?: number, freq?: number): Array<{t:number,o:number,h:number,l:number,c:number,v:number}>;
+        ticks(n?: number): Array<{price:number,size:number,side:string,t:number}>;
+        features(): {momentum_5:number,momentum_20:number,rsi_14:number,zscore_20:number,ofi:number,hurst:number,spread:number,regime:string,vol_20:number};
+        sma(n?: number): number[];
+        ema(n?: number): number[];
+        rsi(n?: number): number[];
+        zscore(n?: number): number[];
+        bollinger(n?: number, k?: number): Array<{upper:number,lower:number,mid:number,pct:number}>;
+        momentum(n?: number): number[];
+        ofiSeries(n?: number): number[];
+        ic(signal: number[], horizon?: number): number;
+        rollingIC(signal: number[], horizon?: number, window?: number): number[];
+        halfLife(series?: number[]): number;
+        hurst(n?: number): number;
+        evalSignal(signal: number[], horizon?: number, tc?: number): {sharpe:number,ic:number,maxDD:number,equity:number[]};
+        plot(series: number[], opts?: {label?:string,color?:string,type?:string}): void;
+        scatter(x: number[], y: number[], opts?: {label?:string}): void;
+        heatmap(matrix: number[][], labels?: string[]): void;
+        log(...args: any[]): void;
+      };
+    `, 'lexie-api.d.ts');
+
+    monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+      value: CODE_SNIPPETS.strategy,
+      language: 'javascript',
+      theme: isDark() ? 'vs-dark' : 'vs',
+      fontSize: 12,
+      fontFamily: "'DM Mono', monospace",
+      minimap: { enabled: false },
+      lineNumbers: 'on',
+      scrollBeyondLastLine: false,
+      automaticLayout: true,
+      tabSize: 2,
+      wordWrap: 'on',
+      suggestOnTriggerCharacters: true,
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  RUN / BACKTEST
+// ═══════════════════════════════════════════════════
+async function runStrategy() {
+  if (!monacoEditor) return;
+  const code = monacoEditor.getValue();
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Running...';
+  consoleLog('Running strategy...');
+
+  try {
+    const result = await runInWorker(code, {});
+    if (result.ok) {
+      result.logs.forEach(l => consoleLog(l));
+      if (result.plots) {
+        result.plots.forEach(p => plotUserSeries(p.series, p.opts));
+      }
+      if (result.result && result.result.equity) {
+        updateEquityChart(result.result.equity);
+        const s = result.result;
+        const el = document.getElementById('score-display');
+        el.style.display = '';
+        el.textContent = `Sharpe ${s.sharpe} · IC ${s.ic}`;
+        el.style.background = s.sharpe > 0.5 ? 'rgba(63,185,80,.15)' : s.sharpe > 0 ? 'rgba(227,179,65,.15)' : 'rgba(248,81,73,.15)';
+        el.style.color = s.sharpe > 0.5 ? 'var(--green)' : s.sharpe > 0 ? 'var(--yellow)' : 'var(--red)';
+      }
+    } else {
+      consoleLog('❌ ' + result.error);
+    }
+  } catch(e) {
+    consoleLog('❌ Worker error: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '▶ Run';
+}
+
+async function runBacktest() {
+  consoleLog('Running backtest (Monte Carlo 20 seeds)...');
+  const code = monacoEditor?.getValue() || CODE_SNIPPETS.strategy;
+  const results = [];
+  const seedBase = Date.now();
+  for (let i = 0; i < 20; i++) {
+    rng = mulberry32(seedBase + i * 999);
+    market = new MarketSim(currentScenario);
+    try {
+      const r = await runInWorker(code, {});
+      if (r.ok && r.result?.sharpe != null) results.push(r.result.sharpe);
+    } catch {}
+  }
+  rng = mulberry32(daySeed);
+  market = new MarketSim(currentScenario);
+  initCharts();
+  if (results.length) {
+    const avg = results.reduce((a,b)=>a+b,0)/results.length;
+    const std = Math.sqrt(results.reduce((a,v)=>a+(v-avg)**2,0)/results.length);
+    consoleLog(`Backtest (n=20): Mean Sharpe ${avg.toFixed(2)} ± ${std.toFixed(2)} | Min ${Math.min(...results).toFixed(2)} Max ${Math.max(...results).toFixed(2)}`);
+  } else {
+    consoleLog('Backtest: strategy must return { sharpe, ic, equity[] } via ctx.evalSignal()');
+  }
+}
+
+function consoleLog(msg) {
+  document.getElementById('console-out').textContent = msg;
+}
+
+// ═══════════════════════════════════════════════════
+//  TEACHING MODULES
+// ═══════════════════════════════════════════════════
+const LESSONS = [
+  {
+    title: 'Microstructure',
+    tag: 'Module 1 · Foundation',
+    tagColor: 'var(--blue)',
+    body: `The bid-ask spread is the cost of immediacy. Market makers quote a <strong>bid</strong> (price they buy at) and an <strong>ask</strong> (price they sell at). The difference is their profit — and your transaction cost.<br><br>
+<strong>Order Flow Imbalance (OFI)</strong> measures whether buy or sell pressure dominates recent trades. High OFI often predicts short-term price movement.`,
+    formula: 'OFI = (buyVol − sellVol) / (buyVol + sellVol)',
+    tryCode: CODE_SNIPPETS.ofi,
+    quiz: {
+      q: 'If OFI = +0.7, what does this indicate?',
+      opts: ['More sell volume than buy volume','More buy volume than sell volume','Balanced order flow','Price is decreasing'],
+      correct: 1,
+      explain: 'OFI of +0.7 means buy volume is 85% of total flow — strong buying pressure, often predictive of short-term price rise.'
+    }
+  },
+  {
+    title: 'Information Coefficient',
+    tag: 'Module 2 · Signal Evaluation',
+    tagColor: 'var(--yellow)',
+    body: `The <strong>Information Coefficient (IC)</strong> measures how well your signal predicts future returns. It is the rank correlation between your signal today and the realised return <em>k</em> bars later.<br><br>
+IC > 0.05 is considered good in practice. IC > 0.10 is strong. Most real alpha sources have IC of 0.02–0.06.`,
+    formula: 'IC = Spearman(signal_t, return_{t+k})',
+    tryCode: CODE_SNIPPETS.explore,
+    quiz: {
+      q: 'Your signal has IC = 0.03. Is this useful?',
+      opts: ['No — too close to zero','Yes — after 100 bets it is statistically significant','Only if Sharpe > 1','IC is irrelevant'],
+      correct: 1,
+      explain: 'IC of 0.03 across 100 independent bets gives t-stat ≈ 0.3 — marginal. But with 1000 bets/year it can still yield positive Sharpe if turnover is controlled.'
+    }
+  },
+  {
+    title: 'Correlation Structures',
+    tag: 'Module 3 · Multi-Asset',
+    tagColor: 'var(--purple)',
+    body: `Assets move together because they share common factors (market beta, sector, macro regime). The <strong>correlation matrix</strong> encodes these relationships.<br><br>
+Pairs trading exploits <em>temporarily</em> elevated spread between correlated assets. The key insight: correlation is <strong>not stable</strong> — it breaks during crises and regimes shifts.`,
+    formula: 'Spread_t = price_A − β · price_B  (β from rolling OLS)',
+    tryCode: CODE_SNIPPETS.pairs,
+    quiz: {
+      q: 'Why does a correlation-based strategy fail when correlation drops from 0.85 to 0.3?',
+      opts: ['It makes more profit','The hedged spread is no longer mean-reverting','Transaction costs increase','Nothing changes'],
+      correct: 1,
+      explain: 'The strategy assumes the residual spread (after hedging with β) is stationary. If correlation breaks, β is wrong, the hedge fails, and the spread trends rather than reverts.'
+    }
+  },
+  {
+    title: 'Regime Detection',
+    tag: 'Module 4 · Market States',
+    tagColor: 'var(--teal)',
+    body: `Markets switch between regimes: <strong>trending</strong> (momentum works), <strong>mean-reverting</strong> (contrarian works), and <strong>volatile</strong> (both fail, stay flat).<br><br>
+The <strong>Hurst exponent</strong> (H) distinguishes these: H > 0.5 = trending, H < 0.5 = mean-reverting, H ≈ 0.5 = random walk.`,
+    formula: 'H = log(R/S) / log(N/2)',
+    tryCode: CODE_SNIPPETS.regime_sig,
+    quiz: {
+      q: 'Hurst = 0.62. Which strategy should you apply?',
+      opts: ['Mean reversion (Z-score short)','Momentum (buy recent winners)','Stay flat, too volatile','Random entry'],
+      correct: 1,
+      explain: 'H > 0.5 indicates trending behaviour — recent winners tend to keep winning. Momentum strategies (SMA crossover, trend-following) are appropriate.'
+    }
+  },
+  {
+    title: 'Alpha Decay',
+    tag: 'Module 5 · Signal Lifecycle',
+    tagColor: 'var(--orange)',
+    body: `Every alpha signal has a <strong>half-life</strong>: the time for its predictive power to decay by half. Fast signals (OFI, spread) decay in seconds. Slow signals (momentum, value) decay in weeks or months.<br><br>
+If too much capital chases the same signal, it gets <em>crowded</em> — the signal arbitrages itself away. The Hurst exponent and IC decay curve together reveal the optimal holding period.`,
+    formula: 'half-life = ln(2) / |β|  where β from ΔP = α + β·P_{t-1}',
+    tryCode: CODE_SNIPPETS.composite,
+    quiz: {
+      q: 'Your signal\'s IC at 1-bar horizon is 0.08, but at 20-bar is 0.01. What does this imply?',
+      opts: ['Hold for 20 bars to maximise profit','The signal is short-lived — hold 1–3 bars maximum','The signal is useless','IC always decays, ignore it'],
+      correct: 1,
+      explain: 'High IC at short horizon and low at long horizon means the signal\'s edge dissipates quickly. Optimal holding period is 1–3 bars. Holding longer exposes you to noise without edge.'
+    }
+  },
+  {
+    title: 'False Discovery',
+    tag: 'Module 6 · Backtest Pitfalls',
+    tagColor: 'var(--red)',
+    body: `Run 100 random strategies on historical data. On average, <strong>5 will look significant at p=0.05</strong> by pure chance. This is the multiple testing problem — most backtests overfit.<br><br>
+Solutions: out-of-sample testing, walk-forward validation, haircut Sharpe (reduce by √(number of trials)), and the <em>Deflated Sharpe Ratio</em>.`,
+    formula: 'DSR = Φ( (SR − SR*) · √(T-1) / √(1 − γ·SR + SR²·(κ-1)/4) )',
+    tryCode: CODE_SNIPPETS.notebook,
+    quiz: {
+      q: 'You tested 50 strategies and found one with Sharpe 1.8. Should you trade it?',
+      opts: ['Yes, Sharpe > 1 is always good','No — with 50 trials, expected max Sharpe by chance is ~2.0','Only if IC > 0.1','Sharpe is irrelevant'],
+      correct: 1,
+      explain: 'Expected maximum Sharpe from 50 random strategies is approximately √(2 · log(50)) ≈ 2.8σ of the null. Sharpe of 1.8 is below this — likely noise. Always apply Bonferroni or DSR correction.'
+    }
+  },
+];
+
+let currentLesson = 0;
+let quizAnswered = false;
+
+function setLesson(i) {
+  currentLesson = i;
+  quizAnswered = false;
+  renderLesson();
+}
+
+function renderLesson() {
+  const L = LESSONS[currentLesson];
+  document.getElementById('teach-title').textContent = L.title;
+  document.getElementById('teach-progress').textContent = `Module ${currentLesson+1} of ${LESSONS.length}`;
+  document.getElementById('teach-content').innerHTML = `
+    <div class="teach-card">
+      <div class="teach-card-tag" style="color:${L.tagColor}">${L.tag}</div>
+      <div class="teach-card-title">${L.title}</div>
+      <div class="teach-card-body">${L.body}</div>
+      <div class="teach-formula">${L.formula}</div>
+    </div>
+    <div class="teach-quiz">
+      <div class="teach-quiz-q">${L.quiz.q}</div>
+      ${L.quiz.opts.map((o,i)=>`<button class="quiz-opt" id="qopt${i}" onclick="answerQuiz(${i})">${o}</button>`).join('')}
+      <div id="quiz-explain" style="display:none;font-size:10.5px;color:var(--dim);margin-top:8px;line-height:1.6;padding:8px;background:var(--bg3);border-radius:6px;"></div>
+    </div>
+    <button class="try-btn" onclick="tryInTerminal()">⚡ Try this in the terminal →</button>
+    <div class="teach-nav">
+      <button class="teach-nav-btn" onclick="prevLesson()" ${currentLesson===0?'disabled':''}>← Prev</button>
+      <button class="teach-nav-btn primary" onclick="nextLesson()" ${currentLesson===LESSONS.length-1?'disabled':''}>Next →</button>
+    </div>
+  `;
+}
+
+function answerQuiz(i) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const L = LESSONS[currentLesson];
+  document.querySelectorAll('.quiz-opt').forEach((b, idx) => {
+    b.classList.add(idx === L.quiz.correct ? 'correct' : (idx === i && i !== L.quiz.correct ? 'wrong' : ''));
+  });
+  const explain = document.getElementById('quiz-explain');
+  explain.style.display = 'block';
+  explain.textContent = L.quiz.explain;
+}
+
+function tryInTerminal() {
+  const L = LESSONS[currentLesson];
+  if (monacoEditor) monacoEditor.setValue(L.tryCode);
+}
+
+function nextLesson() { if (currentLesson < LESSONS.length-1) setLesson(currentLesson+1); }
+function prevLesson() { if (currentLesson > 0) setLesson(currentLesson-1); }
+
+// ═══════════════════════════════════════════════════
+//  SIGNAL SUBMISSION → Firebase
+// ═══════════════════════════════════════════════════
+async function submitSignal() {
+  if (!monacoEditor) return;
+  const code = monacoEditor.getValue();
+  const result = await runInWorker(code, {});
+  if (!result.ok || !result.result?.sharpe) {
+    consoleLog('❌ Run your strategy first to get a score, then submit.');
+    return;
+  }
+  if (!window._db || !window._user) {
+    consoleLog('Sign in at the hub to submit to the leaderboard.');
+    return;
+  }
+  try {
+    await window._addDoc(window._collection(window._db, 'leaderboard'), {
+      uid: window._user.uid,
+      name: window._user.displayName || 'Anonymous',
+      sharpe: result.result.sharpe,
+      ic: result.result.ic,
+      scenario: currentScenario,
+      ts: Date.now(),
+    });
+    consoleLog(`✅ Submitted! Sharpe ${result.result.sharpe} · IC ${result.result.ic} — check the hub leaderboard.`);
+  } catch(e) {
+    consoleLog('Submission error: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  UI CONTROLS
+// ═══════════════════════════════════════════════════
+function setScenario(s) {
+  currentScenario = s;
+  rng = mulberry32(daySeed + s.length);
+  market = new MarketSim(s);
+  initCharts();
+  consoleLog(`Market: ${s} — ${market.prices.length} bars generated`);
+  document.querySelectorAll('.sidebar-btn').forEach(b => {
+    if (b.textContent.trim().includes(
+      {trend:'Trending',mean_rev:'Mean-Rev',volatile:'Volatile',regime:'Regime',multi:'Multi'}[s]||'')) {
+      b.classList.add('active');
+    } else if (['Trending','Mean-Rev','Volatile','Regime-Switch','Multi-Asset'].some(n=>b.textContent.includes(n))) {
+      b.classList.remove('active');
+    }
+  });
+}
+
+function loadSnippet(key) {
+  if (monacoEditor && CODE_SNIPPETS[key]) monacoEditor.setValue(CODE_SNIPPETS[key]);
+}
+
+function setEditorTab(tab) {
+  document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  if (monacoEditor && CODE_SNIPPETS[tab]) monacoEditor.setValue(CODE_SNIPPETS[tab]);
+}
+
+function switchMode(m) {
+  // placeholder for tab switching
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+let tick = 0;
+function marketTick() {
+  if (!market) return;
+  market.step();
+  tick++;
+  document.getElementById('market-clock').textContent = `T+${tick}`;
+  // Update price chart last point live
+  if (charts['chart-price']) {
+    const c = charts['chart-price'];
+    c.data.labels.push(c.data.labels.length);
+    c.data.labels.shift();
+    c.data.datasets[0].data.push(market.prices.at(-1));
+    c.data.datasets[0].data.shift();
+    c.data.datasets[1].data = FE.sma(market.prices.slice(-150), 20);
+    if (tick % 10 === 0) c.update('none');
+  }
+}
+
+function toggleTheme() {
+  const r = document.documentElement;
+  const isLight = r.getAttribute('data-theme') === 'light';
+  r.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  if (monacoEditor) monaco.editor.setTheme(isLight ? 'vs-dark' : 'vs');
+  localStorage.setItem('imc-theme', isLight ? 'dark' : 'light');
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('imc-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  
+  market = new MarketSim('trend');
+  initCharts();
+  renderLesson();
+  
+  // Load Monaco
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js';
+  script.onload = initMonaco;
+  document.head.appendChild(script);
+  
+  // Live market ticks every 800ms
+  setInterval(marketTick, 800);
+});
+
+// Expose globals for inline event handlers
+window.setScenario = setScenario;
+window.loadSnippet = loadSnippet;
+window.switchMode = switchMode;
+window.setEditorTab = setEditorTab;
+window.runStrategy = runStrategy;
+window.runBacktest = runBacktest;
+window.setLesson = setLesson;
+window.answerQuiz = answerQuiz;
+window.tryInTerminal = tryInTerminal;
+window.nextLesson = nextLesson;
+window.prevLesson = prevLesson;
+window.submitSignal = submitSignal;
+window.toggleTheme = toggleTheme;
+</script>
+</body>
+</html>
