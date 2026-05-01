@@ -9,6 +9,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
 <style>
+  /* ── Global typography upgrade ── */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif!important;font-size:15px!important;}
+  /* Setup / intro screen */
+  #setup,#intro,.intro-screen{max-width:720px;margin:0 auto;padding:48px 24px;}
+  .setup-hero,.intro-hero{text-align:center;margin-bottom:36px;}
+  .setup-tag,.intro-tag{font-size:0.68rem!important;font-weight:700!important;letter-spacing:0.18em!important;text-transform:uppercase!important;margin-bottom:10px!important;}
+  .setup-title,.intro-title{font-size:2.4rem!important;font-weight:800!important;color:var(--bright)!important;margin-bottom:8px!important;letter-spacing:-0.02em;}
+  .setup-sub,.intro-sub{font-size:0.95rem!important;line-height:1.65!important;color:var(--dim)!important;margin-bottom:0!important;}
+  /* Cards */
+  .rule-card,.info-card,.card,.intro-card,.role-card{background:var(--bg2)!important;border:1px solid var(--border)!important;border-radius:10px!important;padding:20px 24px!important;margin-bottom:14px!important;}
+  .rule-card h3,.info-card h3,.card h3,.card-title,.role-name{font-size:0.72rem!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:0.1em!important;color:var(--yellow)!important;margin-bottom:10px!important;}
+  .rule-card p,.info-card p,.card p,.role-desc,.card-body{font-size:0.875rem!important;line-height:1.65!important;color:var(--text)!important;}
+  /* Buttons */
+  .btn-primary,.start-btn,.setup-start .btn,.btn.btn-lg{font-size:0.95rem!important;font-weight:700!important;padding:14px 40px!important;border-radius:8px!important;}
+  /* Section labels */
+  .section-label,.spec-section-title,.section-title{font-size:0.68rem!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:0.14em!important;color:var(--dim)!important;margin-bottom:12px!important;}
+
 :root{
   --bg:#060d1a;--panel:#0d1829;--panel2:#101e30;
   --border:#1e3a5f;--border2:#1e2d4a;
@@ -22,7 +40,7 @@
   --purple-bg:rgba(168,85,247,0.12);--teal-bg:rgba(20,184,166,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;min-height:100vh;}
 a{color:var(--blue-l);text-decoration:none;}
 a:hover{text-decoration:underline;}
 .hidden{display:none!important;}
@@ -51,17 +69,17 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:8px 18p
 #phase-intro{max-width:700px;margin:48px auto;padding:0 20px;}
 .intro-hero{text-align:center;margin-bottom:32px;}
 .intro-tag{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--teal);text-transform:uppercase;margin-bottom:8px;}
-.intro-title{font-size:34px;font-weight:900;color:#fff;margin-bottom:8px;}
-.intro-sub{color:var(--dim2);font-size:15px;line-height:1.6;}
+.intro-title{font-size:36px;font-weight:900;color:#fff;margin-bottom:8px;}
+.intro-sub{color:var(--dim2);font-size:16px;line-height:1.6;}
 .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:28px 0;}
 .role-card{background:var(--panel);border:1px solid var(--border2);border-radius:12px;padding:18px 20px;}
 .role-card.trader{border-color:rgba(168,85,247,.35);}
 .role-card.coder{border-color:rgba(20,184,166,.35);}
 .role-icon{font-size:28px;margin-bottom:10px;}
-.role-name{font-size:16px;font-weight:700;margin-bottom:6px;}
+.role-name{font-size:17px;font-weight:700;margin-bottom:6px;}
 .role-card.trader .role-name{color:var(--purple);}
 .role-card.coder .role-name{color:var(--teal);}
-.role-desc{font-size:12px;color:var(--dim2);line-height:1.6;}
+.role-desc{font-size:14px;color:var(--dim2);line-height:1.6;}
 .flow-bar{display:flex;align-items:center;gap:8px;justify-content:center;margin:16px 0;flex-wrap:wrap;}
 .flow-step{font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;}
 .flow-step.t{background:var(--purple-bg);color:var(--purple);}
@@ -188,6 +206,7 @@ canvas{width:100%;border-radius:6px;}
 .tnb:hover{color:var(--text);}
 .tnb.active{background:var(--panel);border-color:var(--border);color:var(--text);}
 </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
