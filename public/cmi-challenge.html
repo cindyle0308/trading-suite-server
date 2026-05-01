@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CMI Challenge | IMC Spring Week Simulator</title>
+<title>Asset Manager Challenge | LeXie Trading Suite</title>
 <style>
   /* ══════════════════════════════════════════════
      CROSS-PLATFORM TYPOGRAPHY + VISUAL POLISH
@@ -367,15 +367,15 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:6px 14p
   <span class="sep">|</span>
   <a href="basket-blitz.html">Basket</a>
   <a href="options-outcry.html">Outcry</a>
-  <span class="cur">CMI Challenge</span>
+  <span class="cur">Asset Manager Challenge</span>
 <span class="theme-nav-btns"><button class="tnb" data-t="light" onclick="setTheme('light',true)" title="Light">☀</button><button class="tnb" data-t="system" onclick="setTheme('system',true)" title="System">⊙</button><button class="tnb" data-t="dark" onclick="setTheme('dark',true)" title="Dark">☾</button></span>
 </nav>
 
 <!-- SETUP -->
 <div id="setup">
   <div class="setup-hero">
-    <div class="setup-tag">IMC Spring Week — Day 2 Capstone</div>
-    <div class="setup-title">🏦 CMI Challenge</div>
+    <div class="setup-tag">LeXie — Asset Manager Capstone</div>
+    <div class="setup-title">🏦 Asset Manager Challenge</div>
     <div class="setup-sub">Competitive Market Investment · Full 5-panel simulator · Choose your scenario and role</div>
   </div>
   <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;">Select Scenario</div>
@@ -413,7 +413,7 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:6px 14p
     </div>
   </div>
   <div style="text-align:center;margin-top:12px;">
-    <button class="btn btn-primary" onclick="startCMI()">Enter the Market 🏦</button>
+    <button class="btn btn-primary" onclick="startAssetMgr()">Enter the Market 🏦</button>
   </div>
 </div>
 
@@ -495,7 +495,7 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:6px 14p
     <div class="sr-title">Stock Performance</div>
     <div id="stock-report-rows"></div>
   </div>
-  <button class="btn btn-primary" onclick="restartCMI()" style="margin-right:8px;">Play Again</button>
+  <button class="btn btn-primary" onclick="restartAssetMgr()" style="margin-right:8px;">Play Again</button>
   <a href="index.html"><button class="btn btn-secondary">Back to Hub</button></a>
 </div>
 
@@ -580,7 +580,7 @@ function selectRole(role) {
   document.getElementById('rc-am').className = 'role-card' + (role==='am'?' selected-am':'');
 }
 
-function startCMI() {
+function startAssetMgr() {
   // Init stocks
   G.stocks = STOCKS_INIT.map(s => ({
     ...s, price: s.price*(0.97+Math.random()*0.06),
@@ -995,7 +995,7 @@ function endSession() {
   const portRet=pnl/50000*100;
   const alpha=portRet-benchRet;
   let medal='📊',title='Session Complete!',sub='';
-  if(pnl>8000){medal='🥇';title='Elite Performance!';sub='Top-tier result. IMC traders would be impressed.';}
+  if(pnl>8000){medal='🥇';title='Elite Performance!';sub='Top-tier result. LeXie traders would be impressed.';}
   else if(pnl>3000){medal='🥈';title='Strong Session!';sub='Profitable and above benchmark. Keep refining.';}
   else if(pnl>0){medal='🥉';title='In the Green!';sub='Profitable session. Alpha generation needs work.';}
   else{medal='📉';title='Tough Session';sub='Focus on news reaction speed and inventory management.';}
@@ -1025,7 +1025,7 @@ function endSession() {
   document.getElementById('stock-report-rows').innerHTML=rows;
 }
 
-function restartCMI() {
+function restartAssetMgr() {
   clearInterval(G.interval);
   document.getElementById('results').classList.add('hidden');
   document.getElementById('setup').classList.remove('hidden');
