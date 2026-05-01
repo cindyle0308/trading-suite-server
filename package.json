@@ -1,0 +1,12 @@
+{
+  "name": "trading-suite",
+  "version": "1.0.0",
+  "description": "IMC Trading Suite – 13 games",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
