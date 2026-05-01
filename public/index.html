@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IMC Trading Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06090f;--bg2:#0b111c;--bg3:#101824;--bg4:#162030;
+  --border:#1a2d46;--border2:#243d5a;--text:#b0c8e4;--dim:#4a6a8a;
+  --bright:#e0eefa;--green:#00d888;--red:#ff3d5a;--yellow:#ffc840;
+  --blue:#3a90ff;--purple:#9d60ff;--shadow:rgba(0,0,0,.4);
+}
+[data-theme="light"]{
+  --bg:#f0f4f8!important;--bg2:#ffffff!important;--bg3:#f5f8fc!important;--bg4:#edf1f7!important;
+  --border:#d0dce8!important;--border2:#b8cfe0!important;--text:#2a3f55!important;--dim:#7a9ab8!important;
+  --bright:#0d1b2a!important;--shadow:rgba(0,0,0,.12)!important;
+}
+@media(prefers-color-scheme:light){:root:not([data-theme]){
+  --bg:#f0f4f8!important;--bg2:#ffffff!important;--bg3:#f5f8fc!important;--bg4:#edf1f7!important;
+  --border:#d0dce8!important;--border2:#b8cfe0!important;--text:#2a3f55!important;--dim:#7a9ab8!important;
+  --bright:#0d1b2a!important;--shadow:rgba(0,0,0,.12)!important;
+}}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+
+/* ── TOP NAV ── */
+.top-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:44px;flex-shrink:0}
+.nav-brand{color:var(--bright);font-weight:800;font-size:0.9rem;letter-spacing:0.05em;margin-right:8px}
+.nav-brand span{color:var(--yellow)}
+.nav-link{color:var(--dim);text-decoration:none;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;transition:color .15s}
+.nav-link:hover{color:var(--text)}
+.nav-link.mm{color:var(--green)}
+.nav-link.mm:hover{color:#00ffaa}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.user-pill{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 6px;cursor:pointer;transition:border-color .15s}
+.user-pill:hover{border-color:var(--border2)}
+.user-avatar{width:26px;height:26px;border-radius:50%;object-fit:cover}
+.user-name{font-size:0.78rem;font-weight:600;color:var(--text);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.signout-btn{font-size:0.7rem;color:var(--dim);background:none;border:none;cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:.07em;transition:color .15s}
+.signout-btn:hover{color:var(--red)}
+.theme-btns{display:flex;gap:4px}
+.tnb{background:none;border:1px solid transparent;border-radius:5px;color:var(--dim);font-size:0.8rem;cursor:pointer;padding:3px 6px;transition:all .15s}
+.tnb:hover,.tnb.active{border-color:var(--border2);color:var(--bright)}
+
+/* ── AUTH GATE ── */
+#auth-gate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:0;padding:40px 24px}
+.auth-logo{font-size:3rem;margin-bottom:16px}
+.auth-title{font-size:2.2rem;font-weight:800;color:var(--bright);margin-bottom:8px;text-align:center}
+.auth-title span{color:var(--yellow)}
+.auth-sub{color:var(--dim);font-size:0.95rem;margin-bottom:36px;text-align:center;max-width:380px;line-height:1.6}
+.google-btn{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px 28px;cursor:pointer;transition:all .2s;font-size:0.95rem;font-weight:600;color:var(--bright)}
+.google-btn:hover{border-color:var(--blue);background:var(--bg3);transform:translateY(-1px);box-shadow:0 4px 20px var(--shadow)}
+.google-btn svg{width:22px;height:22px;flex-shrink:0}
+.auth-note{margin-top:20px;font-size:0.78rem;color:var(--dim);text-align:center;max-width:320px;line-height:1.5}
+.auth-error{margin-top:16px;color:var(--red);font-size:0.85rem;text-align:center;display:none}
+
+/* ── MAIN HUB ── */
+#hub{display:none}
+.hub-header{padding:40px 32px 0}
+.hub-greeting{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--yellow);margin-bottom:8px}
+.hub-title{font-size:2.4rem;font-weight:800;color:var(--bright);margin-bottom:6px}
+.hub-sub{color:var(--dim);font-size:0.92rem;margin-bottom:32px}
+.hub-mm-banner{background:linear-gradient(135deg,rgba(0,216,136,.08),rgba(58,144,255,.06));border:1px solid rgba(0,216,136,.25);border-radius:12px;padding:16px 22px;display:flex;align-items:center;gap:16px;margin-bottom:36px;cursor:pointer;transition:border-color .2s}
+.hub-mm-banner:hover{border-color:rgba(0,216,136,.5)}
+.banner-icon{font-size:2rem}
+.banner-text h3{font-size:0.95rem;font-weight:700;color:var(--green);margin-bottom:3px}
+.banner-text p{font-size:0.82rem;color:var(--dim)}
+.banner-arrow{margin-left:auto;font-size:1.2rem;color:var(--green)}
+
+/* ── GAME GRID ── */
+.section-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:14px;padding:0 32px}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:0 32px 32px}
+.game-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
+.game-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 24px var(--shadow)}
+.card-emoji{font-size:1.6rem;margin-bottom:10px}
+.card-badge{display:inline-block;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:2px 8px;border-radius:4px;margin-bottom:10px}
+.badge-solo{background:rgba(58,144,255,.15);color:var(--blue);border:1px solid rgba(58,144,255,.25)}
+.badge-collab{background:rgba(157,96,255,.15);color:var(--purple);border:1px solid rgba(157,96,255,.25)}
+.badge-theory{background:rgba(255,200,64,.12);color:var(--yellow);border:1px solid rgba(255,200,64,.2)}
+.card-title{font-size:1rem;font-weight:700;color:var(--bright);margin-bottom:4px}
+.card-desc{font-size:0.8rem;color:var(--dim);line-height:1.5}
+.card-tag{margin-top:10px;font-size:0.7rem;font-weight:600;color:var(--dim);font-family:'DM Mono',monospace}
+.hub-footer{padding:16px 32px 40px;border-top:1px solid var(--border);margin-top:8px;text-align:center;color:var(--dim);font-size:0.78rem}
+
+/* ── SPINNER ── */
+#loading{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--dim);font-size:0.88rem}
+</style>
+</head>
+<body>
+
+<!-- Loading state -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">Checking session…</div>
+</div>
+
+<!-- Auth gate (shown when signed out) -->
+<div id="auth-gate" style="display:none">
+  <div class="auth-logo">📈</div>
+  <h1 class="auth-title">IMC <span>Trading Suite</span></h1>
+  <p class="auth-sub">13 games to sharpen your quant trading skills — from market making to algo strategies. Sign in to begin.</p>
+  <button class="google-btn" id="sign-in-btn" onclick="signInWithGoogle()">
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      <path fill="none" d="M0 0h48v48H0z"/>
+    </svg>
+    Continue with Google
+  </button>
+  <p class="auth-note">Access is restricted to signed-in users. Your Google account is used for authentication only — no data is stored.</p>
+  <p class="auth-error" id="auth-error"></p>
+</div>
+
+<!-- Main hub (shown when signed in) -->
+<div id="hub" style="display:none">
+  <nav class="top-nav">
+    <span class="nav-brand">📈 IMC <span>Trading</span> Suite</span>
+    <a href="https://lexie-marketmakerbaos.onrender.com" target="_blank" class="nav-link mm">⚡ Market Maker ↗</a>
+    <div class="nav-right">
+      <div class="theme-btns">
+        <button class="tnb" data-t="light" onclick="setTheme('light',true)" title="Light">☀</button>
+        <button class="tnb" data-t="system" onclick="setTheme('system',true)" title="System">⊙</button>
+        <button class="tnb" data-t="dark" onclick="setTheme('dark',true)" title="Dark">☾</button>
+      </div>
+      <div class="user-pill" onclick="toggleSignout()">
+        <img class="user-avatar" id="user-avatar" src="" alt="">
+        <span class="user-name" id="user-name"></span>
+      </div>
+      <button class="signout-btn" id="signout-btn" onclick="signOut()" style="display:none">Sign out</button>
+    </div>
+  </nav>
+
+  <div style="padding:0 32px;max-width:1200px;margin:0 auto">
+    <div class="hub-header" style="padding-left:0;padding-right:0">
+      <div class="hub-greeting" id="hub-greeting">Welcome back</div>
+      <h1 class="hub-title">Trading Suite</h1>
+      <p class="hub-sub">13 interactive games · solo challenges · collaborative sims · theory drills</p>
+      <a href="https://lexie-marketmakerbaos.onrender.com" target="_blank" class="hub-mm-banner" style="text-decoration:none">
+        <span class="banner-icon">⚡</span>
+        <div class="banner-text">
+          <h3>Market Maker Game</h3>
+          <p>Live multiplayer market making simulation — trade with other players in real time</p>
+        </div>
+        <span class="banner-arrow">↗</span>
+      </a>
+    </div>
+
+    <p class="section-label" style="padding-left:0">Solo Challenges</p>
+    <div class="game-grid" style="padding-left:0;padding-right:0">
+      <a href="momentum-trainer.html" class="game-card">
+        <div class="card-emoji">📈</div>
+        <span class="card-badge badge-solo">Solo</span>
+        <div class="card-title">Momentum Trainer</div>
+        <div class="card-desc">Read SMA crossover signals and ride trends. Learn the basics of momentum strategies.</div>
+        <div class="card-tag">SMA · Trend Following · Beginner</div>
+      </a>
+      <a href="spread-trader.html" class="game-card">
+        <div class="card-emoji">⚖️</div>
+        <span class="card-badge badge-solo">Solo</span>
+        <div class="card-title">Spread Trader</div>
+        <div class="card-desc">Pairs trading via mean reversion. Spot divergences and trade the spread back to equilibrium.</div>
+        <div class="card-tag">Mean Reversion · Z-score · Pairs</div>
+      </a>
+      <a href="regime-rider.html" class="game-card">
+        <div class="card-emoji">🌀</div>
+        <span class="card-badge badge-solo">Solo</span>
+        <div class="card-title">Regime Rider</div>
+        <div class="card-desc">Classify market regimes and deploy the right strategy. Trending, ranging, or volatile.</div>
+        <div class="card-tag">Regime Detection · Adaptive Strategy</div>
+      </a>
+      <a href="algo-blitz.html" class="game-card">
+        <div class="card-emoji">⚡</div>
+        <span class="card-badge badge-solo">Solo</span>
+        <div class="card-title">Algo Blitz</div>
+        <div class="card-desc">20 rapid-fire quant problems under time pressure. Test your mental maths and algo intuition.</div>
+        <div class="card-tag">Speed · Mental Maths · Theory</div>
+      </a>
+      <a href="arbitrage-sprint.html" class="game-card">
+        <div class="card-emoji">🏃</div>
+        <span class="card-badge badge-solo">Solo</span>
+        <div class="card-title">Arbitrage Sprint</div>
+        <div class="card-desc">5-round Prosperity-style manual trading. Spot mispricings and capture arbitrage before they close.</div>
+        <div class="card-tag">Arbitrage · Manual Trading · IMC Style</div>
+      </a>
+      <a href="basket-blitz.html" class="game-card">
+        <div class="card-emoji">🧺</div>
+        <span class="card-badge badge-solo">Solo</span>
+        <div class="card-title">Basket Blitz</div>
+        <div class="card-desc">ETF arbitrage race. Reconstruct basket fair value and trade when ETF drifts from NAV.</div>
+        <div class="card-tag">ETF · NAV · Basket Arbitrage</div>
+      </a>
+      <a href="options-outcry.html" class="game-card">
+        <div class="card-emoji">📣</div>
+        <span class="card-badge badge-solo">Solo</span>
+        <div class="card-title">Options Outcry</div>
+        <div class="card-desc">Derivatives desk simulation. Price options, manage Greeks, and hedge your book under pressure.</div>
+        <div class="card-tag">Options · Greeks · Delta Hedging</div>
+      </a>
+      <a href="quant-relay.html" class="game-card">
+        <div class="card-emoji">🔬</div>
+        <span class="card-badge badge-theory">Theory</span>
+        <div class="card-title">Quant Relay</div>
+        <div class="card-desc">4-stage quant research pipeline. Hypothesis → signal → backtest → deploy. Beat the clock.</div>
+        <div class="card-tag">Research · Backtesting · Signal Alpha</div>
+      </a>
+      <a href="alpha-factory.html" class="game-card">
+        <div class="card-emoji">🏭</div>
+        <span class="card-badge badge-theory">Theory</span>
+        <div class="card-title">Alpha Factory</div>
+        <div class="card-desc">Build and combine alpha signals. Sharpe ratio optimisation across a multi-signal portfolio.</div>
+        <div class="card-tag">Alpha · Sharpe · Portfolio Construction</div>
+      </a>
+    </div>
+
+    <p class="section-label" style="padding-left:0;margin-top:8px">Multiplayer Simulations</p>
+    <div class="game-grid" style="padding-left:0;padding-right:0">
+      <a href="price-war.html" class="game-card">
+        <div class="card-emoji">⚔️</div>
+        <span class="card-badge badge-collab">Multiplayer</span>
+        <div class="card-title">Price War</div>
+        <div class="card-desc">Live market making battle. Compete to provide the tightest spreads while managing inventory risk.</div>
+        <div class="card-tag">Market Making · Spread · Inventory</div>
+      </a>
+      <a href="bot-builder.html" class="game-card">
+        <div class="card-emoji">🤖</div>
+        <span class="card-badge badge-collab">Multiplayer</span>
+        <div class="card-title">Bot Builder</div>
+        <div class="card-desc">Program your trading bot in a live sprint. Compete against other bots in real-time markets.</div>
+        <div class="card-tag">Algo · Bot · Live Competition</div>
+      </a>
+      <a href="cmi-challenge.html" class="game-card">
+        <div class="card-emoji">🏆</div>
+        <span class="card-badge badge-collab">Multiplayer</span>
+        <div class="card-title">CMI Challenge</div>
+        <div class="card-desc">Full CMI market simulator. Complete multi-round trading challenge with live leaderboard.</div>
+        <div class="card-tag">CMI · Full Sim · Leaderboard</div>
+      </a>
+    </div>
+
+    <div class="hub-footer">
+      <p>IMC Trading Suite · Built for Warwick Finance &amp; Quant Soc</p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDPNaHsWtignrwVrUI-0KcTc6HQzV9sck0",
+  authDomain: "market-maker-game-68184.firebaseapp.com",
+  projectId: "market-maker-game-68184",
+  storageBucket: "market-maker-game-68184.firebasestorage.app",
+  messagingSenderId: "317566731846",
+  appId: "1:317566731846:web:bd5cc5f2d62bedaf58ec47",
+  measurementId: "G-Q5G8JDYNPS"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// expose to window for onclick handlers
+window.signInWithGoogle = async () => {
+  const errEl = document.getElementById('auth-error');
+  errEl.style.display = 'none';
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    errEl.textContent = e.message || 'Sign-in failed. Please try again.';
+    errEl.style.display = 'block';
+  }
+};
+
+window.signOut = async () => {
+  await fbSignOut(auth);
+};
+
+window.toggleSignout = () => {
+  const btn = document.getElementById('signout-btn');
+  btn.style.display = btn.style.display === 'none' ? 'inline' : 'none';
+};
+
+onAuthStateChanged(auth, user => {
+  document.getElementById('loading').style.display = 'none';
+  if (user) {
+    // Show hub
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('hub').style.display = 'block';
+    // Populate user info
+    const name = user.displayName || user.email || 'Trader';
+    const firstName = name.split(' ')[0];
+    document.getElementById('hub-greeting').textContent = `Welcome back, ${firstName}`;
+    document.getElementById('user-name').textContent = firstName;
+    const avatar = document.getElementById('user-avatar');
+    if (user.photoURL) {
+      avatar.src = user.photoURL;
+      avatar.style.display = 'block';
+    } else {
+      avatar.style.display = 'none';
+    }
+  } else {
+    // Show auth gate
+    document.getElementById('hub').style.display = 'none';
+    document.getElementById('auth-gate').style.display = 'flex';
+  }
+});
+</script>
+
+<script>
+// Theme
+function setTheme(t, save) {
+  const root = document.documentElement;
+  if (t === 'light') root.setAttribute('data-theme','light');
+  else if (t === 'dark') root.setAttribute('data-theme','dark');
+  else root.removeAttribute('data-theme');
+  document.querySelectorAll('.tnb').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+  if (save) localStorage.setItem('imc-theme', t);
+}
+const saved = localStorage.getItem('imc-theme') || 'dark';
+setTheme(saved, false);
+</script>
+</body>
+</html>
