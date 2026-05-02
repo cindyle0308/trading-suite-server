@@ -2,888 +2,546 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Regime Rider — LeXie Trading Suite</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Macro Strategy Desk — LeXie Capital</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="instruments.js"></script>
+<script src="lexie-core.js"></script>
 <style>
-  /* ══════════════════════════════════════════════
-     CROSS-PLATFORM TYPOGRAPHY + VISUAL POLISH
-     Fixes Mac/Windows font rendering gap
-  ══════════════════════════════════════════════ */
-
-  /* Mac font smoothing fix — prevents thin rendering on Retina */
-  *{
-    box-sizing:border-box;margin:0;padding:0;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    text-rendering:optimizeLegibility;
-    -webkit-text-size-adjust:100%;
-  }
-
-  /* Force Inter with heavier fallback stack for Windows ClearType */
-  body{
-    font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
-    font-size:15px!important;
-    font-weight:400;
-    letter-spacing:-0.005em;
-    line-height:1.6;
-  }
-
-  /* ── SETUP / INTRO SCREENS ── */
-  #setup,#intro,.intro-screen,.setup-screen{
-    max-width:740px;margin:0 auto;padding:52px 28px;
-  }
-  .setup-hero,.intro-hero{text-align:center;margin-bottom:40px;}
-
-  /* Tag line above title */
-  .setup-tag,.intro-tag{
-    font-size:0.65rem!important;font-weight:800!important;
-    letter-spacing:0.22em!important;text-transform:uppercase!important;
-    margin-bottom:12px!important;opacity:.85;
-  }
-
-  /* Main title — heavier on Mac, same visual weight as Windows */
-  .setup-title,.intro-title{
-    font-size:2.6rem!important;font-weight:900!important;
-    color:var(--bright)!important;
-    margin-bottom:10px!important;
-    letter-spacing:-0.03em!important;
-    line-height:1.1!important;
-  }
-
-  /* Subtitle */
-  .setup-sub,.intro-sub{
-    font-size:1rem!important;line-height:1.7!important;
-    color:var(--dim)!important;max-width:520px;margin:0 auto!important;
-  }
-
-  /* ── CARDS — polished with subtle gradient + shadow ── */
-  .rule-card,.info-card,.card,.intro-card,.role-card,
-  .feature-card,.theory-card{
-    background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%)!important;
-    border:1px solid var(--border)!important;
-    border-radius:12px!important;
-    padding:22px 26px!important;
-    margin-bottom:14px!important;
-    box-shadow:0 2px 12px var(--shadow),0 0 0 0px transparent!important;
-    transition:border-color .2s,box-shadow .2s,transform .15s!important;
-  }
-  .rule-card:hover,.info-card:hover,.card:hover,.intro-card:hover,
-  .role-card:hover,.feature-card:hover,.theory-card:hover{
-    border-color:var(--border2)!important;
-    box-shadow:0 4px 24px var(--shadow)!important;
-    transform:translateY(-1px)!important;
-  }
-
-  /* Card headings */
-  .rule-card h3,.info-card h3,.card h3,.card-title,.role-name,
-  .feature-title,.theory-card h3{
-    font-size:0.68rem!important;font-weight:800!important;
-    text-transform:uppercase!important;letter-spacing:0.15em!important;
-    color:var(--yellow)!important;margin-bottom:10px!important;
-  }
-
-  /* Card body text */
-  .rule-card p,.info-card p,.card p,.role-desc,.card-body,
-  .feature-desc,.theory-card p{
-    font-size:0.9rem!important;line-height:1.7!important;
-    color:var(--text)!important;font-weight:400!important;
-  }
-
-  /* ── CTA BUTTONS ── */
-  .btn-primary,.start-btn,.setup-start .btn,
-  button[onclick*="start"],button[onclick*="Start"]{
-    font-family:'Inter',sans-serif!important;
-    font-size:0.95rem!important;font-weight:700!important;
-    letter-spacing:0.02em!important;
-    padding:14px 44px!important;border-radius:9px!important;
-    transition:all .2s!important;
-  }
-
-  /* Flow steps in relay etc */
-  .flow-step{
-    font-size:0.7rem!important;font-weight:700!important;
-    letter-spacing:0.06em!important;
-    padding:6px 14px!important;border-radius:20px!important;
-  }
-  .flow-arr{font-size:1rem!important;opacity:.5;}
-
-  /* Role icons */
-  .role-icon{font-size:2.2rem!important;margin-bottom:12px!important;}
-
-  /* Section labels */
-  .section-label,.spec-section-title,.section-title{
-    font-size:0.65rem!important;font-weight:800!important;
-    text-transform:uppercase!important;letter-spacing:0.16em!important;
-    color:var(--dim)!important;margin-bottom:14px!important;
-  }
-
-  /* Number badges (rule-num style) */
-  .rule-num{
-    background:var(--bg4)!important;color:var(--yellow)!important;
-    font-family:'DM Mono',monospace!important;
-    font-size:0.72rem!important;font-weight:700!important;
-    width:24px!important;height:24px!important;border-radius:5px!important;
-    display:flex!important;align-items:center!important;justify-content:center!important;
-    flex-shrink:0!important;margin-top:2px!important;
-  }
-
-  /* Two-column role-card grid */
-  .roles-grid,.role-grid{
-    display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important;
-  }
-  @media(max-width:600px){
-    .roles-grid,.role-grid{grid-template-columns:1fr!important;}
-    .setup-title,.intro-title{font-size:2rem!important;}
-  }
-
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#06090f;--bg2:#0b111c;--bg3:#101824;--bg4:#162030;
-  --border:#1a2d46;--border2:#243d5a;--text:#b0c8e4;--dim:#4a6a8a;
-  --bright:#e0eefa;--green:#00d888;--red:#ff3d5a;--yellow:#ffc840;
-  --blue:#3a90ff;--purple:#9d60ff;
-}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
-.hidden{display:none!important}
-.suite-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.suite-nav a{color:var(--dim);text-decoration:none;font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;transition:color .15s}
-.suite-nav a:hover{color:var(--text)}
-.suite-nav a.active{color:var(--blue)}
-.suite-nav .brand{color:var(--bright);font-weight:700;font-size:0.8rem;margin-right:8px}
-
-/* ── SETUP ─────────────────────────────── */
-#setup{max-width:740px;margin:0 auto;padding:48px 24px}
-.page-title{font-size:2rem;font-weight:700;color:var(--bright);margin-bottom:6px}
-.page-sub{color:var(--dim);font-size:0.9rem;margin-bottom:32px}
-.theory-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-bottom:16px}
-.theory-card h3{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--blue);margin-bottom:10px}
-.theory-card p{font-size:0.875rem;line-height:1.65;color:var(--text)}
-.theory-card code{background:var(--bg4);color:var(--green);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:0.82rem}
-.regime-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}
-.regime-pill{border-radius:8px;padding:14px 16px;border:1px solid}
-.regime-pill h4{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
-.regime-pill p{font-size:0.78rem;line-height:1.5;color:var(--text);opacity:.85}
-.regime-pill.trend{border-color:rgba(0,216,136,.3);background:rgba(0,216,136,.04)}
-.regime-pill.trend h4{color:var(--green)}
-.regime-pill.chop{border-color:rgba(255,200,64,.3);background:rgba(255,200,64,.04)}
-.regime-pill.chop h4{color:var(--yellow)}
-.regime-pill.vol{border-color:rgba(255,61,90,.3);background:rgba(255,61,90,.04)}
-.regime-pill.vol h4{color:var(--red)}
-.rule-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
-.rule-num{background:var(--bg4);color:var(--blue);font-family:'DM Mono',monospace;font-size:0.75rem;font-weight:700;width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.rule-row p{font-size:0.875rem;line-height:1.6;color:var(--text)}
-.start-btn{margin-top:28px;background:var(--blue);color:#fff;border:none;padding:14px 40px;border-radius:8px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:opacity .15s}
-.start-btn:hover{opacity:.85}
-
-/* ── GAME ──────────────────────────────── */
-#game{display:flex;flex-direction:column;height:calc(100vh - 41px)}
-.game-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:18px;flex-shrink:0}
-.stat-block{display:flex;flex-direction:column;gap:2px}
-.stat-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--dim)}
-.stat-value{font-size:1.05rem;font-weight:700;font-family:'DM Mono',monospace;color:var(--bright)}
-.stat-value.blue{color:var(--blue)}
-.sep{width:1px;height:36px;background:var(--border);margin:0 2px}
-.game-body{flex:1;display:grid;grid-template-columns:1fr 290px;min-height:0}
-
-/* Chart area */
-.chart-area{display:flex;flex-direction:column;background:var(--bg);padding:14px;gap:10px;min-height:0;overflow:hidden}
-canvas{display:block;width:100%;border-radius:8px}
-
-/* Indicator row */
-.indicator-row{display:flex;gap:10px;flex-shrink:0}
-.indicator-card{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px}
-.ind-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--dim);margin-bottom:6px}
-.ind-bar-track{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;margin-bottom:4px}
-.ind-bar-fill{height:8px;border-radius:4px;transition:width .4s}
-.ind-value{font-size:0.8rem;font-family:'DM Mono',monospace;font-weight:700;color:var(--bright)}
-
-/* Round flash */
-.round-flash{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;text-align:center;flex-shrink:0}
-.rf-question{font-size:0.8rem;color:var(--dim);margin-bottom:6px}
-.rf-countdown{font-size:1.4rem;font-weight:700;font-family:'DM Mono',monospace;color:var(--yellow)}
-
-/* Side panel */
-.side-panel{background:var(--bg2);border-left:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
-.panel-section{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px}
-.panel-section h4{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--dim);margin-bottom:10px}
-
-/* Classification buttons */
-.regime-btn-group{display:grid;grid-template-columns:1fr;gap:7px;margin-bottom:8px}
-.regime-btn{padding:10px 12px;border-radius:7px;border:1px solid;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .2s;text-align:left;background:transparent}
-.regime-btn.trend{border-color:rgba(0,216,136,.35);color:var(--green)}
-.regime-btn.trend:hover:not(:disabled){background:rgba(0,216,136,.12)}
-.regime-btn.trend.selected{background:rgba(0,216,136,.18);border-color:var(--green)}
-.regime-btn.chop{border-color:rgba(255,200,64,.35);color:var(--yellow)}
-.regime-btn.chop:hover:not(:disabled){background:rgba(255,200,64,.12)}
-.regime-btn.chop.selected{background:rgba(255,200,64,.18);border-color:var(--yellow)}
-.regime-btn.volatile{border-color:rgba(255,61,90,.35);color:var(--red)}
-.regime-btn.volatile:hover:not(:disabled){background:rgba(255,61,90,.12)}
-.regime-btn.volatile.selected{background:rgba(255,61,90,.18);border-color:var(--red)}
-.regime-btn:disabled{opacity:.3;cursor:not-allowed}
-
-/* Strategy buttons */
-.strat-btn-group{display:grid;grid-template-columns:1fr;gap:7px}
-.strat-btn{padding:10px 12px;border-radius:7px;border:1px solid var(--border2);font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .2s;text-align:left;background:transparent;color:var(--text)}
-.strat-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
-.strat-btn.selected{background:rgba(58,144,255,.12);border-color:var(--blue);color:var(--blue)}
-.strat-btn:disabled{opacity:.3;cursor:not-allowed}
-
-.confirm-btn{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:0.88rem;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:8px}
-.confirm-btn:hover:not(:disabled){opacity:.85}
-.confirm-btn:disabled{opacity:.3;cursor:not-allowed}
-
-/* Scoreboard */
-.score-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:0.8rem}
-.score-row span:first-child{color:var(--dim)}
-.score-row span:last-child{font-family:'DM Mono',monospace;font-weight:600;color:var(--bright)}
-
-/* Round feedback */
-.round-result{border-radius:8px;padding:10px 14px;font-size:0.82rem;line-height:1.5;display:none}
-.round-result.correct{background:rgba(0,216,136,.08);border:1px solid rgba(0,216,136,.3);color:var(--green)}
-.round-result.partial{background:rgba(255,200,64,.08);border:1px solid rgba(255,200,64,.3);color:var(--yellow)}
-.round-result.wrong{background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.3);color:var(--red)}
-
-/* History */
-.hist-log{max-height:140px;overflow-y:auto}
-.hist-row{font-size:0.72rem;font-family:'DM Mono',monospace;padding:3px 0;border-bottom:1px solid var(--border);color:var(--dim);display:flex;justify-content:space-between}
-.hist-row .pts{font-weight:700}
-.hist-row .pts.pos{color:var(--green)}.hist-row .pts.neg{color:var(--red)}.hist-row .pts.zero{color:var(--dim)}
-
-/* ── RESULTS ──────────────────────────── */
-#results{max-width:660px;margin:0 auto;padding:48px 24px}
-.res-title{font-size:1.8rem;font-weight:700;color:var(--bright);margin-bottom:4px}
-.res-sub{color:var(--dim);font-size:0.88rem;margin-bottom:32px}
-.res-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
-.res-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
-.res-card .val{font-size:1.5rem;font-weight:700;font-family:'DM Mono',monospace;color:var(--bright);margin-bottom:4px}
-.res-card .val.pos{color:var(--green)}.res-card .val.neg{color:var(--red)}
-.res-card .lbl{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--dim)}
-.breakdown-table{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px}
-.bt-header{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:10px 16px;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--dim);border-bottom:1px solid var(--border)}
-.bt-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:10px 16px;font-size:0.8rem;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace}
-.bt-row:last-child{border-bottom:none}
-.play-again{background:var(--blue);color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:opacity .15s}
-.play-again:hover{opacity:.85}
-
-.feedback-toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:0.82rem;font-weight:600;border-left:3px solid;animation:slideIn .25s ease;z-index:99;background:var(--bg3);max-width:300px}
-@keyframes slideIn{from{transform:translateX(60px);opacity:0}to{transform:none;opacity:1}}
-
-/* ── LIGHT MODE ── */
-[data-theme="light"]{
-  --bg:#f0f4f8!important;--panel:#ffffff!important;--panel2:#e8edf3!important;
-  --border:#c5d0de!important;--border2:#d5dde8!important;
-  --text:#1e2d3d!important;--dim:#6b7d8f!important;--dim2:#4a5a6a!important;
-  --blue:#2563eb!important;--blue-l:#1d4ed8!important;
-  --green:#16a34a!important;--red:#dc2626!important;
-  --yellow:#b45309!important;--purple:#7c3aed!important;
-  --cyan:#0e7490!important;--teal:#0f766e!important;--orange:#c2410c!important;
-  --green-bg:rgba(22,163,74,0.12)!important;--red-bg:rgba(220,38,38,0.12)!important;
-  --blue-bg:rgba(37,99,235,0.12)!important;--yellow-bg:rgba(180,83,9,0.12)!important;
-  --purple-bg:rgba(124,58,237,0.12)!important;--teal-bg:rgba(15,118,110,0.12)!important;
-  --orange-bg:rgba(194,65,12,0.12)!important;
-
-  --bg2:#ffffff!important;--bg3:#f5f8fc!important;--bg4:#edf1f7!important;--bright:#0d1b2a!important;--shadow:rgba(0,0,0,.12)!important;
-}
-@media(prefers-color-scheme:light){
-  :root:not([data-theme]){
-    --bg:#f0f4f8!important;--panel:#ffffff!important;--panel2:#e8edf3!important;
-    --border:#c5d0de!important;--border2:#d5dde8!important;
-    --text:#1e2d3d!important;--dim:#6b7d8f!important;--dim2:#4a5a6a!important;
-    --blue:#2563eb!important;--blue-l:#1d4ed8!important;
-    --green:#16a34a!important;--red:#dc2626!important;
-    --yellow:#b45309!important;--purple:#7c3aed!important;
-    --cyan:#0e7490!important;--teal:#0f766e!important;--orange:#c2410c!important;
-    --green-bg:rgba(22,163,74,0.12)!important;--red-bg:rgba(220,38,38,0.12)!important;
-    --blue-bg:rgba(37,99,235,0.12)!important;--yellow-bg:rgba(180,83,9,0.12)!important;
-    --purple-bg:rgba(124,58,237,0.12)!important;--teal-bg:rgba(15,118,110,0.12)!important;
-    --orange-bg:rgba(194,65,12,0.12)!important;
-  
-  --bg2:#ffffff!important;--bg3:#f5f8fc!important;--bg4:#edf1f7!important;--bright:#0d1b2a!important;--shadow:rgba(0,0,0,.12)!important;
-}
-}
-/* Theme toggle button in nav */
-.theme-nav-btns{margin-left:auto;display:flex;gap:3px;align-items:center;}
-.tnb{padding:3px 8px;border-radius:5px;border:1px solid var(--border2);
-  background:transparent;color:var(--dim);font-size:10px;font-weight:700;
-  cursor:pointer;transition:all .12s;line-height:1;}
-.tnb:hover{color:var(--text);}
-.tnb.active{background:var(--panel);border-color:var(--border);color:var(--text);}
+:root{--bg:#080c14;--surface:#0f1520;--card:#131c2e;--card2:#1a2540;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#c8d8f0;--dim:#667890;--accent:#667eea;--accent2:#764ba2;--green:#22c55e;--red:#ef4444;--gold:#f59e0b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(102,126,234,0.025)1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,0.025)1px,transparent 1px);background-size:40px 40px;}
+.header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:1px solid var(--border);background:rgba(8,12,20,0.85);backdrop-filter:blur(12px);}
+.back-btn{font-size:12px;color:var(--dim);text-decoration:none;display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:8px;transition:all .2s;}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+.header-title{display:flex;flex-direction:column;align-items:center;}
+.header-title h1{font-size:16px;font-weight:800;color:#e8f0fe;}
+.header-title p{font-size:11px;color:var(--dim);}
+.status-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600;border:1px solid var(--border);color:var(--dim);}
+.status-badge.running{background:rgba(245,158,11,0.15);color:var(--gold);border-color:rgba(245,158,11,0.3);}
+.status-badge.done{background:rgba(34,197,94,0.15);color:var(--green);border-color:rgba(34,197,94,0.3);}
+.pipeline{display:flex;align-items:center;justify-content:center;gap:0;padding:12px 32px;background:rgba(10,15,25,0.7);border-bottom:1px solid var(--border);position:relative;z-index:5;}
+.pipe-step{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;font-size:11px;font-weight:600;color:var(--dim);border:1px solid transparent;transition:all .3s;white-space:nowrap;}
+.pipe-step.active{background:rgba(102,126,234,0.15);border-color:rgba(102,126,234,0.3);color:var(--accent);}
+.pipe-step.done{color:var(--green);}
+.pipe-arrow{color:var(--border2);font-size:14px;margin:0 2px;}
+.main{max-width:1300px;margin:0 auto;padding:24px 32px;position:relative;z-index:1;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.step-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;}
+.card-title{font-size:14px;font-weight:700;color:#e8f0fe;}
+.card-sub{font-size:11px;color:var(--dim);}
+.chart-box{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.chart-box h3{font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:2px;}
+.chart-box p{font-size:10px;color:var(--dim);margin-bottom:10px;}
+.chart-wrap{position:relative;height:180px;}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px;text-align:center;}
+.metric-value{font-size:20px;font-weight:800;color:#e8f0fe;}
+.metric-label{font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:0.4px;}
+.metric.good .metric-value{color:var(--green);}
+.metric.bad  .metric-value{color:var(--red);}
+.metric.warn .metric-value{color:var(--gold);}
+.param-group{margin-bottom:0;}
+.param-group label{display:block;font-size:11px;color:var(--dim);margin-bottom:4px;}
+.param-group select,.param-group input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);color:#e8f0fe;border-radius:8px;padding:7px 10px;font-size:13px;}
+.param-group select:focus,.param-group input:focus{outline:none;border-color:var(--accent);}
+.btn{padding:8px 18px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.btn-primary:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-secondary{background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text);}
+.btn-secondary:hover{background:var(--card2);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.interp-box{background:rgba(102,126,234,0.06);border:1px solid rgba(102,126,234,0.15);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--dim);line-height:1.6;margin-top:12px;}
+.interp-box strong{color:#e8f0fe;}
+.regime-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+.regime-pill.growth{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
+.regime-pill.inflation{background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);}
+.regime-pill.riskoff{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3);}
+.regime-pill.deflation{background:rgba(102,126,234,0.15);color:var(--accent);border:1px solid rgba(102,126,234,0.3);}
+.macro-scenario-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;}
+.macro-scenario-card:hover{background:var(--card2);border-color:rgba(102,126,234,0.3);}
+.macro-scenario-card.active{background:rgba(102,126,234,0.08);border-color:rgba(102,126,234,0.4);}
+.scenario-title{font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:4px;}
+.scenario-desc{font-size:11px;color:var(--dim);line-height:1.4;}
+.alloc-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.alloc-row:last-child{border:none;}
+.alloc-name{font-size:12px;color:#e8f0fe;width:140px;flex-shrink:0;}
+.alloc-bar-wrap{flex:1;background:rgba(255,255,255,0.06);border-radius:3px;height:6px;overflow:hidden;}
+.alloc-bar{height:100%;border-radius:3px;transition:width .4s;}
+.alloc-pct{font-size:11px;color:var(--dim);width:38px;text-align:right;flex-shrink:0;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px;}
 </style>
 </head>
-<body>
-
-<nav class="suite-nav">
-  <a href="index.html" class="brand">⌂ Hub</a>
-  <a href="quant-relay.html">Relay</a>
-  <a href="alpha-factory.html">Alpha Factory</a>
-  <a href="cmi-challenge.html">Asset Mgr</a>
-  <a href="arbitrage-sprint.html">Arb Sprint</a>
-  <a href="price-war.html">Price War</a>
-  <a href="algo-blitz.html">Algo Blitz</a>
-  <a href="bot-builder.html">Bot Builder</a>
-  <a href="basket-blitz.html">Basket</a>
-  <a href="options-outcry.html">Outcry</a>
-  <a href="momentum-trainer.html">Momentum</a>
-  <a href="spread-trader.html">Spread</a>
-  <a href="regime-rider.html" class="active">Regime</a>
-<a href="https://lexie-marketmakerbaos.onrender.com" target="_blank">Market Maker</a>
-<span class="theme-nav-btns"><button class="tnb" data-t="light" onclick="setTheme('light',true)" title="Light">☀</button><button class="tnb" data-t="system" onclick="setTheme('system',true)" title="System">⊙</button><button class="tnb" data-t="dark" onclick="setTheme('dark',true)" title="Dark">☾</button></span>
-
-    <a href="terminal.html">⌨ Terminal</a>
-</nav>
-
-<!-- SETUP -->
-<div id="setup">
-  <div class="page-title">Regime Rider</div>
-  <div class="page-sub">Identify market regimes and apply the right strategy — beginner level</div>
-
-  <div class="theory-card">
-    <h3>The Concept: Market Regimes</h3>
-    <p>Markets don't behave the same way all the time. They cycle through <strong style="color:var(--bright)">regimes</strong> — distinct states with different statistical properties. A strategy that crushes it in a trending market will bleed in a choppy one. The key skill: <em>identify what regime you're in, then apply the appropriate strategy.</em> This is regime detection.</p>
-    <div class="regime-grid">
-      <div class="regime-pill trend">
-        <h4>📈 Trending</h4>
-        <p>Strong directional move. Low-moderate vol. SMA spread is wide and growing. Follow the trend — momentum works here.</p>
-      </div>
-      <div class="regime-pill chop">
-        <h4>↔ Choppy</h4>
-        <p>No clear direction. Low vol. Price oscillates around a mean. Fade extremes — mean reversion works here.</p>
-      </div>
-      <div class="regime-pill vol">
-        <h4>⚡ Volatile</h4>
-        <p>High, unpredictable vol. Large random swings. No strategy edge. Stay flat — protect capital.</p>
-      </div>
-    </div>
+<body data-desk="regime-rider">
+<header class="header">
+  <a href="index.html" class="back-btn">&#x2190; Lobby</a>
+  <div class="header-title">
+    <h1>&#x1F310; Macro Strategy Desk</h1>
+    <p>Regime identification &bull; Asset allocation &bull; Risk-off navigation</p>
   </div>
+  <span class="status-badge" id="status-badge">Select Scenario</span>
+</header>
 
-  <div class="theory-card">
-    <h3>How to Play</h3>
-    <div class="rule-row"><div class="rule-num">1</div><p>Every 15 seconds a new <strong style="color:var(--bright)">classification round</strong> begins. You see the price chart, a volatility meter, and a trend-strength meter.</p></div>
-    <div class="rule-row"><div class="rule-num">2</div><p>Read the two indicators and <strong>classify the regime</strong> (Trending / Choppy / Volatile) then <strong>pick a strategy</strong> (Follow Trend / Fade Extremes / Stay Flat).</p></div>
-    <div class="rule-row"><div class="rule-num">3</div><p>Scoring: <strong style="color:var(--green)">+3 pts</strong> for correct regime AND correct strategy. <strong style="color:var(--yellow)">+1 pt</strong> for correct regime only. <strong style="color:var(--red)">−1 pt</strong> for wrong regime.</p></div>
-    <div class="rule-row"><div class="rule-num">4</div><p>After each round, you see the correct answer and an explanation. Game lasts 8 rounds (~2 minutes).</p></div>
-  </div>
-
-  <div class="theory-card">
-    <h3>The Two Indicators to Read</h3>
-    <p><strong style="color:var(--red)">Volatility Meter</strong> shows 20-bar realised vol (annualised). Low = below 15%, Medium = 15–35%, High = above 35%. <strong style="color:var(--blue)">Trend Strength</strong> shows how wide the SMA-10/SMA-30 spread is as a % of price. Strong (>0.8%) means clear trend. Weak (<0.3%) means flat or oscillating. Together they identify the regime: low vol + strong trend = Trending; low vol + weak trend = Choppy; high vol = Volatile (regardless of trend).</p>
-  </div>
-
-  <button class="start-btn" onclick="startGame()">Start Reading →</button>
+<div class="pipeline">
+  <div class="pipe-step active" id="step-1">1 Scenario</div>
+  <div class="pipe-arrow">&#x203A;</div>
+  <div class="pipe-step" id="step-2">2 Regime Map</div>
+  <div class="pipe-arrow">&#x203A;</div>
+  <div class="pipe-step" id="step-3">3 Allocate</div>
+  <div class="pipe-arrow">&#x203A;</div>
+  <div class="pipe-step" id="step-4">4 Simulate</div>
+  <div class="pipe-arrow">&#x203A;</div>
+  <div class="pipe-step" id="step-5">5 Attribution</div>
 </div>
 
-<!-- GAME -->
-<div id="game" class="hidden">
-  <div class="game-header">
-    <div class="stat-block">
-      <div class="stat-label">Round</div>
-      <div class="stat-value blue" id="hdr-round">1 / 8</div>
+<div class="main">
+
+<!-- Step 1: Scenario selection -->
+<div class="card" style="margin-bottom:16px">
+  <div class="card-header">
+    <div class="step-num">1</div>
+    <div><div class="card-title">Macro Scenario Selection</div><div class="card-sub">Choose a regime to navigate — each has distinct asset class winners and losers</div></div>
+    <button class="btn btn-secondary" onclick="randomScenario()" style="margin-left:auto">&#x1F3B2; Random</button>
+  </div>
+  <div class="grid-2" id="scenario-grid" style="gap:10px"></div>
+</div>
+
+<!-- Step 2: Regime map -->
+<div class="card" style="margin-bottom:16px" id="card-regime" style="display:none">
+  <div class="card-header">
+    <div class="step-num">2</div>
+    <div><div class="card-title">Regime Characteristics</div><div class="card-sub" id="regime-sub">Asset class performance expectations in this regime</div></div>
+    <div id="regime-pill-wrap" style="margin-left:auto"></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="chart-box">
+      <h3>Simulated Asset Paths</h3>
+      <p>Key instruments in this regime (300 bars)</p>
+      <div class="chart-wrap"><canvas id="chart-paths"></canvas></div>
     </div>
-    <div class="sep"></div>
-    <div class="stat-block">
-      <div class="stat-label">Score</div>
-      <div class="stat-value" id="hdr-score">0 pts</div>
-    </div>
-    <div class="sep"></div>
-    <div class="stat-block">
-      <div class="stat-label">Correct / Total</div>
-      <div class="stat-value" id="hdr-acc">0 / 0</div>
-    </div>
-    <div class="sep"></div>
-    <div class="stat-block">
-      <div class="stat-label">Current Price</div>
-      <div class="stat-value" id="hdr-price">—</div>
-    </div>
-    <div class="sep"></div>
-    <div class="stat-block">
-      <div class="stat-label">Round Timer</div>
-      <div class="stat-value blue" id="hdr-time">15s</div>
+    <div class="chart-box">
+      <h3>Historical Return Profile</h3>
+      <p>Expected annualised returns in this regime type</p>
+      <div class="chart-wrap"><canvas id="chart-returns"></canvas></div>
     </div>
   </div>
+  <div class="grid-4" id="regime-metrics"></div>
+</div>
 
-  <div class="game-body">
-    <div class="chart-area">
-      <canvas id="chart" height="240"></canvas>
-
-      <div class="indicator-row">
-        <div class="indicator-card">
-          <div class="ind-label" style="color:var(--red)">⚡ Volatility (20-bar realised, ann.)</div>
-          <div class="ind-bar-track">
-            <div class="ind-bar-fill" id="vol-fill" style="background:var(--red);width:0%"></div>
-          </div>
-          <div class="ind-value" id="vol-val">—</div>
-          <div style="font-size:0.7rem;color:var(--dim);margin-top:3px" id="vol-desc">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="ind-label" style="color:var(--blue)">📊 Trend Strength (SMA spread %)</div>
-          <div class="ind-bar-track">
-            <div class="ind-bar-fill" id="trend-fill" style="background:var(--blue);width:0%"></div>
-          </div>
-          <div class="ind-value" id="trend-val">—</div>
-          <div style="font-size:0.7rem;color:var(--dim);margin-top:3px" id="trend-desc">—</div>
-        </div>
-      </div>
-
-      <div class="round-flash">
-        <div class="rf-question" id="rf-q">Analyse the chart and indicators, then classify the regime →</div>
-        <div class="rf-countdown" id="rf-cd">15s</div>
-      </div>
+<!-- Step 3: Portfolio allocation -->
+<div class="card" style="margin-bottom:16px" id="card-alloc">
+  <div class="card-header">
+    <div class="step-num">3</div>
+    <div><div class="card-title">Portfolio Allocation</div><div class="card-sub">Construct a portfolio suited to the identified regime. Weights must sum to 100%.</div></div>
+    <div style="display:flex;gap:8px;margin-left:auto">
+      <button class="btn btn-secondary" onclick="applyOptimal()">&#x2B50; Optimal Weights</button>
+      <button class="btn btn-secondary" onclick="applyEqual()">&#x3D; Equal Weight</button>
     </div>
-
-    <div class="side-panel">
-      <div class="panel-section">
-        <h4>Step 1 — Classify Regime</h4>
-        <div class="regime-btn-group">
-          <button class="regime-btn trend" id="btn-trend" onclick="selectRegime('trending')">📈 TRENDING</button>
-          <button class="regime-btn chop" id="btn-chop"  onclick="selectRegime('choppy')">↔ CHOPPY</button>
-          <button class="regime-btn volatile" id="btn-vol" onclick="selectRegime('volatile')">⚡ VOLATILE</button>
-        </div>
-      </div>
-
-      <div class="panel-section">
-        <h4>Step 2 — Pick Strategy</h4>
-        <div class="strat-btn-group">
-          <button class="strat-btn" id="btn-follow" onclick="selectStrat('follow')">🏄 Follow the Trend</button>
-          <button class="strat-btn" id="btn-fade"   onclick="selectStrat('fade')">↩ Fade Extremes (Mean Rev)</button>
-          <button class="strat-btn" id="btn-flat"   onclick="selectStrat('flat')">🛡 Stay Flat (No Trade)</button>
-        </div>
-        <button class="confirm-btn" id="btn-confirm" onclick="submitAnswer()" disabled>Confirm Answer →</button>
-      </div>
-
-      <div class="round-result" id="round-result"></div>
-
-      <div class="panel-section">
-        <h4>Score</h4>
-        <div class="score-row"><span>Total Points</span><span id="sc-pts">0</span></div>
-        <div class="score-row"><span>Regime Accuracy</span><span id="sc-racc">—</span></div>
-        <div class="score-row"><span>Strategy Accuracy</span><span id="sc-sacc">—</span></div>
-      </div>
-
-      <div class="panel-section">
-        <h4>Round History</h4>
-        <div class="hist-log" id="hist-log"><div class="hist-row"><span>No rounds yet</span></div></div>
-      </div>
-    </div>
+  </div>
+  <div id="alloc-controls" style="margin-bottom:16px"></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="font-size:12px;color:var(--dim)">Total: <span id="total-weight" style="font-weight:700;color:#e8f0fe">0%</span></div>
+    <div style="font-size:11px;color:var(--dim)" id="weight-warning"></div>
   </div>
 </div>
 
-<!-- RESULTS -->
-<div id="results" class="hidden">
-  <div class="res-title">Regime Rider Complete</div>
-  <div class="res-sub">Here's how well you read the market</div>
-  <div class="res-grid">
-    <div class="res-card">
-      <div class="val" id="res-score">0</div>
-      <div class="lbl">Total Points</div>
-    </div>
-    <div class="res-card">
-      <div class="val" id="res-racc">0%</div>
-      <div class="lbl">Regime Accuracy</div>
-    </div>
-    <div class="res-card">
-      <div class="val" id="res-sacc">0%</div>
-      <div class="lbl">Strategy Accuracy</div>
-    </div>
+<!-- Step 4+5: Simulation & Attribution -->
+<div class="card" id="card-sim">
+  <div class="card-header">
+    <div class="step-num">4</div>
+    <div><div class="card-title">Portfolio Simulation &amp; Attribution</div><div class="card-sub">20 paths — portfolio vs equal-weight benchmark</div></div>
+    <button class="btn btn-primary" id="sim-btn" onclick="runSim()" style="margin-left:auto">&#x25B6; Run Simulation</button>
   </div>
-  <div class="breakdown-table">
-    <div class="bt-header"><span>Round</span><span>True Regime</span><span>Your Guess</span><span>Points</span></div>
-    <div id="bt-body"></div>
+  <div id="sim-placeholder" style="color:var(--dim);font-size:13px;padding:8px 0">Set your allocation above then run the simulation.</div>
+  <div id="sim-results" style="display:none">
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="metric" id="sm-alpha"><div class="metric-value" id="smv-alpha">-</div><div class="metric-label">Alpha vs EW</div></div>
+      <div class="metric" id="sm-sharpe"><div class="metric-value" id="smv-sharpe">-</div><div class="metric-label">Sharpe</div></div>
+      <div class="metric" id="sm-maxdd"><div class="metric-value" id="smv-maxdd">-</div><div class="metric-label">Max DD</div></div>
+      <div class="metric" id="sm-regime"><div class="metric-value" id="smv-regime">-</div><div class="metric-label">Regime Fit Score</div></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:14px">
+      <div class="chart-box">
+        <h3>Portfolio vs Benchmark Equity</h3>
+        <p>Your allocation (blue) vs equal-weight (grey)</p>
+        <div class="chart-wrap" style="height:200px"><canvas id="chart-equity"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <h3>Attribution by Asset</h3>
+        <p>Contribution to total return from each position</p>
+        <div class="chart-wrap" style="height:200px"><canvas id="chart-attrib"></canvas></div>
+      </div>
+    </div>
+    <div id="attrib-detail" style="margin-bottom:12px"></div>
+    <div class="interp-box" id="sim-interp"></div>
   </div>
-  <div class="theory-card" style="margin-bottom:20px">
-    <h3>Key Takeaway</h3>
-    <p id="res-feedback">—</p>
-  </div>
-  <button class="play-again" onclick="location.reload()">Play Again</button>
 </div>
+
+</div><!-- /main -->
 
 <script>
-// ── Constants ──────────────────────────────────────────────────────────────
-const TOTAL_ROUNDS  = 8;
-const ROUND_SECS    = 15;
-const CHART_N       = 60;
-const TICK_MS       = 300;   // fast ticks — accumulate history during round
-const TICKS_PER_ROUND = Math.floor(ROUND_SECS * 1000 / TICK_MS);
-
-// Regime definitions
-const REGIMES = {
-  trending: { drift: 0.0025, vol: 0.009, label: 'Trending' },
-  choppy:   { drift: 0.0002, vol: 0.005, label: 'Choppy'   },
-  volatile: { drift: 0.0005, vol: 0.022, label: 'Volatile' },
-};
-
-// Correct strategy per regime
-const CORRECT_STRAT = { trending:'follow', choppy:'fade', volatile:'flat' };
-
-// ── State ──────────────────────────────────────────────────────────────────
-let prices = [];
-let G = {
-  round: 0,
-  score: 0,
-  roundsAnswered: 0,
-  regimeCorrect: 0,
-  stratCorrect: 0,
-  history: [],
-  trueRegime: null,
-  guessRegime: null,
-  guessStrat: null,
-  ticksInRound: 0,
-  roundTimer: null,
-  tickInterval: null,
-  countdownSec: ROUND_SECS,
-  answered: false,
-};
-
-// ── Math ───────────────────────────────────────────────────────────────────
-function randn(){ let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
-function sma(arr,n){ if(arr.length<n)return null; return arr.slice(-n).reduce((a,b)=>a+b,0)/n; }
-
-// ── Regime selection ───────────────────────────────────────────────────────
-function pickRegime() {
-  const keys = Object.keys(REGIMES);
-  return keys[Math.floor(Math.random() * keys.length)];
-}
-
-// ── Price tick ─────────────────────────────────────────────────────────────
-function tick() {
-  const r = REGIMES[G.trueRegime];
-  const last = prices[prices.length - 1];
-  const newP = last * Math.exp(r.drift * (Math.random()<0.5?1:-1) + r.vol * randn());
-  prices.push(newP);
-  if (prices.length > CHART_N + 20) prices.shift();
-  G.ticksInRound++;
-  drawChart();
-  updateIndicators();
-}
-
-// ── Drawing ────────────────────────────────────────────────────────────────
-function drawChart() {
-  const canvas = document.getElementById('chart');
-  const W = canvas.width, H = canvas.height;
-  const ctx = canvas.getContext('2d');
-  const disp = prices.slice(-CHART_N);
-  if (disp.length < 2) return;
-
-  const minP = Math.min(...disp) * 0.995;
-  const maxP = Math.max(...disp) * 1.005;
-  const xp = i => (i / (CHART_N - 1)) * (W - 40) + 10;
-  const yp = v => H - 8 - ((v - minP) / (maxP - minP)) * (H - 16);
-
-  // BG
-  ctx.fillStyle = '#0b111c'; ctx.fillRect(0, 0, W, H);
-
-  // Regime shade (subtle)
-  const shadeColors = { trending:'rgba(0,216,136,0.03)', choppy:'rgba(255,200,64,0.03)', volatile:'rgba(255,61,90,0.03)' };
-  ctx.fillStyle = shadeColors[G.trueRegime] || 'transparent';
-  ctx.fillRect(10, 8, W - 50, H - 16);
-
-  // Grid
-  ctx.strokeStyle = '#1a2d46'; ctx.lineWidth = 0.5;
-  [0.25, 0.5, 0.75].forEach(f => {
-    const y = 8 + f * (H - 16);
-    ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W - 40, y); ctx.stroke();
-    const val = maxP - f * (maxP - minP);
-    ctx.fillStyle = '#4a6a8a'; ctx.font = '10px DM Mono,monospace';
-    ctx.fillText(val.toFixed(2), W - 38, y + 4);
-  });
-
-  // SMA-30 (blue)
-  drawSMALine(ctx, disp, xp, yp, 30, '#3a90ff', 1.0);
-  // SMA-10 (yellow)
-  drawSMALine(ctx, disp, xp, yp, 10, '#ffc840', 1.0);
-
-  // Price line
-  ctx.strokeStyle = '#b0c8e4'; ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  disp.forEach((v, i) => { i === 0 ? ctx.moveTo(xp(i), yp(v)) : ctx.lineTo(xp(i), yp(v)); });
-  ctx.stroke();
-
-  // Current price dot
-  ctx.fillStyle = '#e0eefa';
-  ctx.beginPath(); ctx.arc(xp(disp.length - 1), yp(disp[disp.length - 1]), 3, 0, Math.PI * 2); ctx.fill();
-
-  // Legend
-  ctx.font = '10px DM Mono,monospace';
-  ctx.fillStyle = '#ffc840'; ctx.fillText('SMA10', 12, 20);
-  ctx.fillStyle = '#3a90ff'; ctx.fillText('SMA30', 68, 20);
-  ctx.fillStyle = '#b0c8e4'; ctx.fillText('Price', 124, 20);
-}
-
-function drawSMALine(ctx, disp, xp, yp, n, color, lw) {
-  ctx.strokeStyle = color; ctx.lineWidth = lw;
-  ctx.beginPath(); let started = false;
-  for (let i = 0; i < disp.length; i++) {
-    const slice = disp.slice(Math.max(0, i - n + 1), i + 1);
-    if (slice.length < n) continue;
-    const v = slice.reduce((a, b) => a + b, 0) / n;
-    if (!started) { ctx.moveTo(xp(i), yp(v)); started = true; }
-    else ctx.lineTo(xp(i), yp(v));
+/* ── Macro scenarios ── */
+var SCENARIOS = [
+  {
+    id:'growth',
+    name:'Risk-On Growth Boom',
+    emoji:'&#x1F4C8;',
+    pill:'growth',
+    desc:'Strong GDP, low unemployment, rising corporate earnings. Equities outperform. Commodities rise on demand. Bonds underperform as rates drift up.',
+    instruments:['SPX','NDX','AAPL','NVDA','OIL','COPPER'],
+    optimalWeights:{SPX:30,NDX:25,AAPL:15,NVDA:15,OIL:10,COPPER:5},
+    regimeReturns:{Equities:22,Commodities:12,HighYield:8,Gold:-2,Bonds:-4,Cash:3},
+    driftMult:{SPX:1.8,NDX:2.0,AAPL:1.6,NVDA:2.2,OIL:1.3,COPPER:1.4},
+    hint:'Overweight growth equities and economically-sensitive commodities. Underweight bonds and gold.'
+  },
+  {
+    id:'inflation',
+    name:'Stagflation / High Inflation',
+    emoji:'&#x1F525;',
+    pill:'inflation',
+    desc:'CPI elevated, central banks hiking. Real assets outperform. Bonds suffer. Equities mixed — value beats growth. Commodities surge.',
+    instruments:['GOLD','SILVER','OIL','BRENT','WHEAT','TLT'],
+    optimalWeights:{GOLD:30,SILVER:15,OIL:25,BRENT:15,WHEAT:10,TLT:5},
+    regimeReturns:{Commodities:28,Gold:18,RealEstate:10,Equities:2,Bonds:-12,Tech:-8},
+    driftMult:{GOLD:1.5,SILVER:1.4,OIL:1.8,BRENT:1.7,WHEAT:1.6,TLT:-1.2},
+    hint:'Real assets dominate. Gold and energy as inflation hedges. Cut bond exposure aggressively.'
+  },
+  {
+    id:'riskoff',
+    name:'Risk-Off / Recession',
+    emoji:'&#x1F4C9;',
+    pill:'riskoff',
+    desc:'Growth slowing, credit spreads widening, VIX spiking. Safe havens rally. Quality and defensive equities hold up. Energy and cyclicals crater.',
+    instruments:['GOLD','TLT','GLD','SPX','VIX','US10Y'],
+    optimalWeights:{GOLD:25,TLT:30,GLD:20,SPX:10,VIX:5,US10Y:10},
+    regimeReturns:{Bonds:15,Gold:12,Defensives:4,Cash:4,Cyclicals:-18,Tech:-22},
+    driftMult:{GOLD:1.3,TLT:1.4,GLD:1.2,SPX:-0.5,VIX:2.0,US10Y:1.3},
+    hint:'Flight to quality. Long bonds and gold. Reduce equity beta. VIX exposure as hedge.'
+  },
+  {
+    id:'deflation',
+    name:'Deflationary Slowdown',
+    emoji:'&#x1F9CA;',
+    pill:'deflation',
+    desc:'Growth weak but inflation low. Central banks easing. Duration assets rally. Technology outperforms on falling rates. Commodities weak.',
+    instruments:['TLT','US10Y','BUND','NDX','SPY','GOLD'],
+    optimalWeights:{TLT:25,US10Y:20,BUND:10,NDX:30,SPY:10,GOLD:5},
+    regimeReturns:{LongBonds:20,Tech:18,Gold:8,Equities:10,Commodities:-10,Energy:-15},
+    driftMult:{TLT:1.6,US10Y:1.5,BUND:1.4,NDX:1.7,SPY:1.3,GOLD:0.9},
+    hint:'Long duration wins. Growth tech outperforms on falling discount rates. Avoid commodities.'
   }
-  ctx.stroke();
+];
+
+var currentScenario = null;
+var allocWeights = {};
+var charts = {};
+
+Chart.defaults.color = '#667890';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+function mkChart(id, cfg) {
+  if (charts[id]) charts[id].destroy();
+  var ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, cfg);
 }
 
-// ── Indicators ─────────────────────────────────────────────────────────────
-function updateIndicators() {
-  const disp = prices.slice(-CHART_N);
-  const cur = disp[disp.length - 1];
-
-  // Realised vol: 20-bar log returns std, annualised
-  const window20 = disp.slice(-21);
-  let rvol = 0;
-  if (window20.length >= 2) {
-    const rets = window20.slice(1).map((v, i) => Math.log(v / window20[i]));
-    const m = rets.reduce((a, b) => a + b, 0) / rets.length;
-    const variance = rets.reduce((a, b) => a + (b - m) ** 2, 0) / rets.length;
-    rvol = Math.sqrt(variance) * Math.sqrt(252 * (1000 / TICK_MS)) * 100; // annualised %
+function setStep(n) {
+  for (var i=1;i<=5;i++){
+    var el=document.getElementById('step-'+i);
+    if(!el)continue;
+    el.className='pipe-step'+(i<n?' done':i===n?' active':'');
   }
-
-  // Trend strength: |SMA10 - SMA30| / price
-  const f = sma(disp, 10), s = sma(disp, 30);
-  const trendStr = (f && s) ? Math.abs(f - s) / cur * 100 : 0;
-
-  // Update vol bar
-  const volPct = Math.min(rvol / 60 * 100, 100);
-  document.getElementById('vol-fill').style.width = volPct + '%';
-  document.getElementById('vol-fill').style.background = rvol > 35 ? 'var(--red)' : rvol > 15 ? 'var(--yellow)' : 'var(--green)';
-  document.getElementById('vol-val').textContent = rvol.toFixed(1) + '%  annualised';
-  document.getElementById('vol-desc').textContent = rvol > 35 ? 'HIGH — large random swings' : rvol > 15 ? 'MEDIUM — moderate moves' : 'LOW — calm market';
-
-  // Update trend bar
-  const trendPct = Math.min(trendStr / 2 * 100, 100);
-  document.getElementById('trend-fill').style.width = trendPct + '%';
-  document.getElementById('trend-fill').style.background = trendStr > 0.8 ? 'var(--blue)' : trendStr > 0.3 ? 'var(--purple)' : 'var(--dim)';
-  document.getElementById('trend-val').textContent = trendStr.toFixed(3) + '% spread';
-  document.getElementById('trend-desc').textContent = trendStr > 0.8 ? 'STRONG — clear directional trend' : trendStr > 0.3 ? 'MODERATE — some direction' : 'WEAK — flat / oscillating';
-
-  document.getElementById('hdr-price').textContent = cur.toFixed(2);
 }
 
-// ── Round management ───────────────────────────────────────────────────────
-function startRound() {
-  G.round++;
-  G.answered = false;
-  G.guessRegime = null;
-  G.guessStrat = null;
-  G.ticksInRound = 0;
-  G.countdownSec = ROUND_SECS;
-  G.trueRegime = pickRegime();
+/* ── Scenario grid ── */
+function buildScenarioGrid() {
+  var el = document.getElementById('scenario-grid');
+  el.innerHTML = SCENARIOS.map(function(s,idx) {
+    return '<div class="macro-scenario-card" id="sc-'+idx+'" onclick="selectScenario('+idx+')">'+
+      '<div class="scenario-title">'+s.emoji+' '+s.name+'</div>'+
+      '<div class="scenario-desc">'+s.desc+'</div>'+
+    '</div>';
+  }).join('');
+}
 
-  // Reset UI
-  ['btn-trend','btn-chop','btn-vol'].forEach(id => {
-    const b = document.getElementById(id);
-    b.classList.remove('selected'); b.disabled = false;
+function randomScenario() {
+  selectScenario(Math.floor(Math.random()*SCENARIOS.length));
+}
+
+function selectScenario(idx) {
+  currentScenario = SCENARIOS[idx];
+  document.querySelectorAll('.macro-scenario-card').forEach(function(el,i){
+    el.className='macro-scenario-card'+(i===idx?' active':'');
   });
-  ['btn-follow','btn-fade','btn-flat'].forEach(id => {
-    const b = document.getElementById(id);
-    b.classList.remove('selected'); b.disabled = false;
+  populateRegimeMap();
+  buildAllocControls();
+  setStep(2);
+  var sb=document.getElementById('status-badge');
+  sb.textContent=currentScenario.name;
+}
+
+/* ── Regime map ── */
+function populateRegimeMap() {
+  var s = currentScenario;
+  document.getElementById('regime-sub').textContent = 'Asset expectations: ' + s.name;
+  var pillHtml = '<span class="regime-pill '+s.pill+'">'+s.emoji+' '+s.pill.charAt(0).toUpperCase()+s.pill.slice(1)+'</span>';
+  document.getElementById('regime-pill-wrap').innerHTML = pillHtml;
+
+  // Simulate paths for key instruments
+  var seed = Math.floor(Date.now()/1000) & 0xFFFFFF;
+  var datasets = s.instruments.slice(0,4).map(function(k, i) {
+    var inst = LX_INSTRUMENTS[k];
+    if (!inst) return null;
+    var mult = s.driftMult[k] || 1.0;
+    // Custom simulate with drift multiplier
+    var prices = simWithDrift(k, 300, seed + i*999, mult);
+    var norm = prices.map(function(v){return v/prices[0];});
+    var colors = ['#667eea','#22c55e','#f59e0b','#ef4444'];
+    return {label:inst.ticker, data:norm, borderColor:colors[i], borderWidth:1.5, pointRadius:0, tension:0.2, fill:false};
+  }).filter(Boolean);
+
+  mkChart('chart-paths', {
+    type:'line',
+    data:{labels:Array.from({length:300},function(_,i){return i;}), datasets:datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:10}}}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
   });
-  document.getElementById('btn-confirm').disabled = true;
-  document.getElementById('round-result').style.display = 'none';
 
-  document.getElementById('hdr-round').textContent = G.round + ' / ' + TOTAL_ROUNDS;
-  document.getElementById('rf-q').textContent = 'Round ' + G.round + ' — classify the regime and pick a strategy';
-  document.getElementById('rf-cd').textContent = ROUND_SECS + 's';
-  document.getElementById('rf-cd').style.color = 'var(--yellow)';
+  // Return bar chart
+  var rKeys = Object.keys(s.regimeReturns);
+  var rVals = rKeys.map(function(k){return s.regimeReturns[k];});
+  var rColors = rVals.map(function(v){return v>=0?'rgba(34,197,94,0.75)':'rgba(239,68,68,0.75)';});
+  mkChart('chart-returns', {
+    type:'bar',
+    data:{labels:rKeys, datasets:[{label:'Expected Ann. Return %', data:rVals, backgroundColor:rColors, borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'}},y:{grid:{display:false}}}}
+  });
 
-  // Countdown timer
-  clearInterval(G.roundTimer);
-  G.roundTimer = setInterval(() => {
-    G.countdownSec--;
-    document.getElementById('rf-cd').textContent = G.countdownSec + 's';
-    if (G.countdownSec <= 5) document.getElementById('rf-cd').style.color = 'var(--red)';
-    if (G.countdownSec <= 0) {
-      clearInterval(G.roundTimer);
-      if (!G.answered) submitAnswer(true); // auto-submit (no answer = wrong)
+  // Regime metrics
+  document.getElementById('regime-metrics').innerHTML = [
+    {label:'Key Winner',  value: rKeys.reduce(function(a,b){return s.regimeReturns[a]>s.regimeReturns[b]?a:b;}), cls:'good'},
+    {label:'Key Loser',   value: rKeys.reduce(function(a,b){return s.regimeReturns[a]<s.regimeReturns[b]?a:b;}), cls:'bad'},
+    {label:'Instruments', value: s.instruments.length, cls:''},
+    {label:'Regime Type', value: s.pill, cls:''}
+  ].map(function(m){
+    return '<div class="metric '+m.cls+'"><div class="metric-value" style="font-size:14px">'+m.value+'</div><div class="metric-label">'+m.label+'</div></div>';
+  }).join('');
+}
+
+/* ── Allocation controls ── */
+function buildAllocControls() {
+  var s = currentScenario;
+  allocWeights = {};
+  s.instruments.forEach(function(k){ allocWeights[k] = 0; });
+
+  var el = document.getElementById('alloc-controls');
+  el.innerHTML = s.instruments.map(function(k) {
+    var inst = LX_INSTRUMENTS[k];
+    if (!inst) return '';
+    return '<div class="alloc-row">'+
+      '<div class="alloc-name">'+inst.emoji+' '+inst.ticker+'</div>'+
+      '<div class="alloc-bar-wrap"><div class="alloc-bar" id="bar-'+k+'" style="width:0%;background:'+inst.theme+'"></div></div>'+
+      '<input type="range" min="0" max="60" value="0" step="5" id="sl-'+k+'" oninput="updateAlloc(\''+k+'\')" style="width:100px;margin:0 10px;accent-color:var(--accent)">'+
+      '<div class="alloc-pct" id="pct-'+k+'">0%</div>'+
+    '</div>';
+  }).join('');
+}
+
+function updateAlloc(k) {
+  var v = parseInt(document.getElementById('sl-'+k).value);
+  allocWeights[k] = v;
+  document.getElementById('pct-'+k).textContent = v + '%';
+  document.getElementById('bar-'+k).style.width = v + '%';
+  var total = Object.values(allocWeights).reduce(function(s,v){return s+v;},0);
+  document.getElementById('total-weight').textContent = total + '%';
+  var warn = document.getElementById('weight-warning');
+  warn.textContent = total > 100 ? 'Warning: exceeds 100%' : total < 100 ? (100-total)+'% unallocated' : 'Fully allocated';
+  warn.style.color = total === 100 ? 'var(--green)' : total > 100 ? 'var(--red)' : 'var(--dim)';
+}
+
+function applyEqual() {
+  var s = currentScenario;
+  var w = Math.floor(100/s.instruments.length);
+  s.instruments.forEach(function(k,i){
+    var v = i === s.instruments.length-1 ? 100-(w*(s.instruments.length-1)) : w;
+    var sl = document.getElementById('sl-'+k);
+    if(sl){ sl.value = Math.min(60,v); updateAlloc(k); }
+  });
+}
+
+function applyOptimal() {
+  var s = currentScenario;
+  s.instruments.forEach(function(k){
+    var v = s.optimalWeights[k] || 0;
+    var sl = document.getElementById('sl-'+k);
+    if(sl){ sl.value = v; updateAlloc(k); }
+  });
+}
+
+/* ── Simulate with drift multiplier ── */
+function simWithDrift(instKey, bars, seed, driftMult) {
+  var inst = LX_INSTRUMENTS[instKey];
+  if (!inst) return Array(bars).fill(100);
+  var rng = lxMulberry32(seed || Math.floor(Date.now()/86400000)*31337);
+  var dt = 1/252;
+  var drift = inst.annDrift * driftMult * dt;
+  var vol   = inst.vol * Math.sqrt(dt);
+  var prices = [inst.startPrice];
+  for (var i=1;i<bars;i++){
+    var u1=rng(),u2=rng();
+    var z=Math.sqrt(-2*Math.log(u1+1e-10))*Math.cos(2*Math.PI*u2);
+    var prev=(i>1?(prices[i-1]-prices[i-2])/prices[i-2]:0);
+    var hurstAdj=(inst.hurst-0.5)*2*prev;
+    prices.push(+(prices[i-1]*(1+drift+vol*z+hurstAdj*0.1)).toFixed(4));
+  }
+  return prices;
+}
+
+/* ── Run simulation ── */
+function runSim() {
+  var total = Object.values(allocWeights).reduce(function(s,v){return s+v;},0);
+  if (total < 95 || total > 105) {
+    alert('Weights must sum to approximately 100%. Currently: '+total+'%');
+    return;
+  }
+  var btn=document.getElementById('sim-btn');
+  btn.disabled=true; btn.textContent='Simulating 20 paths...';
+  var sb=document.getElementById('status-badge');
+  sb.className='status-badge running'; sb.textContent='Running';
+  setStep(4);
+
+  setTimeout(function(){
+    var s = currentScenario;
+    var pathResults = [];
+    for (var sim=0;sim<20;sim++) {
+      var seed = (Date.now()&0xFFFFFF)^(sim*31337);
+      // Simulate each instrument
+      var instPaths = {};
+      s.instruments.forEach(function(k){
+        var mult = s.driftMult[k]||1.0;
+        instPaths[k] = simWithDrift(k, 300, seed+(k.charCodeAt(0)*997), mult);
+      });
+      // Benchmark (equal weight)
+      var ewW = 100/s.instruments.length;
+      var portEq=[100], ewEq=[100];
+      for (var i=1;i<300;i++) {
+        var portRet=0, ewRet=0;
+        s.instruments.forEach(function(k){
+          var ret=(instPaths[k][i]-instPaths[k][i-1])/instPaths[k][i-1];
+          portRet += (allocWeights[k]/100)*ret;
+          ewRet   += (ewW/100)*ret;
+        });
+        portEq.push(portEq[portEq.length-1]*(1+portRet*0.5));
+        ewEq.push(ewEq[ewEq.length-1]*(1+ewRet*0.5));
+      }
+      // Attribution
+      var attrib = {};
+      s.instruments.forEach(function(k){
+        var totalRet=(instPaths[k][299]-instPaths[k][0])/instPaths[k][0];
+        attrib[k] = (allocWeights[k]/100)*totalRet*100;
+      });
+      var portTotal = portEq[portEq.length-1]-100;
+      var ewTotal   = ewEq[ewEq.length-1]-100;
+      var returns   = portEq.slice(1).map(function(v,i){return (v-portEq[i])/portEq[i];});
+      var meanR=mean(returns), sdR=stdDev(returns)+1e-9;
+      var sharpe=meanR/sdR*Math.sqrt(252);
+      var maxDD=computeMaxDD(portEq);
+      pathResults.push({portEq:portEq, ewEq:ewEq, portTotal:portTotal, ewTotal:ewTotal, sharpe:sharpe, maxDD:maxDD, attrib:attrib});
     }
-  }, 1000);
+    displaySimResults(pathResults);
+    btn.disabled=false; btn.textContent='Re-run (20 paths)';
+    sb.className='status-badge done'; sb.textContent='Done';
+    setStep(5);
+    if (window.LX) {
+      var avgSharpe=mean(pathResults.map(function(r){return r.sharpe;}));
+      LX.recordRun({sharpe:avgSharpe, isBacktest:true, desk:'regime-rider'});
+    }
+  }, 350);
 }
 
-// ── Answer submission ──────────────────────────────────────────────────────
-function selectRegime(r) {
-  G.guessRegime = r;
-  ['btn-trend','btn-chop','btn-vol'].forEach(id => document.getElementById(id).classList.remove('selected'));
-  const map = { trending:'btn-trend', choppy:'btn-chop', volatile:'btn-vol' };
-  document.getElementById(map[r]).classList.add('selected');
-  checkConfirmReady();
-}
+function displaySimResults(results) {
+  var avgAlpha  = mean(results.map(function(r){return r.portTotal-r.ewTotal;}));
+  var avgSharpe = mean(results.map(function(r){return r.sharpe;}));
+  var avgMaxDD  = mean(results.map(function(r){return r.maxDD;}));
 
-function selectStrat(s) {
-  G.guessStrat = s;
-  ['btn-follow','btn-fade','btn-flat'].forEach(id => document.getElementById(id).classList.remove('selected'));
-  const map = { follow:'btn-follow', fade:'btn-fade', flat:'btn-flat' };
-  document.getElementById(map[s]).classList.add('selected');
-  checkConfirmReady();
-}
+  // Regime fit: how well does allocation match optimal?
+  var s = currentScenario;
+  var opt = s.optimalWeights;
+  var fitScore = 100 - s.instruments.reduce(function(sum,k){
+    return sum + Math.abs((allocWeights[k]||0)-(opt[k]||0));
+  },0)/2;
+  fitScore = Math.max(0, Math.min(100, Math.round(fitScore)));
 
-function checkConfirmReady() {
-  document.getElementById('btn-confirm').disabled = !(G.guessRegime && G.guessStrat);
-}
+  document.getElementById('smv-alpha').textContent  = (avgAlpha>0?'+':'')+avgAlpha.toFixed(1)+'%';
+  document.getElementById('smv-sharpe').textContent = avgSharpe.toFixed(2);
+  document.getElementById('smv-maxdd').textContent  = (avgMaxDD*100).toFixed(1)+'%';
+  document.getElementById('smv-regime').textContent = fitScore+'/100';
+  document.getElementById('sm-alpha').className  = 'metric'+(avgAlpha>2?' good':avgAlpha>0?'':' bad');
+  document.getElementById('sm-sharpe').className = 'metric'+(avgSharpe>1?' good':avgSharpe>0?'':' bad');
+  document.getElementById('sm-maxdd').className  = 'metric'+(avgMaxDD<0.1?' good':avgMaxDD<0.2?'':' bad');
+  document.getElementById('sm-regime').className = 'metric'+(fitScore>=70?' good':fitScore>=40?'warn':' bad');
 
-function submitAnswer(auto) {
-  if (G.answered) return;
-  G.answered = true;
-  clearInterval(G.roundTimer);
-
-  // Disable buttons
-  ['btn-trend','btn-chop','btn-vol','btn-follow','btn-fade','btn-flat','btn-confirm']
-    .forEach(id => document.getElementById(id).disabled = true);
-
-  const tr = G.trueRegime;
-  const correctStrat = CORRECT_STRAT[tr];
-  const gr = G.guessRegime || 'none';
-  const gs = G.guessStrat  || 'none';
-  const regimeOk   = gr === tr;
-  const stratOk    = gs === correctStrat;
-  const bothOk     = regimeOk && stratOk;
-
-  // Score
-  let pts = 0;
-  if (auto) { pts = 0; }
-  else if (bothOk)   { pts = 3; G.regimeCorrect++; G.stratCorrect++; }
-  else if (regimeOk) { pts = 1; G.regimeCorrect++; }
-  else               { pts = -1; }
-
-  if (!auto) G.roundsAnswered++;
-  G.score += pts;
-
-  // Explanation
-  const regimeNames = { trending:'Trending 📈', choppy:'Choppy ↔', volatile:'Volatile ⚡' };
-  const stratNames  = { follow:'Follow Trend', fade:'Fade Extremes', flat:'Stay Flat' };
-  const regimeExpl  = {
-    trending: 'The vol was low-moderate and the SMA spread was wide — a clear directional trend. Follow-trend strategies profit here.',
-    choppy:   'Vol was low and the SMA lines were flat/tangled — the market oscillates around a mean. Mean reversion is the edge here.',
-    volatile: 'Vol was very high with large random swings. No strategy has a reliable edge — preserving capital is the priority.',
-  };
-
-  let resultClass, summary;
-  if (auto)       { resultClass='wrong';   summary='⏰ Time\'s up! No answer submitted.'; }
-  else if (bothOk){ resultClass='correct'; summary='✓ Perfect! +3 points.'; }
-  else if (regimeOk){ resultClass='partial'; summary='✓ Correct regime, wrong strategy. +1 point.'; }
-  else            { resultClass='wrong';   summary='✗ Wrong regime. −1 point.'; }
-
-  const resEl = document.getElementById('round-result');
-  resEl.className = 'round-result ' + resultClass;
-  resEl.innerHTML = `<strong>${summary}</strong><br>
-    True regime: <strong>${regimeNames[tr]}</strong>  ·  Correct strategy: <strong>${stratNames[correctStrat]}</strong><br>
-    <span style="opacity:.85;font-size:.78rem">${regimeExpl[tr]}</span>`;
-  resEl.style.display = 'block';
-
-  // History
-  G.history.push({ round: G.round, tr, gr, pts });
-  addHistRow(G.round, regimeNames[tr], gr==='none'?'—':regimeNames[gr], pts);
-
-  // Scoreboard
-  document.getElementById('hdr-score').textContent = G.score + ' pts';
-  document.getElementById('hdr-acc').textContent = G.regimeCorrect + ' / ' + G.roundsAnswered;
-  document.getElementById('sc-pts').textContent = G.score;
-  document.getElementById('sc-racc').textContent = G.roundsAnswered > 0 ? Math.round(G.regimeCorrect / G.roundsAnswered * 100) + '%' : '—';
-  document.getElementById('sc-sacc').textContent = G.roundsAnswered > 0 ? Math.round(G.stratCorrect  / G.roundsAnswered * 100) + '%' : '—';
-
-  toast(auto ? '⏰ Time\'s up!' : bothOk ? '✓ Perfect! +3' : regimeOk ? 'Regime right! +1' : '✗ Wrong regime −1',
-        auto ? '#ffc840' : bothOk ? '#00d888' : regimeOk ? '#ffc840' : '#ff3d5a');
-
-  // Advance
-  if (G.round >= TOTAL_ROUNDS) {
-    setTimeout(endGame, 2500);
-  } else {
-    setTimeout(startRound, 2800);
+  // Equity chart (mean paths)
+  var n = results[0].portEq.length;
+  var meanPort=[],meanEW=[];
+  for(var i=0;i<n;i++){
+    meanPort.push(mean(results.map(function(r){return r.portEq[i];})));
+    meanEW.push(mean(results.map(function(r){return r.ewEq[i];})));
   }
-}
+  mkChart('chart-equity',{type:'line',data:{labels:Array.from({length:n},function(_,i){return i;}),datasets:[
+    {label:'Your Portfolio',data:meanPort,borderColor:'#667eea',borderWidth:2,pointRadius:0,fill:false},
+    {label:'Equal Weight',  data:meanEW,  borderColor:'rgba(255,255,255,0.25)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:10}}}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}});
 
-function addHistRow(rnd, trueR, guessR, pts) {
-  const log = document.getElementById('hist-log');
-  if (log.children.length === 1 && log.children[0].children.length === 1) log.innerHTML = '';
-  const d = document.createElement('div');
-  d.className = 'hist-row';
-  d.innerHTML = `<span>R${rnd}</span><span>${trueR.replace(/ [📈↔⚡]/,'')||'—'}</span><span>${guessR.replace(/ [📈↔⚡]/,'')||'—'}</span><span class="pts ${pts>0?'pos':pts<0?'neg':'zero'}">${pts>0?'+':''}${pts}p</span>`;
-  log.prepend(d);
-}
+  // Attribution bar chart
+  var avgAttrib={};
+  s.instruments.forEach(function(k){ avgAttrib[k]=mean(results.map(function(r){return r.attrib[k];})); });
+  var attribLabels=s.instruments.map(function(k){return LX_INSTRUMENTS[k]?LX_INSTRUMENTS[k].ticker:k;});
+  var attribVals=s.instruments.map(function(k){return avgAttrib[k];});
+  var attribColors=attribVals.map(function(v){return v>=0?'rgba(34,197,94,0.75)':'rgba(239,68,68,0.75)';});
+  mkChart('chart-attrib',{type:'bar',data:{labels:attribLabels,datasets:[{label:'Contribution %',data:attribVals,backgroundColor:attribColors,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}});
 
-// ── Start / End ────────────────────────────────────────────────────────────
-function startGame() {
-  document.getElementById('setup').classList.add('hidden');
-  document.getElementById('game').classList.remove('hidden');
-
-  // Seed prices
-  prices = [100];
-  for (let i = 0; i < 30; i++) {
-    prices.push(prices[prices.length - 1] * Math.exp(0.008 * randn()));
-  }
-
-  function initCanvas() {
-    const canvas = document.getElementById('chart');
-    const bw = canvas.parentElement.getBoundingClientRect().width;
-    canvas.width = Math.max(400, bw > 0 ? bw - 28 : window.innerWidth - 330);
-    canvas.height = 240;
-    drawChart();
-    G.tickInterval = setInterval(tick, TICK_MS);
-    startRound();
-  }
-  requestAnimationFrame(() => requestAnimationFrame(initCanvas));
-}
-
-function endGame() {
-  clearInterval(G.tickInterval);
-  clearInterval(G.roundTimer);
-  document.getElementById('game').classList.add('hidden');
-  document.getElementById('results').classList.remove('hidden');
-
-  const maxScore = TOTAL_ROUNDS * 3;
-  document.getElementById('res-score').textContent = G.score + ' / ' + maxScore;
-  document.getElementById('res-score').className = 'val ' + (G.score > maxScore * 0.5 ? 'pos' : G.score < 0 ? 'neg' : '');
-  const racc = G.roundsAnswered > 0 ? Math.round(G.regimeCorrect / G.roundsAnswered * 100) : 0;
-  const sacc = G.roundsAnswered > 0 ? Math.round(G.stratCorrect  / G.roundsAnswered * 100) : 0;
-  document.getElementById('res-racc').textContent = racc + '%';
-  document.getElementById('res-sacc').textContent = sacc + '%';
-
-  // Breakdown table
-  const tbody = document.getElementById('bt-body');
-  const rnames = { trending:'Trending 📈', choppy:'Choppy ↔', volatile:'Volatile ⚡' };
-  G.history.forEach(h => {
-    const row = document.createElement('div');
-    row.className = 'bt-row';
-    const correct = h.tr === h.gr;
-    row.innerHTML = `
-      <span style="color:var(--dim)">Round ${h.round}</span>
-      <span style="color:${h.tr==='trending'?'var(--green)':h.tr==='choppy'?'var(--yellow)':'var(--red)'}">${rnames[h.tr]}</span>
-      <span style="color:${correct?'var(--green)':'var(--red)'}">${h.gr==='none'?'—':rnames[h.gr]||h.gr}</span>
-      <span style="color:${h.pts>0?'var(--green)':h.pts<0?'var(--red)':'var(--dim)'}">${h.pts>0?'+':''}${h.pts} pts</span>`;
-    tbody.appendChild(row);
+  // Attribution detail
+  var detailHtml='<div style="font-size:11px;color:var(--dim);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Position Attribution</div>';
+  s.instruments.forEach(function(k){
+    var inst=LX_INSTRUMENTS[k];
+    var v=avgAttrib[k];
+    var color=v>=0?'#22c55e':'#ef4444';
+    detailHtml+='<div class="alloc-row"><div class="alloc-name">'+(inst?inst.emoji+' '+inst.ticker:k)+'</div>'+
+      '<div class="alloc-bar-wrap"><div class="alloc-bar" style="width:'+Math.min(100,Math.abs(v)*5)+'%;background:'+color+'"></div></div>'+
+      '<div class="alloc-pct" style="color:'+color+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</div></div>';
   });
+  document.getElementById('attrib-detail').innerHTML=detailHtml;
 
-  let fb = '';
-  if (racc >= 80) fb = 'Excellent regime detection! You can reliably distinguish market states. Now practice applying this in the full Momentum Trainer and Spread Trader games — and eventually the advanced bot games.';
-  else if (racc >= 50) fb = 'Solid foundation. The trickiest case is usually Choppy vs Trending when vol is similar — focus on the SMA spread width. Wide and diverging = Trending. Flat and tangled = Choppy.';
-  else fb = 'Keep practicing! Key rule: check vol first (if high → Volatile regardless). Then check SMA spread direction. Grows steadily → Trending. Oscillates near 0 → Choppy.';
-  document.getElementById('res-feedback').textContent = fb;
+  // Interpretation
+  var interp='<strong>Regime: '+s.name+'</strong><br>';
+  interp+='Your portfolio generated <strong>'+(avgAlpha>0?'+':'')+avgAlpha.toFixed(1)+'% alpha</strong> vs equal-weight benchmark. ';
+  interp+='Regime fit score: <strong>'+fitScore+'/100</strong> ';
+  interp+=(fitScore>=70?'(excellent positioning for this macro environment).':fitScore>=40?'(reasonable but consider: '+s.hint+')':'(needs work — '+s.hint+')');
+  interp+='<br>Sharpe: <strong>'+avgSharpe.toFixed(2)+'</strong>. Max drawdown: <strong>'+(avgMaxDD*100).toFixed(1)+'%</strong>.';
+  document.getElementById('sim-interp').innerHTML=interp;
+
+  document.getElementById('sim-placeholder').style.display='none';
+  document.getElementById('sim-results').style.display='block';
 }
 
-// ── Toast ──────────────────────────────────────────────────────────────────
-function toast(msg, color) {
-  const t = document.createElement('div');
-  t.className = 'feedback-toast'; t.style.borderLeftColor = color; t.style.color = color;
-  t.textContent = msg; document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2000);
+function computeMaxDD(equity) {
+  var peak=equity[0],maxDD=0;
+  equity.forEach(function(v){if(v>peak)peak=v;var dd=(peak-v)/peak;if(dd>maxDD)maxDD=dd;});
+  return maxDD;
 }
-</script>
+function mean(arr){return arr.length?arr.reduce(function(s,v){return s+v;},0)/arr.length:0;}
+function stdDev(arr){if(arr.length<2)return 0;var m=mean(arr);return Math.sqrt(arr.reduce(function(s,v){return s+(v-m)*(v-m);},0)/(arr.length-1));}
 
-<script>
-(function(){
-  function setTheme(t,save){
-    if(save) localStorage.setItem('imc-theme',t);
-    var root=document.documentElement;
-    if(t==='dark') root.setAttribute('data-theme','dark');
-    else if(t==='light') root.setAttribute('data-theme','light');
-    else root.removeAttribute('data-theme');
-    document.querySelectorAll('.tnb').forEach(function(b){
-      b.classList.toggle('active', b.dataset.t===t);
-    });
-  }
-  window.setTheme=setTheme;
-  // Apply saved theme on load
-  setTheme(localStorage.getItem('imc-theme')||'system', false);
-})();
+document.addEventListener('DOMContentLoaded',function(){
+  buildScenarioGrid();
+  if(window.LX)LX.visitDesk('regime-rider');
+});
 </script>
 </body>
 </html>
