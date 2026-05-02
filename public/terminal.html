@@ -103,6 +103,62 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .console-output{font-family:'DM Mono',monospace;font-size:10px;color:var(--teal);flex:1;overflow-y:auto;white-space:pre-wrap;line-height:1.55;}
 .score-pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.25);}
 
+
+/* ── TEACH TABS ── */
+.teach-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.teach-tab{flex:1;padding:7px 0;font-size:10px;font-weight:700;border:none;background:none;color:var(--dim);cursor:pointer;letter-spacing:.06em;transition:all .15s;}
+.teach-tab:hover{color:var(--text);}
+.teach-tab.active{color:var(--bright);border-bottom:2px solid var(--blue);}
+
+/* ── LEADERBOARD ── */
+.lb-panel{flex:1;overflow-y:auto;padding:12px;}
+.lb-table{width:100%;border-collapse:collapse;font-size:10px;}
+.lb-table th{text-align:left;color:var(--dim);font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 6px;border-bottom:1px solid var(--border);}
+.lb-table td{padding:5px 6px;border-bottom:1px solid var(--border);color:var(--text);}
+.lb-table tr:hover td{background:var(--bg3);}
+.lb-rank{font-weight:800;color:var(--dim);font-family:'DM Mono',monospace;}
+.lb-gold{color:var(--yellow)!important;}
+.lb-silver{color:#c0c0c0!important;}
+.lb-bronze{color:#cd7f32!important;}
+.lb-empty{text-align:center;color:var(--dim);padding:24px;font-size:11px;}
+
+/* ── DATA EXPLORER ── */
+.de-panel{flex:1;overflow-y:auto;background:var(--bg);padding:16px;display:none;flex-direction:column;gap:14px;}
+.de-section-title{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+.de-table{width:100%;border-collapse:collapse;font-size:10.5px;}
+.de-table th{text-align:left;color:var(--dim);font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-bottom:1px solid var(--border);}
+.de-table td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;}
+.de-table tr:hover td{background:var(--bg3);}
+.de-val-pos{color:var(--green)!important;}
+.de-val-neg{color:var(--red)!important;}
+.de-val-neu{color:var(--dim)!important;}
+.de-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.de-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.de-metric{font-size:18px;font-weight:800;color:var(--bright);font-family:'DM Mono',monospace;}
+.de-metric-label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;}
+.de-refresh-btn{background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);color:var(--blue);font-size:10px;font-weight:700;padding:4px 12px;border-radius:5px;cursor:pointer;margin-left:auto;font-family:'DM Mono',monospace;}
+.de-refresh-btn:hover{background:rgba(88,166,255,.2);}
+.ic-bar{display:inline-block;height:8px;border-radius:2px;vertical-align:middle;margin-left:4px;}
+
+/* ── ROUND BANNER ── */
+.round-banner{display:none;padding:8px 14px;background:rgba(227,179,65,.07);border-bottom:1px solid rgba(227,179,65,.2);flex-shrink:0;}
+.round-banner-inner{display:flex;align-items:center;gap:10px;}
+.round-name{font-size:11px;font-weight:700;color:var(--yellow);}
+.round-desc{font-size:10px;color:var(--dim);flex:1;}
+.round-target{font-size:10px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text);}
+.round-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(63,185,80,.15);color:var(--green);}
+.round-close{background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;margin-left:4px;}
+
+/* ── COMPETITION ROUNDS ── */
+.round-item{display:flex;align-items:center;gap:7px;width:100%;padding:6px 12px;font-size:10.5px;font-weight:500;color:var(--dim);background:none;border:none;cursor:pointer;transition:all .12s;text-align:left;}
+.round-item:hover{background:var(--bg3);color:var(--text);}
+.round-item .ri-num{font-size:9px;font-weight:800;font-family:'DM Mono',monospace;width:14px;flex-shrink:0;color:var(--dim);}
+.round-item .ri-check{margin-left:auto;font-size:11px;}
+
+/* ── WALK-FORWARD BUTTON ── */
+.wf-btn{background:rgba(188,140,255,.1);border:1px solid rgba(188,140,255,.25);color:var(--purple);border-radius:6px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;margin-left:4px;}
+.wf-btn:hover{background:rgba(188,140,255,.2);}
+
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
@@ -158,7 +214,15 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="sidebar-btn" onclick="setLesson(5)"><span class="icon">⚠️</span> False Discovery</button>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-label">Compete</div>
+      <div class="sidebar-label">Competition</div>
+      <button class="round-item" id="ri-1" data-round="1" onclick="startRound(1)"><span class="ri-num">01</span> Trend Surf<span class="ri-check" id="rc-1"></span></button>
+      <button class="round-item" id="ri-2" data-round="2" onclick="startRound(2)"><span class="ri-num">02</span> Mean Rev<span class="ri-check" id="rc-2"></span></button>
+      <button class="round-item" id="ri-3" data-round="3" onclick="startRound(3)"><span class="ri-num">03</span> Flow Hunt<span class="ri-check" id="rc-3"></span></button>
+      <button class="round-item" id="ri-4" data-round="4" onclick="startRound(4)"><span class="ri-num">04</span> Regime Adapt<span class="ri-check" id="rc-4"></span></button>
+      <button class="round-item" id="ri-5" data-round="5" onclick="startRound(5)"><span class="ri-num">05</span> Alpha Fusion<span class="ri-check" id="rc-5"></span></button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Tools</div>
       <button class="sidebar-btn" onclick="submitSignal()"><span class="icon">🏆</span> Submit Signal <span class="sidebar-badge">Live</span></button>
       <button class="sidebar-btn" onclick="window.location.href='quant-relay.html'"><span class="icon">🔬</span> Quant Relay</button>
       <button class="sidebar-btn" onclick="window.location.href='alpha-factory.html'"><span class="icon">🏭</span> Alpha Factory</button>
@@ -173,7 +237,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="editor-tab" onclick="setEditorTab('notebook')">notebook.js</button>
       <button class="run-btn" id="run-btn" onclick="runStrategy()">▶ Run</button>
       <button class="bt-btn" onclick="runBacktest()">⏱ Backtest</button>
+      <button class="wf-btn" onclick="runWalkForward()">🔀 Walk-Fwd</button>
     </div>
+    <div class="round-banner" id="round-banner"><div class="round-banner-inner"><span class="round-name" id="rb-name"></span><span class="round-desc" id="rb-desc"></span><span class="round-target" id="rb-target"></span><span class="round-badge" id="rb-badge" style="display:none">✓ Cleared</span><button class="round-close" onclick="closeRound()">✕</button></div></div>
     <div class="editor-charts">
       <div class="editor-pane">
         <div id="monaco-container"></div>
@@ -203,14 +269,46 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
     </div>
   </div>
 
+  <!-- DATA EXPLORER PANEL -->
+  <div class="de-panel" id="de-panel">
+    <div style="display:flex;align-items:center;margin-bottom:4px;">
+      <span style="font-size:12px;font-weight:700;color:var(--bright);">Data Explorer</span>
+      <button class="de-refresh-btn" onclick="runDataExplorer()">↺ Refresh</button>
+    </div>
+    <div class="de-section-title">Market Regime</div>
+    <div class="de-grid" id="de-regime-grid">
+      <div class="de-card"><div class="de-metric" id="de-hurst">—</div><div class="de-metric-label">Hurst Exponent</div></div>
+      <div class="de-card"><div class="de-metric" id="de-hl">—</div><div class="de-metric-label">Half-Life (bars)</div></div>
+      <div class="de-card"><div class="de-metric" id="de-regime">—</div><div class="de-metric-label">Regime</div></div>
+      <div class="de-card"><div class="de-metric" id="de-vol">—</div><div class="de-metric-label">Realised Vol (ann)</div></div>
+    </div>
+    <div class="de-section-title" style="margin-top:14px;">Feature Snapshot</div>
+    <table class="de-table" id="de-features-table">
+      <thead><tr><th>Feature</th><th>Value</th><th>Interpretation</th></tr></thead>
+      <tbody id="de-features-body"></tbody>
+    </table>
+    <div class="de-section-title" style="margin-top:14px;">IC Ranking — Signal Predictability</div>
+    <table class="de-table" id="de-ic-table">
+      <thead><tr><th>Signal</th><th>H=1</th><th>H=3</th><th>H=5</th><th>H=10</th><th>H=20</th></tr></thead>
+      <tbody id="de-ic-body"></tbody>
+    </table>
+    <div class="de-section-title" style="margin-top:14px;">Correlated Assets</div>
+    <table class="de-table">
+      <thead><tr><th>Asset</th><th>Current Price</th><th>ρ vs Main</th><th>Momentum(20)</th></tr></thead>
+      <tbody id="de-assets-body"></tbody>
+    </table>
+  </div>
+
   <!-- TEACH PANEL -->
   <div class="teach-panel">
-    <div class="teach-topbar">
+    <div class="teach-tabs"><button class="teach-tab active" id="tab-learn" onclick="showLearnPanel()">📖 Learn</button><button class="teach-tab" id="tab-lb" onclick="showLeaderboard()">🏆 Board</button></div>
+    <div class="teach-topbar" id="teach-topbar-bar">
       <span style="font-size:14px;">📖</span>
       <span class="teach-title" id="teach-title">Microstructure</span>
       <span class="teach-progress" id="teach-progress">Module 1 of 6</span>
     </div>
     <div class="teach-content" id="teach-content"></div>
+    <div class="lb-panel" id="lb-panel" style="display:none;"><div class="lb-empty" id="lb-loading">Loading leaderboard…</div><table class="lb-table" id="lb-table" style="display:none;"><thead><tr><th>#</th><th>Player</th><th>Sharpe</th><th>IC</th><th>Scenario</th></tr></thead><tbody id="lb-body"></tbody></table></div>
   </div>
 
 </div>
@@ -599,7 +697,9 @@ function runInWorker(code, ctxData) {
           const fwd = h === 5 ? fwdReturns : prices.map((_,i)=>i+h<prices.length?(prices[i+h]-prices[i])/prices[i]:0);
           return _FE.ic(sig, fwd);
         };
-        const _evalSignal = (sig, horizon=5, tc=0.001) => {
+        const _evalSignal = (sig, horizon=5, tc=0.001, maxPos) => {
+          maxPos = maxPos || ctxData.maxPos || 1.0;
+          sig = sig.map(v => Math.max(-maxPos, Math.min(maxPos, v || 0)));
           const fwd = prices.map((_,i)=>i+horizon<prices.length?(prices[i+horizon]-prices[i])/prices[i]:0);
           const equity=[0]; let pnl=0;
           for(let i=0;i<Math.min(sig.length,fwd.length);i++){pnl+=sig[i]*fwd[i]-Math.abs(sig[i])*tc;equity.push(pnl);}
@@ -619,6 +719,7 @@ function runInWorker(code, ctxData) {
           ticks:     (n=50)  => ctxData.ticks.slice(-n),
           features:  ()      => ctxData.features,
           regime:    ()      => ctxData.regime,
+          assets:    ()      => ctxData.assets,
           // Computed series — fully dynamic, any n
           sma:       (n=20)  => _FE.sma(prices, n),
           ema:       (n=20)  => _FE.ema(prices, n),
@@ -670,6 +771,8 @@ function runInWorker(code, ctxData) {
       rsi: FE.rsi(prices, 14),
       ofi: FE.ofi(m.trades, 20),
       regime: m.currentRegime,
+      maxPos: currentMaxPos,
+      assets: m.correlatedPrices.map((p,i) => ({ prices: [], currentPrice: p, rho: m.corrMatrix[0][Math.min(i+1,2)] })),
     };
     
     worker.onmessage = e => {
@@ -1059,6 +1162,8 @@ async function runStrategy() {
   btn.textContent = '⏳ Running...';
   consoleLog('Running strategy...');
 
+  // Pass current round constraints to worker via ctxData override
+  const _origMaxPos = currentMaxPos;
   try {
     const result = await runInWorker(code, {});
     if (result.ok) {
@@ -1093,27 +1198,46 @@ async function runStrategy() {
 }
 
 async function runBacktest() {
-  consoleLog('⏱ Backtest starting — 20 Monte Carlo seeds...');
+  const N = 20;
+  consoleLog(`⏱ Backtest — running ${N} Monte Carlo seeds...`);
   const code = monacoEditor?.getValue() || CODE_SNIPPETS.strategy;
-  const results = [];
+  const results = []; const sharpes = [];
   const seedBase = Date.now();
-  for (let i = 0; i < 20; i++) {
-    rng = mulberry32(seedBase + i * 999);
+  const btn = document.querySelector('.bt-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 0/' + N; }
+  for (let i = 0; i < N; i++) {
+    rng = mulberry32(seedBase + i * 997);
     market = new MarketSim(currentScenario);
     try {
       const r = await runInWorker(code, {});
-      if (r.ok && r.result?.sharpe != null) results.push(r.result.sharpe);
+      if (r.ok && r.result?.sharpe != null) {
+        sharpes.push(r.result.sharpe);
+        results.push(r.result);
+      }
     } catch {}
+    if (btn) btn.textContent = `⏳ ${i+1}/${N}`;
+    await new Promise(r => setTimeout(r, 0)); // yield to UI
   }
+  if (btn) { btn.disabled = false; btn.textContent = '⏱ Backtest'; }
+  // Restore deterministic market
   rng = mulberry32(daySeed);
   market = new MarketSim(currentScenario);
   initCharts();
-  if (results.length) {
-    const avg = results.reduce((a,b)=>a+b,0)/results.length;
-    const std = Math.sqrt(results.reduce((a,v)=>a+(v-avg)**2,0)/results.length);
-    consoleLog(`Backtest (n=20): Mean Sharpe ${avg.toFixed(2)} ± ${std.toFixed(2)} | Min ${Math.min(...results).toFixed(2)} Max ${Math.max(...results).toFixed(2)}`);
+  if (sharpes.length) {
+    const avg = sharpes.reduce((a,b)=>a+b,0)/sharpes.length;
+    const std = Math.sqrt(sharpes.reduce((a,v)=>a+(v-avg)**2,0)/sharpes.length);
+    const minS = Math.min(...sharpes), maxS = Math.max(...sharpes);
+    consoleLog(`📊 MC Backtest (n=${N}): Mean Sharpe ${avg.toFixed(2)} ± ${std.toFixed(2)}`);
+    consoleLog(`   Min: ${minS.toFixed(2)} | Max: ${maxS.toFixed(2)} | >0: ${sharpes.filter(s=>s>0).length}/${N}`);
+    // Round completion check
+    if (currentRound && avg >= currentRound.target) {
+      consoleLog(`🏆 Round cleared! Mean Sharpe ${avg.toFixed(2)} ≥ target ${currentRound.target}`);
+      markRoundCleared(currentRound.id);
+    } else if (currentRound) {
+      consoleLog(`   Target: ${currentRound.target} — need ${(currentRound.target - avg).toFixed(2)} more Sharpe`);
+    }
   } else {
-    consoleLog('Backtest: strategy must return { sharpe, ic, equity[] } via ctx.evalSignal()');
+    consoleLog('Backtest: strategy must return ctx.evalSignal(...) result');
   }
 }
 
@@ -1130,6 +1254,158 @@ function clearConsole() {
   document.getElementById('console-out').textContent = '▶ Console cleared.';
 }
 window.clearConsole = clearConsole;
+
+
+// ═══════════════════════════════════════════════════
+//  COMPETITION ROUNDS — Prosperity-style
+// ═══════════════════════════════════════════════════
+const ROUNDS = [
+  { id:1, name:'Round 1 — Trend Surf',    scenario:'trend',    target:0.8,  maxPos:1.0, tc:0.001,
+    desc:'Ride persistent momentum. Identify trend onset and hold through it.',
+    hint:'Try ctx.momentum(20) or SMA crossover.' },
+  { id:2, name:'Round 2 — Mean Rev',      scenario:'mean_rev', target:0.6,  maxPos:0.8, tc:0.0005,
+    desc:'Markets revert to equilibrium. Trade overextension with position limits.',
+    hint:'Try ctx.zscore(20) → -tanh(z). Watch half-life.' },
+  { id:3, name:'Round 3 — Flow Hunt',     scenario:'trend',    target:0.5,  maxPos:0.5, tc:0.0005,
+    desc:'Tight position limits. Use microstructure signals to front-run flow.',
+    hint:'Try ctx.ofiSeries(20). Combine with spread data.' },
+  { id:4, name:'Round 4 — Regime Adapt', scenario:'regime',   target:0.7,  maxPos:1.0, tc:0.001,
+    desc:'Market switches between trending and reverting. Detect and adapt.',
+    hint:'Use ctx.regime() to condition: mom in trend, zscore in mean-rev.' },
+  { id:5, name:'Round 5 — Alpha Fusion', scenario:'multi',    target:1.0,  maxPos:1.5, tc:0.001,
+    desc:'Full alpha: combine momentum, mean-reversion, OFI with IC weighting.',
+    hint:'Load the Composite snippet. Tune the IC weights.' },
+];
+
+let currentRound = null;
+let currentMaxPos = 1.0;
+
+function startRound(n) {
+  const r = ROUNDS[n-1];
+  currentRound = r;
+  currentMaxPos = r.maxPos;
+  setScenario(r.scenario);
+  // Show banner
+  document.getElementById('round-banner').style.display = 'block';
+  document.getElementById('rb-name').textContent = r.name;
+  document.getElementById('rb-desc').textContent = r.desc;
+  document.getElementById('rb-target').textContent = `Target: Sharpe ≥ ${r.target} | MaxPos: ±${r.maxPos} | TC: ${r.tc}`;
+  const cleared = getRoundCleared(n);
+  document.getElementById('rb-badge').style.display = cleared ? '' : 'none';
+  // Switch to terminal mode
+  if (document.getElementById('de-panel').style.display !== 'none') switchMode('terminal');
+  // Load hint
+  consoleLog(`🏁 ${r.name} — ${r.hint}`);
+  consoleLog(`   Position limit: ±${r.maxPos} | TC: ${r.tc*100}bps | Target Sharpe: ${r.target}`);
+}
+
+function closeRound() {
+  currentRound = null;
+  currentMaxPos = 1.0;
+  document.getElementById('round-banner').style.display = 'none';
+}
+
+function getRoundCleared(n) {
+  const saved = JSON.parse(localStorage.getItem('lexie-rounds') || '{}');
+  return saved[n] === true;
+}
+function markRoundCleared(n) {
+  const saved = JSON.parse(localStorage.getItem('lexie-rounds') || '{}');
+  saved[n] = true;
+  localStorage.setItem('lexie-rounds', JSON.stringify(saved));
+  document.getElementById(`rc-${n}`).textContent = '✓';
+  document.getElementById('rb-badge').style.display = '';
+}
+function initRoundBadges() {
+  for (let i=1;i<=5;i++) {
+    if (getRoundCleared(i)) document.getElementById(`rc-${i}`).textContent = '✓';
+  }
+}
+window.startRound = startRound;
+window.closeRound = closeRound;
+
+
+// ═══════════════════════════════════════════════════
+//  DATA EXPLORER
+// ═══════════════════════════════════════════════════
+function runDataExplorer() {
+  const m = market;
+  const prices = m.prices;
+  const returns = prices.map((v,i)=>i===0?0:(v-prices[i-1])/prices[i-1]);
+
+  // Regime metrics
+  const hurst = FE.hurst(prices.slice(-100));
+  const hl    = FE.halfLife(prices.slice(-60));
+  const annVol = Math.sqrt(returns.slice(-60).reduce((a,v)=>a+v**2,0)/60 * 252);
+
+  document.getElementById('de-hurst').textContent  = hurst.toFixed(3);
+  document.getElementById('de-hurst').className    = 'de-metric ' + (hurst>0.55?'de-val-pos':hurst<0.45?'de-val-neg':'de-val-neu');
+  document.getElementById('de-hl').textContent     = isNaN(hl) ? 'N/A' : hl.toFixed(1);
+  document.getElementById('de-regime').textContent = m.currentRegime.toUpperCase();
+  document.getElementById('de-vol').textContent    = (annVol*100).toFixed(1) + '%';
+
+  // Feature snapshot
+  const feats = buildCtx(m).features();
+  const featRows = [
+    { name:'Momentum (5)',  val:feats.momentum_5,  fmt:v=>(v*100).toFixed(2)+'%', interp: v=>v>0?'Bullish ↑':'Bearish ↓' },
+    { name:'Momentum (20)', val:feats.momentum_20, fmt:v=>(v*100).toFixed(2)+'%', interp: v=>v>0?'Uptrend':'Downtrend' },
+    { name:'RSI (14)',       val:feats.rsi_14,      fmt:v=>v!=null?v.toFixed(1):'-', interp: v=>v>70?'Overbought':v<30?'Oversold':'Neutral' },
+    { name:'Z-score (20)',  val:feats.zscore_20,   fmt:v=>v.toFixed(2)+'σ', interp: v=>Math.abs(v)>2?'Extreme':Math.abs(v)>1?'Extended':'Normal' },
+    { name:'OFI',           val:feats.ofi,         fmt:v=>v.toFixed(3), interp: v=>v>0.3?'Buy pressure':v<-0.3?'Sell pressure':'Balanced' },
+    { name:'Spread',        val:feats.spread,      fmt:v=>(v*100).toFixed(3)+'%', interp: ()=>'Transaction cost' },
+    { name:'Hurst',         val:hurst,             fmt:v=>v.toFixed(3), interp: v=>v>0.55?'Trending':v<0.45?'Mean-Reverting':'Random Walk' },
+    { name:'Half-life',     val:hl,                fmt:v=>isNaN(v)?'N/A':v.toFixed(1)+' bars', interp: v=>isNaN(v)?'Not mean-reverting':v<20?'Fast reversion':'Slow reversion' },
+    { name:'Ann. Vol',      val:annVol,            fmt:v=>(v*100).toFixed(1)+'%', interp: v=>v>0.3?'High vol':v<0.1?'Low vol':'Normal' },
+  ];
+  const tbody = document.getElementById('de-features-body');
+  tbody.innerHTML = featRows.map(f => {
+    const cls = f.val > 0 ? 'de-val-pos' : f.val < 0 ? 'de-val-neg' : '';
+    return `<tr><td>${f.name}</td><td class="${cls}" style="font-weight:600">${f.fmt(f.val)}</td><td style="color:var(--dim);font-family:'Inter',sans-serif">${f.interp(f.val)}</td></tr>`;
+  }).join('');
+
+  // IC ranking at multiple horizons
+  const signals = {
+    'Momentum(5)':  FE.momentum(prices, 5).map(v=>v||0),
+    'Momentum(20)': FE.momentum(prices, 20).map(v=>v||0),
+    'Z-score(20)':  FE.zscore(prices, 20).map(v=>-v),  // inverted for mean-rev
+    'RSI(14)':      FE.rsi(prices, 14).map(v=>v!=null?(50-v)/50:0),
+    'OFI(20)':      FE.ofi(m.trades, 20),
+    'EMA cross':    FE.ema(prices,5).map((v,i)=>v - FE.ema(prices,20)[i]),
+    'Bollinger%':   FE.bollinger(prices,20).map(b=>b.pct-0.5),
+  };
+  const horizons = [1, 3, 5, 10, 20];
+  const icResults = [];
+  for (const [name, sig] of Object.entries(signals)) {
+    const ics = horizons.map(h => {
+      const fwd = prices.map((_,i)=>i+h<prices.length?(prices[i+h]-prices[i])/prices[i]:null).filter(v=>v!=null);
+      const s   = sig.slice(0, fwd.length);
+      return FE.ic(s, fwd);
+    });
+    icResults.push({ name, ics, best: Math.max(...ics.map(Math.abs)) });
+  }
+  icResults.sort((a,b)=>b.best-a.best);
+
+  const icTbody = document.getElementById('de-ic-body');
+  icTbody.innerHTML = icResults.map(r => {
+    const cells = r.ics.map(v => {
+      const cls = v > 0.05 ? 'de-val-pos' : v < -0.05 ? 'de-val-neg' : 'de-val-neu';
+      const w = Math.min(Math.abs(v)*300, 40);
+      const bar = `<span class="ic-bar" style="width:${w}px;background:${v>0?'var(--green)':'var(--red)'};opacity:.7"></span>`;
+      return `<td class="${cls}" style="font-weight:600">${v.toFixed(3)}${bar}</td>`;
+    }).join('');
+    return `<tr><td style="font-weight:600">${r.name}</td>${cells}</tr>`;
+  }).join('');
+
+  // Correlated assets
+  const aBody = document.getElementById('de-assets-body');
+  const corrLabels = ['Asset B', 'Asset C', 'Asset D'];
+  aBody.innerHTML = m.correlatedPrices.map((p, i) => {
+    const rho = m.corrMatrix[0][Math.min(i+1, 2)];
+    const mom = FE.momentum([p], 1)[0];
+    return `<tr><td>${corrLabels[i]}</td><td>${p.toFixed(2)}</td><td>${rho.toFixed(2)}</td><td class="${mom>=0?'de-val-pos':'de-val-neg'}">${(mom*100||0).toFixed(2)}%</td></tr>`;
+  }).join('');
+}
+window.runDataExplorer = runDataExplorer;
 
 // ═══════════════════════════════════════════════════
 //  TEACHING MODULES
@@ -1280,6 +1556,77 @@ function tryInTerminal() {
 function nextLesson() { if (currentLesson < LESSONS.length-1) setLesson(currentLesson+1); }
 function prevLesson() { if (currentLesson > 0) setLesson(currentLesson-1); }
 
+
+// ═══════════════════════════════════════════════════
+//  WALK-FORWARD VALIDATION — IS / OOS split
+// ═══════════════════════════════════════════════════
+async function runWalkForward() {
+  if (!monacoEditor) return;
+  const code = monacoEditor.getValue();
+  consoleLog('🔀 Walk-forward: running strategy...');
+  const btn = document.querySelector('.wf-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
+
+  try {
+    const result = await runInWorker(code, {});
+    if (!result.ok) { consoleLog('❌ ' + result.error); return; }
+    if (!result.result?.equity) {
+      consoleLog('❌ Walk-forward needs ctx.evalSignal(...) return value.');
+      return;
+    }
+    const equity = result.result.equity;
+    if (equity.length < 20) { consoleLog('❌ Not enough data points.'); return; }
+    const split = Math.floor(equity.length * 0.6);
+    const isEq  = equity.slice(0, split);
+    const oosEq = equity.slice(split - 1); // overlap by 1 for continuity
+
+    const sharpeOf = (eq) => {
+      if (eq.length < 2) return 0;
+      const rets = eq.slice(1).map((v,i) => v - eq[i]);
+      const mu  = rets.reduce((a,b)=>a+b,0) / rets.length;
+      const sig = Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0) / rets.length);
+      return sig < 1e-9 ? 0 : +(mu / sig * Math.sqrt(252)).toFixed(3);
+    };
+
+    const isSharpe  = sharpeOf(isEq);
+    const oosSharpe = sharpeOf(oosEq);
+    const isFinal   = isEq.at(-1);
+    const oosFinal  = oosEq.at(-1) - oosEq[0];
+    const decay     = isSharpe !== 0 ? +((1 - oosSharpe / isSharpe) * 100).toFixed(0) : 0;
+
+    consoleLog(`📊 Walk-Forward (60% IS / 40% OOS):`);
+    consoleLog(`   IS  Sharpe: ${isSharpe}  | PnL: ${(isFinal*100).toFixed(2)}bps`);
+    consoleLog(`   OOS Sharpe: ${oosSharpe} | PnL: ${(oosFinal*100).toFixed(2)}bps`);
+    if (oosSharpe > 0 && Math.abs(decay) < 80) {
+      consoleLog(`   ✅ Generalises well (${decay}% decay)`);
+    } else if (oosSharpe > 0) {
+      consoleLog(`   ⚠️ Large decay (${decay}%) — possible overfit`);
+    } else {
+      consoleLog(`   ❌ Negative OOS — likely overfit, rethink signal`);
+    }
+
+    // Show IS vs OOS on equity chart
+    const isLen = isEq.length;
+    const fullEq = equity;
+    const isBg  = new Array(isLen).fill(0);
+    const oosBg = new Array(equity.length - isLen).fill(equity[isLen - 1]);
+    const chart = charts['chart-equity'];
+    if (chart) {
+      chart.data.labels = equity.map((_,i) => i);
+      chart.data.datasets = [
+        { label:'In-Sample',     data:[...isEq, ...new Array(equity.length-isLen).fill(null)], borderColor:'rgba(88,166,255,.8)', borderWidth:1.5, pointRadius:0, fill:false, tension:0.2 },
+        { label:'Out-of-Sample', data:[...new Array(isLen-1).fill(null), ...oosEq],           borderColor:'rgba(63,185,80,.8)',  borderWidth:1.5, pointRadius:0, fill:false, tension:0.2 },
+      ];
+      chart.update();
+    }
+  } catch(e) {
+    consoleLog('❌ Walk-forward error: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔀 Walk-Fwd'; }
+  }
+}
+window.runWalkForward = runWalkForward;
+
 // ═══════════════════════════════════════════════════
 //  SIGNAL SUBMISSION → Firebase
 // ═══════════════════════════════════════════════════
@@ -1302,6 +1649,8 @@ async function submitSignal() {
       sharpe: result.result.sharpe,
       ic: result.result.ic,
       scenario: currentScenario,
+      round: currentRound ? currentRound.id : null,
+      maxPos: currentMaxPos,
       ts: Date.now(),
     });
     consoleLog(`✅ Submitted! Sharpe ${result.result.sharpe} · IC ${result.result.ic} — check the hub leaderboard.`);
@@ -1309,6 +1658,72 @@ async function submitSignal() {
     consoleLog('Submission error: ' + e.message);
   }
 }
+
+
+// ═══════════════════════════════════════════════════
+//  LEADERBOARD
+// ═══════════════════════════════════════════════════
+function showLearnPanel() {
+  document.getElementById('tab-learn').classList.add('active');
+  document.getElementById('tab-lb').classList.remove('active');
+  document.getElementById('teach-topbar-bar').style.display = '';
+  document.getElementById('teach-content').style.display = '';
+  document.getElementById('lb-panel').style.display = 'none';
+}
+function showLeaderboard() {
+  document.getElementById('tab-learn').classList.remove('active');
+  document.getElementById('tab-lb').classList.add('active');
+  document.getElementById('teach-topbar-bar').style.display = 'none';
+  document.getElementById('teach-content').style.display = 'none';
+  document.getElementById('lb-panel').style.display = '';
+  loadLeaderboard();
+}
+async function loadLeaderboard() {
+  const loadEl = document.getElementById('lb-loading');
+  const tableEl = document.getElementById('lb-table');
+  loadEl.textContent = 'Loading…';
+  loadEl.style.display = 'block';
+  tableEl.style.display = 'none';
+
+  if (!window._db) {
+    loadEl.textContent = 'Sign in at the hub to view the leaderboard.';
+    return;
+  }
+  try {
+    const q = window._query(
+      window._collection(window._db, 'leaderboard'),
+      window._orderBy('sharpe', 'desc'),
+      window._limit(20)
+    );
+    const snap = await window._getDocs(q);
+    const entries = snap.docs.map(d => d.data());
+    if (!entries.length) {
+      loadEl.textContent = 'No entries yet — be the first to submit!';
+      return;
+    }
+    const medals = ['🥇','🥇','🥈','🥉'];
+    const rankClass = ['lb-gold','lb-gold','lb-silver','lb-bronze'];
+    const tbody = document.getElementById('lb-body');
+    tbody.innerHTML = entries.map((e,i) => {
+      const ts = e.ts ? new Date(e.ts).toLocaleDateString() : '';
+      const cls = rankClass[i] || '';
+      const medal = i < 3 ? (i===0?'🥇':i===1?'🥈':'🥉') : '';
+      return `<tr>
+        <td class="lb-rank ${cls}">${medal||i+1}</td>
+        <td style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.name||'Anon'}</td>
+        <td style="font-weight:700;color:${e.sharpe>1?'var(--green)':e.sharpe>0?'var(--yellow)':'var(--red)'}">${(+e.sharpe).toFixed(2)}</td>
+        <td style="color:var(--dim)">${(+e.ic).toFixed(3)}</td>
+        <td style="color:var(--dim);font-size:9px">${e.scenario||''}</td>
+      </tr>`;
+    }).join('');
+    loadEl.style.display = 'none';
+    tableEl.style.display = '';
+  } catch(e) {
+    loadEl.textContent = 'Error: ' + e.message;
+  }
+}
+window.showLearnPanel = showLearnPanel;
+window.showLeaderboard = showLeaderboard;
 
 // ═══════════════════════════════════════════════════
 //  UI CONTROLS
@@ -1336,15 +1751,26 @@ function setEditorTab(tab) {
 
 function switchMode(m) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if (event?.currentTarget) event.currentTarget.classList.add('active');
+  else document.querySelectorAll('.nav-tab').forEach(t => { if (t.textContent.toLowerCase().includes(m)) t.classList.add('active'); });
+
+  const editorArea = document.querySelector('.editor-area');
+  const dePanel    = document.getElementById('de-panel');
+
   if (m === 'explorer') {
-    consoleLog('📊 Data Explorer: Use explore.js tab or load a Signal snippet from the sidebar to explore features.');
-    consoleLog('   Try: ctx.features() to see all computed features, ctx.scatter() to plot correlations.');
-    document.querySelectorAll('.editor-tab').forEach(t => { if (t.textContent.includes('explore')) t.click(); });
+    editorArea.style.display = 'none';
+    dePanel.style.display = 'flex';
+    runDataExplorer();
   } else if (m === 'composer') {
-    consoleLog('🧩 Signal Composer: Load the Composite snippet from the sidebar to combine multiple signals.');
-    consoleLog('   IC-weighted combination: momentum + mean-reversion + OFI.');
-    document.querySelectorAll('.editor-tab').forEach(t => { if (t.textContent.includes('notebook')) t.click(); });
+    editorArea.style.display = 'none';
+    dePanel.style.display = 'flex';
+    loadSnippet('composite');
+    editorArea.style.display = '';
+    dePanel.style.display = 'none';
+    consoleLog('🧩 Composite snippet loaded → Edit weights, run, then Backtest.');
+  } else {
+    editorArea.style.display = '';
+    dePanel.style.display = 'none';
   }
 }
 
@@ -1402,6 +1828,7 @@ window.addEventListener('DOMContentLoaded', () => {
   market = new MarketSim('trend');
   initCharts();
   renderLesson();
+  initRoundBadges();
   
   // Load Monaco with fallback textarea
   const monacoTimeout = setTimeout(() => {
@@ -1432,6 +1859,12 @@ window.nextLesson = nextLesson;
 window.prevLesson = prevLesson;
 window.submitSignal = submitSignal;
 window.toggleTheme = toggleTheme;
+window.runWalkForward = runWalkForward;
+window.showLearnPanel = showLearnPanel;
+window.showLeaderboard = showLeaderboard;
+window.startRound = startRound;
+window.closeRound = closeRound;
+window.runDataExplorer = runDataExplorer;
 </script>
 </body>
 </html>
