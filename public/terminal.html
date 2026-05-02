@@ -64,7 +64,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 
 /* Editor + Charts split */
 .editor-charts{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.editor-pane{flex:0 0 240px;border-bottom:1px solid var(--border);position:relative;background:var(--bg);}
+.editor-pane{flex:0 0 320px;border-bottom:1px solid var(--border);position:relative;background:var(--bg);}
 #monaco-container{position:absolute;inset:0;}
 .charts-pane{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:var(--border);min-height:0;overflow:hidden;}
 .chart-cell{background:var(--bg);position:relative;overflow:hidden;}
@@ -106,6 +106,25 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 
 /* ── TEACH TABS ── */
 .teach-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.api-section{margin-bottom:18px;}
+.api-section-title{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.api-method{margin-bottom:10px;padding:8px 10px;background:var(--bg3);border-radius:6px;border-left:2px solid var(--purple);}
+.api-sig{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--bright);margin-bottom:3px;}
+.api-desc{font-size:10px;color:var(--dim);line-height:1.5;}
+.api-example{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--teal);margin-top:4px;background:var(--bg4);padding:4px 6px;border-radius:4px;}
+.onboard-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.onboard-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px 32px;max-width:520px;width:90%;}
+.onboard-title{font-size:20px;font-weight:900;color:var(--bright);margin-bottom:4px;}
+.onboard-sub{font-size:12px;color:var(--dim);margin-bottom:22px;}
+.onboard-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+.onboard-step{display:flex;gap:12px;align-items:flex-start;}
+.onboard-num{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.onboard-step-body{font-size:11.5px;line-height:1.6;color:var(--text);}
+.onboard-step-body strong{color:var(--bright);}
+.onboard-start-btn{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s;}
+.onboard-start-btn:hover{opacity:.85;}
+.chart-flash{animation:chartFlash .4s ease;}
+@keyframes chartFlash{0%{opacity:.4;}50%{opacity:1;}100%{opacity:1;}}
 .teach-tab{flex:1;padding:7px 0;font-size:10px;font-weight:700;border:none;background:none;color:var(--dim);cursor:pointer;letter-spacing:.06em;transition:all .15s;}
 .teach-tab:hover{color:var(--text);}
 .teach-tab.active{color:var(--bright);border-bottom:2px solid var(--blue);}
@@ -227,8 +246,19 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 
   <!-- SIDEBAR -->
   <div class="sidebar">
+    <div class="sidebar-section" style="background:linear-gradient(135deg,rgba(88,166,255,.08),rgba(188,140,255,.08));">
+      <button class="sidebar-btn" onclick="showOnboarding()" style="color:var(--blue);font-weight:700;padding:10px 12px;">
+        <span class="icon">🚀</span>
+        <span>Getting Started</span>
+      </button>
+      <button class="sidebar-btn" onclick="showApiDocs()" style="color:var(--dim);">
+        <span class="icon">📋</span>
+        <span>API Reference</span>
+      </button>
+    </div>
     <div class="sidebar-section">
-      <div class="sidebar-label">Market</div>
+      <div class="sidebar-label">Market Scenario</div>
+      <div style="font-size:9px;color:var(--dim);padding:0 12px 6px;line-height:1.4;">Choose the type of market to simulate. Each has different microstructure and favours different signals.</div>
       <button class="sidebar-btn active" data-scenario="trend" onclick="setScenario('trend')"><span class="icon">📈</span> Trending</button>
       <button class="sidebar-btn" data-scenario="mean_rev" onclick="setScenario('mean_rev')"><span class="icon">⚖️</span> Mean-Rev</button>
       <button class="sidebar-btn" data-scenario="volatile" onclick="setScenario('volatile')"><span class="icon">🌩</span> Volatile</button>
@@ -236,7 +266,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="sidebar-btn" data-scenario="multi" onclick="setScenario('multi')"><span class="icon">🔗</span> Multi-Asset</button>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-label">Signals</div>
+      <div class="sidebar-label">Signal Snippets</div>
+      <div style="font-size:9px;color:var(--dim);padding:0 12px 6px;line-height:1.4;">Load a ready-made signal into the editor. Edit and customise it freely.</div>
       <button class="sidebar-btn" onclick="loadSnippet('momentum')"><span class="icon">⚡</span> Momentum</button>
       <button class="sidebar-btn" onclick="loadSnippet('mean_rev')"><span class="icon">⚖️</span> Mean Reversion</button>
       <button class="sidebar-btn" onclick="loadSnippet('ofi')"><span class="icon">📊</span> Order Flow</button>
@@ -245,7 +276,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="sidebar-btn" onclick="loadSnippet('composite')"><span class="icon">🧩</span> Composite</button>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-label">Learn</div>
+      <div class="sidebar-label">Learn Quant Theory</div>
+      <div style="font-size:9px;color:var(--dim);padding:0 12px 6px;line-height:1.4;">Interactive modules explaining the theory behind each technique. Each has a quiz and live code example.</div>
       <button class="sidebar-btn" onclick="setLesson(0)"><span class="icon">📖</span> Microstructure</button>
       <button class="sidebar-btn" onclick="setLesson(1)"><span class="icon">📐</span> Signal IC</button>
       <button class="sidebar-btn" onclick="setLesson(2)"><span class="icon">🔗</span> Correlations</button>
@@ -254,7 +286,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="sidebar-btn" onclick="setLesson(5)"><span class="icon">⚠️</span> False Discovery</button>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-label">Competition</div>
+      <div class="sidebar-label">Competition Rounds</div>
+      <div style="font-size:9px;color:var(--dim);padding:0 12px 6px;line-height:1.4;">6 Prosperity-style rounds with increasing difficulty. Each has position limits and transaction costs. Beat the target Sharpe to clear.</div>
       <button class="round-item" id="ri-1" data-round="1" onclick="startRound(1)"><span class="ri-num">01</span> Trend Surf<span class="ri-check" id="rc-1"></span></button>
       <button class="round-item" id="ri-2" data-round="2" onclick="startRound(2)"><span class="ri-num">02</span> Mean Rev<span class="ri-check" id="rc-2"></span></button>
       <button class="round-item" id="ri-3" data-round="3" onclick="startRound(3)"><span class="ri-num">03</span> Flow Hunt<span class="ri-check" id="rc-3"></span></button>
@@ -263,7 +296,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="round-item" id="ri-6" data-round="6" onclick="startRound(6)"><span class="ri-num">06</span> Multi-Asset<span class="ri-check" id="rc-6"></span></button>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-label">Tools</div>
+      <div class="sidebar-label">More Games</div>
       <button class="sidebar-btn" onclick="submitSignal()"><span class="icon">🏆</span> Submit Signal <span class="sidebar-badge">Live</span></button>
       <button class="sidebar-btn" onclick="window.location.href='quant-relay.html'"><span class="icon">🔬</span> Quant Relay</button>
       <button class="sidebar-btn" onclick="window.location.href='alpha-factory.html'"><span class="icon">🏭</span> Alpha Factory</button>
@@ -310,7 +343,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
     </div>
     <div class="console-bar">
       <div class="console-header"><span class="console-label">Console</span><span id="score-display-inline" class="score-pill" style="display:none;"></span><button onclick="clearConsole()" style="margin-left:auto;background:none;border:none;color:var(--dim);font-size:9px;cursor:pointer;font-family:'DM Mono',monospace;">clear</button></div>
-      <div class="console-output" id="console-out">▶ Ready. Select a scenario, load a signal snippet, then press Run.</div>
+      <div class="console-output" id="console-out">▶ Welcome to LeXie Terminal. New here? Click <strong style="color:var(--blue);cursor:pointer" onclick="showOnboarding()">Getting Started</strong> in the sidebar, or: (1) pick a Market scenario on the left → (2) load a Signal snippet → (3) press ▶ Run → (4) read results here.</div>
     </div>
   </div>
 
@@ -370,7 +403,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 
   <!-- TEACH PANEL -->
   <div class="teach-panel">
-    <div class="teach-tabs"><button class="teach-tab active" id="tab-learn" onclick="showLearnPanel()">📖 Learn</button><button class="teach-tab" id="tab-lb" onclick="showLeaderboard()">🏆 Board</button></div>
+    <div class="teach-tabs"><button class="teach-tab active" id="tab-learn" onclick="showLearnPanel()">📖 Learn</button><button class="teach-tab" id="tab-api" onclick="showApiDocs()">📋 API</button><button class="teach-tab" id="tab-lb" onclick="showLeaderboard()">🏆 Board</button></div>
     <div class="teach-topbar" id="teach-topbar-bar">
       <span style="font-size:14px;">📖</span>
       <span class="teach-title" id="teach-title">Microstructure</span>
@@ -378,6 +411,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
     </div>
     <div class="teach-content" id="teach-content"></div>
     <div class="lb-panel" id="lb-panel" style="display:none;"><div class="lb-empty" id="lb-loading">Loading leaderboard…</div><table class="lb-table" id="lb-table" style="display:none;"><thead><tr><th>#</th><th>Player</th><th>Sharpe</th><th>IC</th><th>Scenario</th></tr></thead><tbody id="lb-body"></tbody></table></div>
+    <div class="api-docs-panel" id="api-docs-panel" style="display:none;overflow-y:auto;padding:14px;flex:1;"></div>
   </div>
 
 </div>
@@ -996,7 +1030,11 @@ const chartDefaults = {
 function initCharts() {
   ['chart-price','chart-equity','chart-ic','chart-dist'].forEach(id => {
     if (charts[id]) charts[id].destroy();
+    charts[id] = null;
   });
+  // Restore chart labels
+  const distLabel = document.querySelector('#chart-dist')?.closest('.chart-cell')?.querySelector('.chart-label');
+  if (distLabel) distLabel.textContent = 'Feature Distribution';
   const m = market;
   const prices = m.prices.slice(-150);
   const labels = prices.map((_,i)=>i);
@@ -1091,24 +1129,45 @@ function updateEquityChart(equity) {
 }
 
 function plotScatter(x, y, opts={}) {
-  const chart = charts['chart-dist'];
-  if (!chart) return;
-  chart.destroy();
-  charts['chart-dist'] = new Chart(document.getElementById('chart-dist'), {
+  // Destroy existing chart-dist (bar histogram) if it exists
+  if (charts['chart-dist']) {
+    try { charts['chart-dist'].destroy(); } catch(e) {}
+    charts['chart-dist'] = null;
+  }
+  const canvas = document.getElementById('chart-dist');
+  if (!canvas) { console.warn('chart-dist canvas not found'); return; }
+  // Update chart label
+  const labelEl = canvas.closest('.chart-cell')?.querySelector('.chart-label');
+  if (labelEl) labelEl.textContent = opts.label || 'Scatter Plot';
+  // Filter out nulls/NaN from data
+  const pts = x.slice(0, y.length)
+    .map((v,i) => ({x: v, y: y[i]}))
+    .filter(p => p.x != null && p.y != null && isFinite(p.x) && isFinite(p.y));
+  if (pts.length === 0) {
+    consoleLog('⚠ scatter: no valid data points (check for nulls in your arrays)');
+    return;
+  }
+  charts['chart-dist'] = new Chart(canvas, {
     type: 'scatter',
     data: {
       datasets: [{
-        label: opts.label || 'Signal vs Return',
-        data: x.slice(0,y.length).map((v,i)=>({x:v,y:y[i]})).filter(p=>p.x!=null&&p.y!=null),
-        backgroundColor: COLORS.blue + '88',
+        label: opts.label || 'Scatter',
+        data: pts,
+        backgroundColor: COLORS.blue + 'aa',
+        borderColor: COLORS.blue,
         pointRadius: 3,
+        borderWidth: 0,
       }]
     },
-    options: { ...chartDefaults, scales: {
-      x: { display:true, grid:{color:gridColor()}, ticks:{color:textColor(),font:{size:8}} },
-      y: { display:true, grid:{color:gridColor()}, ticks:{color:textColor(),font:{size:8}} }
-    }}
+    options: { ...chartDefaults,
+      plugins: { ...chartDefaults.plugins, legend: { display: true, labels: { color: textColor(), font:{size:9}, boxWidth:10 } } },
+      scales: {
+        x: { display: true, title: { display: !!opts.xlabel, text: opts.xlabel||'', color: textColor(), font:{size:9} }, grid: {color:gridColor()}, ticks: {color:textColor(), font:{size:8}} },
+        y: { display: true, title: { display: !!opts.ylabel, text: opts.ylabel||'', color: textColor(), font:{size:9} }, grid: {color:gridColor()}, ticks: {color:textColor(), font:{size:8}} }
+      }
+    }
   });
+  consoleLog(`✓ Scatter rendered: ${pts.length} points — "${opts.label||'Scatter'}"`);
 }
 
 function plotHeatmap(matrix, labels) {
@@ -1136,62 +1195,113 @@ function plotHeatmap(matrix, labels) {
 // ═══════════════════════════════════════════════════
 let monacoEditor = null;
 const CODE_SNIPPETS = {
-  strategy: `// LeXie Research Terminal — Strategy Editor
-// ctx API: ctx.prices(), ctx.sma(n), ctx.ema(n), ctx.rsi(n),
-//          ctx.zscore(n), ctx.momentum(n), ctx.ofiSeries(),
-//          ctx.features(), ctx.ic(signal), ctx.evalSignal(signal)
-//          ctx.plot(series, {label, color}), ctx.log(...)
+  strategy: `// ╔══════════════════════════════════════════════════════════╗
+// ║       LeXie Research Terminal  —  strategy.js            ║
+// ╠══════════════════════════════════════════════════════════╣
+// ║  WORKFLOW                                                ║
+// ║  1. Pick a Market (sidebar left)  →  Trending, Mean-Rev, ║
+// ║     Volatile, Regime-Switch, or Multi-Asset              ║
+// ║  2. Write or load a signal snippet below                 ║
+// ║  3. Press  ▶ Run  (or Ctrl+Enter)  to backtest          ║
+// ║  4. Check the 4 charts + console for results             ║
+// ║  5. Improve your signal, then try ⏱ Backtest (Monte     ║
+// ║     Carlo) or 🔀 Walk-Fwd to validate out-of-sample     ║
+// ║  6. Enter a Competition Round to score on the leaderboard║
+// ╠══════════════════════════════════════════════════════════╣
+// ║  CTX API  (all series are arrays of length N)            ║
+// ║                                                          ║
+// ║  DATA                                                    ║
+// ║  ctx.prices()          → number[]  raw price series      ║
+// ║  ctx.returns()         → number[]  bar-by-bar returns    ║
+// ║  ctx.features()        → {hurst, rsi_14, zscore_20, …}   ║
+// ║  ctx.regime()          → 'trend' | 'mean_rev' | 'random' ║
+// ║  ctx.assets()          → [{prices, rho}, …]  corr assets ║
+// ║                                                          ║
+// ║  INDICATORS (all return number[])                        ║
+// ║  ctx.sma(n)            → Simple Moving Average           ║
+// ║  ctx.ema(n)            → Exponential Moving Average      ║
+// ║  ctx.rsi(n)            → RSI 0–100                       ║
+// ║  ctx.zscore(n)         → rolling Z-score                 ║
+// ║  ctx.bollinger(n,k)    → [{mid,upper,lower,pct}, …]      ║
+// ║  ctx.momentum(n)       → n-bar log-return                ║
+// ║  ctx.ofiSeries(n)      → order flow imbalance            ║
+// ║  ctx.halfLife()        → OU half-life in bars            ║
+// ║                                                          ║
+// ║  EVALUATION                                              ║
+// ║  ctx.ic(signal, h)     → scalar IC vs h-bar fwd return   ║
+// ║  ctx.evalSignal(sig,h) → {sharpe,ic,maxDD,equity}        ║
+// ║                                                          ║
+// ║  OUTPUT (charts + console)                               ║
+// ║  ctx.plot(series, {label, color})  → overlays on price   ║
+// ║  ctx.scatter(x[], y[], {label})    → scatter in chart 4  ║
+// ║  ctx.log(...args)                  → console output      ║
+// ║                                                          ║
+// ║  Load named snippets from the sidebar → Signals section  ║
+// ╚══════════════════════════════════════════════════════════╝
 
-const prices = ctx.prices();
-const sma_fast = ctx.sma(10);
-const sma_slow = ctx.sma(30);
+// ── STEP 1: Get market data ──────────────────────────────
+const prices = ctx.prices();     // Full price history (~300 bars)
+const sma10  = ctx.sma(10);      // Fast moving average
+const sma30  = ctx.sma(30);      // Slow moving average
 
-// Momentum signal: +1 when fast > slow, -1 otherwise
+// ── STEP 2: Build a signal  (values between -1 and +1) ──
+//   Positive = long (buy), Negative = short (sell), 0 = flat
 const signal = prices.map((_, i) => {
-  if (sma_fast[i] == null || sma_slow[i] == null) return 0;
-  return sma_fast[i] > sma_slow[i] ? 1 : -1;
+  if (sma10[i] == null || sma30[i] == null) return 0;
+  // Golden cross: fast > slow → long, otherwise short
+  return sma10[i] > sma30[i] ? 1 : -1;
 });
 
-// Evaluate signal performance
+// ── STEP 3: Evaluate signal performance ─────────────────
 const stats = ctx.evalSignal(signal, 5, 0.001);
 ctx.log('Sharpe:', stats.sharpe, '| IC:', stats.ic, '| MaxDD:', stats.maxDD);
 
-// Plot your signal alongside price
-ctx.plot(sma_fast, { label: 'SMA(10)', color: '#e3b341' });
-ctx.plot(sma_slow, { label: 'SMA(30)', color: '#bc8cff' });
+// ── STEP 4: Visualise ────────────────────────────────────
+ctx.plot(sma10, { label: 'SMA(10)', color: '#e3b341' });
+ctx.plot(sma30, { label: 'SMA(30)', color: '#bc8cff' });
 
+// ── STEP 5: Return stats (required for leaderboard) ──────
 return stats;`,
-  explore: `// Data Explorer — examine features and correlations
+  explore: `// ── Data Explorer: Examine features, IC, and correlations ──
 const prices = ctx.prices();
 const features = ctx.features();
 
-// Log current feature snapshot
-ctx.log('Features:', JSON.stringify(features, null, 2));
+// 1. Log a snapshot of current market features
+ctx.log('Hurst:', features.hurst.toFixed(3),
+        features.hurst > 0.55 ? '→ trending' : features.hurst < 0.45 ? '→ mean-rev' : '→ random');
+ctx.log('RSI(14):', features.rsi_14?.toFixed(1) ?? 'n/a',
+        '| Z-score(20):', features.zscore_20?.toFixed(2) ?? 'n/a');
 
-// Plot RSI
-const rsi = ctx.rsi(14);
-ctx.plot(rsi.map(v => v != null ? (v - 50) / 50 : null), 
-         { label: 'RSI(14) normalised', color: '#39d353' });
-
-// Compute IC of each feature
-const zscore = ctx.zscore(20);
+// 2. Compute IC of three candidate signals (vs 5-bar fwd return)
+const zscore   = ctx.zscore(20);
 const momentum = ctx.momentum(10);
-const ofi = ctx.ofiSeries(20);
+const ofi      = ctx.ofiSeries(20);
 
 const ic_z = ctx.ic(zscore, 5);
 const ic_m = ctx.ic(momentum, 5);
 const ic_o = ctx.ic(ofi, 5);
 
-ctx.log('IC Z-score:', ic_z.toFixed(3),
-        '| IC Momentum:', ic_m.toFixed(3),
-        '| IC OFI:', ic_o.toFixed(3));
+ctx.log('');
+ctx.log('Signal ICs (5-bar horizon):');
+ctx.log('  Z-score IC :', ic_z.toFixed(3));
+ctx.log('  Momentum IC:', ic_m.toFixed(3));
+ctx.log('  OFI IC     :', ic_o.toFixed(3));
+ctx.log('(IC > 0.05 is useful; > 0.10 is strong)');
 
-// Scatter: OFI vs 5-bar forward return
-const returns = ctx.returns();
-const fwd5 = prices.map((_, i) => 
+// 3. Plot RSI normalised to price scale for overlay
+const rsi = ctx.rsi(14);
+ctx.plot(rsi.map(v => v != null ? prices[0] * (0.9 + v/1000) : null),
+         { label: 'RSI proxy', color: '#39d353' });
+
+// 4. Scatter: OFI vs 5-bar forward return → should show in Chart 4
+const fwd5 = prices.map((_, i) =>
   i + 5 < prices.length ? (prices[i+5] - prices[i]) / prices[i] : null
 );
-ctx.scatter(ofi, fwd5, { label: 'OFI vs Fwd Return' });`,
+// filter out null OFI entries at the start
+const validIdx = ofi.map((v,i) => v != null && fwd5[i] != null ? i : -1).filter(i => i >= 0);
+const ofi_clean  = validIdx.map(i => ofi[i]);
+const fwd5_clean = validIdx.map(i => fwd5[i]);
+ctx.scatter(ofi_clean, fwd5_clean, { label: 'OFI vs 5-bar Return', xlabel: 'OFI', ylabel: 'Fwd Return' });`,
   notebook: `// Notebook — free exploration
 const prices = ctx.prices();
 const hl = ctx.halfLife();
@@ -1408,6 +1518,12 @@ async function runStrategy() {
       }
       if (result.result && result.result.equity) {
         updateEquityChart(result.result.equity);
+        // Flash chart pane to signal update
+        document.querySelectorAll('.chart-cell').forEach(el => {
+          el.classList.remove('chart-flash');
+          void el.offsetWidth; // reflow
+          el.classList.add('chart-flash');
+        });
         const s = result.result;
         ['score-display','score-display-inline'].forEach(id => {
           const el = document.getElementById(id);
@@ -2050,6 +2166,10 @@ function exportComposerCode() {
   const code = lines.join('\n');
   if (monacoEditor) monacoEditor.setValue(code);
   switchMode('terminal');
+  // Show onboarding on first visit
+  if (!localStorage.getItem('lexie-onboarded')) {
+    setTimeout(showOnboarding, 800);
+  }
   consoleLog('✅ Composer signal exported to editor. Press Run to test.');
 }
 
@@ -2069,19 +2189,140 @@ window.runComposerSignal = runComposerSignal;
 //  LEADERBOARD
 // ═══════════════════════════════════════════════════
 function showLearnPanel() {
+  ['tab-learn','tab-api','tab-lb'].forEach(id => document.getElementById(id)?.classList.remove('active'));
   document.getElementById('tab-learn').classList.add('active');
-  document.getElementById('tab-lb').classList.remove('active');
   document.getElementById('teach-topbar-bar').style.display = '';
   document.getElementById('teach-content').style.display = '';
   document.getElementById('lb-panel').style.display = 'none';
+  document.getElementById('api-docs-panel').style.display = 'none';
 }
 function showLeaderboard() {
-  document.getElementById('tab-learn').classList.remove('active');
+  ['tab-learn','tab-api','tab-lb'].forEach(id => document.getElementById(id)?.classList.remove('active'));
   document.getElementById('tab-lb').classList.add('active');
   document.getElementById('teach-topbar-bar').style.display = 'none';
   document.getElementById('teach-content').style.display = 'none';
   document.getElementById('lb-panel').style.display = '';
+  document.getElementById('api-docs-panel').style.display = 'none';
   loadLeaderboard();
+}
+function showApiDocs() {
+  ['tab-learn','tab-api','tab-lb'].forEach(id => document.getElementById(id)?.classList.remove('active'));
+  document.getElementById('tab-api')?.classList.add('active');
+  document.getElementById('teach-topbar-bar').style.display = 'none';
+  document.getElementById('teach-content').style.display = 'none';
+  document.getElementById('lb-panel').style.display = 'none';
+  const panel = document.getElementById('api-docs-panel');
+  panel.style.display = '';
+  if (!panel.innerHTML) panel.innerHTML = buildApiDocs();
+  // Also switch teach panel into view if on terminal mode
+}
+function buildApiDocs() {
+  const M = (sig, desc, ex) => `<div class="api-method">
+    <div class="api-sig">${sig}</div>
+    <div class="api-desc">${desc}</div>
+    ${ex ? '<div class="api-example">// ' + ex + '</div>' : ''}
+  </div>`;
+  return `
+  <div style="font-size:13px;font-weight:800;color:var(--bright);margin-bottom:2px;">ctx API Reference</div>
+  <div style="font-size:10px;color:var(--dim);margin-bottom:14px;">All methods available inside strategy.js, explore.js, notebook.js</div>
+
+  <div class="api-section">
+    <div class="api-section-title">📊 Data</div>
+    ${M('ctx.prices() → number[]','Full price history (~300 bars). Index 0 = oldest.','const p = ctx.prices(); // [100.2, 100.5, ...]')}
+    ${M('ctx.returns() → number[]','Bar-by-bar log returns. Same length as prices().','const r = ctx.returns();')}
+    ${M('ctx.features() → object','Current feature snapshot: {hurst, rsi_14, zscore_20, momentum_5, momentum_20, vol_20, ofi}','const f = ctx.features(); ctx.log(f.hurst);')}
+    ${M('ctx.regime() → string','Current market regime: "trend", "mean_rev", or "random"','if (ctx.regime()==="trend") { /* use momentum */ }')}
+    ${M('ctx.assets() → Asset[]','Correlated assets. Each has {prices[], currentPrice, rho}.','const B = ctx.assets()[0]; const pB = B.prices;')}
+    ${M('ctx.ohlcv(n=50) → Bar[]','Last n OHLCV bars: {o,h,l,c,v}.','const bars = ctx.ohlcv(20);')}
+    ${M('ctx.ticks(n=50) → Tick[]','Last n market ticks: {price, side, size}.','const t = ctx.ticks(); ctx.log(t.at(-1).side);')}
+  </div>
+
+  <div class="api-section">
+    <div class="api-section-title">📐 Indicators (return number[])</div>
+    ${M('ctx.sma(n=20) → number[]','Simple moving average. Nulls for first n-1 bars.','const fast = ctx.sma(10), slow = ctx.sma(30);')}
+    ${M('ctx.ema(n=20) → number[]','Exponential moving average.','const trend = ctx.ema(20);')}
+    ${M('ctx.rsi(n=14) → number[]','RSI oscillator, range 0–100. >70 overbought, <30 oversold.','const rsi = ctx.rsi(14);')}
+    ${M('ctx.zscore(n=20) → number[]','Rolling Z-score: how many σ price is from its rolling mean.','const z = ctx.zscore(20); // -3 to +3 typical')}
+    ${M('ctx.bollinger(n=20,k=2) → Band[]','Bollinger Bands. Each element: {mid, upper, lower, pct}.','const bb = ctx.bollinger(); const sig = bb.map(b=>b?-Math.tanh((b.pct-0.5)*4):0);')}
+    ${M('ctx.momentum(n=10) → number[]','n-bar price momentum (log return).','const m = ctx.momentum(20);')}
+    ${M('ctx.ofiSeries(n=20) → number[]','Order Flow Imbalance series. +1 = all buys, -1 = all sells.','const ofi = ctx.ofiSeries(20);')}
+    ${M('ctx.hurst(n=80) → number','Hurst exponent. >0.5 = trending, <0.5 = mean-reverting.','const H = ctx.hurst(); ctx.log("H:", H);')}
+    ${M('ctx.halfLife() → number','OU mean-reversion half-life in bars.','const hl = ctx.halfLife(); ctx.log("half-life:", hl.toFixed(1));')}
+  </div>
+
+  <div class="api-section">
+    <div class="api-section-title">📈 Evaluation</div>
+    ${M('ctx.ic(signal, h=5) → number','Information Coefficient: Spearman rank-corr of signal vs h-bar fwd return. Range −1 to +1.','const ic = ctx.ic(mySignal, 5); ctx.log("IC:", ic);')}
+    ${M('ctx.rollingIC(signal, h=5, w=30) → number[]','Rolling IC over window w — shows IC stability over time.','ctx.plot(ctx.rollingIC(sig, 5, 30), {label:"Rolling IC"});')}
+    ${M('ctx.evalSignal(signal, h=5, tc=0.001) → Stats','Full backtest. Returns {sharpe, ic, maxDD, equity[]}. <strong>Must return stats for leaderboard.</strong>','const stats = ctx.evalSignal(signal, 5, 0.001); return stats;')}
+    ${M('ctx.evalMultiAsset(signalMap, opts) → Stats','Multi-asset backtest. signalMap = {main:[...], B:[...]}','const r = ctx.evalMultiAsset({main:sig, B:sigB}); return r;')}
+  </div>
+
+  <div class="api-section">
+    <div class="api-section-title">🖼 Output</div>
+    ${M('ctx.plot(series, {label?, color?})','Overlay a line on the Price chart. Series must be same length as prices().','ctx.plot(ctx.sma(20), {label:"SMA20", color:"#e3b341"});')}
+    ${M('ctx.scatter(x[], y[], {label?, xlabel?, ylabel?})','Show a scatter plot in Chart 4. Pass two equal-length numeric arrays.','ctx.scatter(ofi, fwd5, {label:"OFI vs Return"});')}
+    ${M('ctx.heatmap(matrix[][], labels[])','Draw a correlation heatmap in Chart 3.','ctx.heatmap([[1,.7],[.7,1]], ["OFI","Mom"]);')}
+    ${M('ctx.log(...args)','Print to the console below the editor.','ctx.log("Sharpe:", stats.sharpe);')}
+  </div>
+
+  <div class="api-section">
+    <div class="api-section-title">🔧 Feature Engine (arbitrary arrays)</div>
+    ${M('ctx.fe.sma(arr, n)','Apply SMA to any numeric array (not just prices).','const smB = ctx.fe.sma(ctx.assets()[0].prices, 20);')}
+    ${M('ctx.fe.zscore(arr, n)','Rolling Z-score on any array.','const spreadZ = ctx.fe.zscore(spread, 20);')}
+    ${M('ctx.fe.ic(signal[], fwd[])','IC between two equal-length arrays.','const ic = ctx.fe.ic(mySignal, fwdReturns);')}
+  </div>
+
+  <div style="font-size:9.5px;color:var(--dim);margin-top:14px;padding:10px;background:var(--bg3);border-radius:6px;">
+    💡 <strong>Tip:</strong> Use Ctrl+Enter to run. Load snippets from Signals in the sidebar.
+    Check 📖 Learn for theory behind each technique.
+  </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+//  ONBOARDING
+// ═══════════════════════════════════════════════════
+function showOnboarding() {
+  if (document.getElementById('onboard-overlay')) return; // already shown
+  const overlay = document.createElement('div');
+  overlay.className = 'onboard-overlay';
+  overlay.id = 'onboard-overlay';
+  overlay.innerHTML = `
+    <div class="onboard-box">
+      <div class="onboard-title">⚡ Welcome to LeXie Terminal</div>
+      <div class="onboard-sub">A research environment for building and testing quantitative trading signals — like Jane Street meets IMC Prosperity, in your browser.</div>
+      <div class="onboard-steps">
+        <div class="onboard-step">
+          <div class="onboard-num">1</div>
+          <div class="onboard-step-body"><strong>Pick a Market Scenario</strong> — Choose from the sidebar: Trending (momentum works), Mean-Rev (Z-score works), Volatile, Regime-Switch, or Multi-Asset. Each has different microstructure.</div>
+        </div>
+        <div class="onboard-step">
+          <div class="onboard-num">2</div>
+          <div class="onboard-step-body"><strong>Write or Load a Signal</strong> — Use the built-in <code>ctx</code> API (see <em>📋 API</em> tab). Load ready-made snippets from the sidebar → Signals. Your code runs in a safe sandbox.</div>
+        </div>
+        <div class="onboard-step">
+          <div class="onboard-num">3</div>
+          <div class="onboard-step-body"><strong>Run & Analyse</strong> — Press <strong>▶ Run</strong> to backtest. Watch the 4 charts: Price overlay, Equity curve, Rolling IC, and Feature/Scatter. Read Sharpe, IC, MaxDD in the console.</div>
+        </div>
+        <div class="onboard-step">
+          <div class="onboard-num">4</div>
+          <div class="onboard-step-body"><strong>Validate & Compete</strong> — Use <em>⏱ Backtest</em> (Monte Carlo across 20 seeds) and <em>🔀 Walk-Fwd</em> to avoid overfitting. Then enter a <strong>Competition Round</strong> to score on the leaderboard.</div>
+        </div>
+        <div class="onboard-step">
+          <div class="onboard-num">5</div>
+          <div class="onboard-step-body"><strong>Learn as You Go</strong> — The <em>📖 Learn</em> panel on the right has 6 interactive modules: Microstructure, Signal IC, Correlations, Regime Detection, Alpha Decay, and False Discovery.</div>
+        </div>
+      </div>
+      <button class="onboard-start-btn" onclick="dismissOnboarding()">🚀 Start Researching</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+function dismissOnboarding() {
+  const el = document.getElementById('onboard-overlay');
+  if (el) el.remove();
+  localStorage.setItem('lexie-onboarded', '1');
 }
 async function loadLeaderboard() {
   const loadEl = document.getElementById('lb-loading');
@@ -2291,6 +2532,9 @@ window.addEventListener('DOMContentLoaded', () => {
 window.setScenario = setScenario;
 window.loadSnippet = loadSnippet;
 window.switchMode = switchMode;
+window.showApiDocs = showApiDocs;
+window.showOnboarding = showOnboarding;
+window.dismissOnboarding = dismissOnboarding;
 window.setEditorTab = setEditorTab;
 window.runStrategy = runStrategy;
 window.runBacktest = runBacktest;
