@@ -1,479 +1,546 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LeXie Trading Suite</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>LeXie Capital — Trading Floor</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>&#x1F3E6;</text></svg>">
 <style>
-  /* ══════════════════════════════════════════════
-     CROSS-PLATFORM TYPOGRAPHY + VISUAL POLISH
-     Fixes Mac/Windows font rendering gap
-  ══════════════════════════════════════════════ */
-
-  /* Mac font smoothing fix — prevents thin rendering on Retina */
-  *{
-    box-sizing:border-box;margin:0;padding:0;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    text-rendering:optimizeLegibility;
-    -webkit-text-size-adjust:100%;
+  :root {
+    --bg:       #080c14;
+    --surface:  #0f1520;
+    --card:     #131c2e;
+    --card2:    #1a2540;
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.12);
+    --text:     #c8d8f0;
+    --dim:      #667890;
+    --accent:   #667eea;
+    --accent2:  #764ba2;
+    --green:    #22c55e;
+    --red:      #ef4444;
+    --gold:     #f59e0b;
   }
-
-  /* Force Inter with heavier fallback stack for Windows ClearType */
-  body{
-    font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
-    font-size:15px!important;
-    font-weight:400;
-    letter-spacing:-0.005em;
-    line-height:1.6;
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'Inter','Segoe UI',sans-serif;
+    background:var(--bg); color:var(--text);
+    min-height:100vh; overflow-x:hidden;
   }
-
-  /* ── SETUP / INTRO SCREENS ── */
-  #setup,#intro,.intro-screen,.setup-screen{
-    max-width:740px;margin:0 auto;padding:52px 28px;
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(102,126,234,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(102,126,234,0.03) 1px, transparent 1px);
+    background-size:40px 40px;
   }
-  .setup-hero,.intro-hero{text-align:center;margin-bottom:40px;}
-
-  /* Tag line above title */
-  .setup-tag,.intro-tag{
-    font-size:0.65rem!important;font-weight:800!important;
-    letter-spacing:0.22em!important;text-transform:uppercase!important;
-    margin-bottom:12px!important;opacity:.85;
+  .header {
+    position:relative; z-index:10;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 40px; border-bottom:1px solid var(--border);
+    background:rgba(8,12,20,0.8); backdrop-filter:blur(12px);
   }
-
-  /* Main title — heavier on Mac, same visual weight as Windows */
-  .setup-title,.intro-title{
-    font-size:2.6rem!important;font-weight:900!important;
-    color:var(--bright)!important;
-    margin-bottom:10px!important;
-    letter-spacing:-0.03em!important;
-    line-height:1.1!important;
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo-icon { font-size:32px; line-height:1; }
+  .logo-text h1 {
+    font-size:22px; font-weight:800;
+    background:linear-gradient(135deg,#e8f0fe,#667eea);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    letter-spacing:-0.5px;
   }
-
-  /* Subtitle */
-  .setup-sub,.intro-sub{
-    font-size:1rem!important;line-height:1.7!important;
-    color:var(--dim)!important;max-width:520px;margin:0 auto!important;
+  .logo-text p { font-size:11px; color:var(--dim); letter-spacing:0.5px; }
+  .header-right { display:flex; align-items:center; gap:16px; }
+  .time-chip {
+    font-size:12px; color:var(--dim);
+    background:var(--surface); border:1px solid var(--border);
+    padding:4px 12px; border-radius:20px; font-variant-numeric:tabular-nums;
   }
-
-  /* ── CARDS — polished with subtle gradient + shadow ── */
-  .rule-card,.info-card,.card,.intro-card,.role-card,
-  .feature-card,.theory-card{
-    background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%)!important;
-    border:1px solid var(--border)!important;
-    border-radius:12px!important;
-    padding:22px 26px!important;
-    margin-bottom:14px!important;
-    box-shadow:0 2px 12px var(--shadow),0 0 0 0px transparent!important;
-    transition:border-color .2s,box-shadow .2s,transform .15s!important;
+  .nav-links { display:flex; gap:8px; }
+  .nav-link {
+    font-size:12px; padding:6px 14px; border-radius:8px;
+    border:1px solid var(--border); background:transparent;
+    color:var(--text); cursor:pointer; text-decoration:none; transition:all .2s;
   }
-  .rule-card:hover,.info-card:hover,.card:hover,.intro-card:hover,
-  .role-card:hover,.feature-card:hover,.theory-card:hover{
-    border-color:var(--border2)!important;
-    box-shadow:0 4px 24px var(--shadow)!important;
-    transform:translateY(-1px)!important;
+  .nav-link:hover { background:var(--card2); border-color:var(--accent); color:var(--accent); }
+  .career-bar {
+    position:relative; z-index:5; padding:16px 40px;
+    background:linear-gradient(135deg,rgba(15,21,32,0.9),rgba(19,28,46,0.9));
+    border-bottom:1px solid var(--border);
   }
-
-  /* Card headings */
-  .rule-card h3,.info-card h3,.card h3,.card-title,.role-name,
-  .feature-title,.theory-card h3{
-    font-size:0.68rem!important;font-weight:800!important;
-    text-transform:uppercase!important;letter-spacing:0.15em!important;
-    color:var(--yellow)!important;margin-bottom:10px!important;
+  .career-inner {
+    max-width:1400px; margin:0 auto;
+    display:flex; align-items:center; gap:20px;
   }
-
-  /* Card body text */
-  .rule-card p,.info-card p,.card p,.role-desc,.card-body,
-  .feature-desc,.theory-card p{
-    font-size:0.9rem!important;line-height:1.7!important;
-    color:var(--text)!important;font-weight:400!important;
+  .career-badge { font-size:28px; flex-shrink:0; }
+  .career-info { flex:1; }
+  .career-title-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .career-title { font-size:15px; font-weight:700; color:#e8f0fe; }
+  .career-xp {
+    font-size:12px; color:var(--accent);
+    background:rgba(102,126,234,0.15); padding:2px 10px; border-radius:12px;
   }
-
-  /* ── CTA BUTTONS ── */
-  .btn-primary,.start-btn,.setup-start .btn,
-  button[onclick*="start"],button[onclick*="Start"]{
-    font-family:'Inter',sans-serif!important;
-    font-size:0.95rem!important;font-weight:700!important;
-    letter-spacing:0.02em!important;
-    padding:14px 44px!important;border-radius:9px!important;
-    transition:all .2s!important;
+  .career-bar-track { background:rgba(255,255,255,0.06); border-radius:4px; height:6px; overflow:hidden; }
+  .career-bar-fill {
+    height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2));
+    border-radius:4px; transition:width .5s cubic-bezier(0.4,0,0.2,1);
   }
-
-  /* Flow steps in relay etc */
-  .flow-step{
-    font-size:0.7rem!important;font-weight:700!important;
-    letter-spacing:0.06em!important;
-    padding:6px 14px!important;border-radius:20px!important;
+  .career-bar-label { margin-top:4px; font-size:11px; color:var(--dim); }
+  .career-right { display:flex; gap:8px; flex-shrink:0; }
+  .career-stat {
+    text-align:center; background:var(--card); border:1px solid var(--border);
+    border-radius:8px; padding:8px 16px; min-width:80px;
   }
-  .flow-arr{font-size:1rem!important;opacity:.5;}
-
-  /* Role icons */
-  .role-icon{font-size:2.2rem!important;margin-bottom:12px!important;}
-
-  /* Section labels */
-  .section-label,.spec-section-title,.section-title{
-    font-size:0.65rem!important;font-weight:800!important;
-    text-transform:uppercase!important;letter-spacing:0.16em!important;
-    color:var(--dim)!important;margin-bottom:14px!important;
+  .career-stat-value { font-size:18px; font-weight:700; color:#e8f0fe; }
+  .career-stat-label { font-size:10px; color:var(--dim); margin-top:1px; }
+  .ticker-bar {
+    position:relative; z-index:5; background:rgba(10,15,25,0.8);
+    border-bottom:1px solid var(--border); padding:8px 0; overflow:hidden;
   }
-
-  /* Number badges (rule-num style) */
-  .rule-num{
-    background:var(--bg4)!important;color:var(--yellow)!important;
-    font-family:'DM Mono',monospace!important;
-    font-size:0.72rem!important;font-weight:700!important;
-    width:24px!important;height:24px!important;border-radius:5px!important;
-    display:flex!important;align-items:center!important;justify-content:center!important;
-    flex-shrink:0!important;margin-top:2px!important;
+  .ticker-scroll { display:flex; gap:0; animation:ticker 45s linear infinite; width:max-content; }
+  @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .ticker-item {
+    display:flex; align-items:center; gap:6px;
+    padding:0 24px; border-right:1px solid var(--border);
+    white-space:nowrap; font-size:12px;
   }
-
-  /* Two-column role-card grid */
-  .roles-grid,.role-grid{
-    display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important;
+  .ticker-name { color:var(--dim); }
+  .ticker-price { font-weight:600; color:#e8f0fe; font-variant-numeric:tabular-nums; }
+  .ticker-change { font-size:11px; }
+  .up { color:var(--green); } .dn { color:var(--red); }
+  .main {
+    position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:32px 40px;
   }
-  @media(max-width:600px){
-    .roles-grid,.role-grid{grid-template-columns:1fr!important;}
-    .setup-title,.intro-title{font-size:2rem!important;}
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .section-title {
+    font-size:13px; font-weight:700; text-transform:uppercase;
+    letter-spacing:1.5px; color:var(--dim); display:flex; align-items:center; gap:8px;
   }
-
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#06090f;--bg2:#0b111c;--bg3:#101824;--bg4:#162030;
-  --border:#1a2d46;--border2:#243d5a;--text:#b0c8e4;--dim:#4a6a8a;
-  --bright:#e0eefa;--green:#00d888;--red:#ff3d5a;--yellow:#ffc840;
-  --blue:#3a90ff;--purple:#9d60ff;--shadow:rgba(0,0,0,.4);
-}
-[data-theme="light"]{
-  --bg:#f0f4f8!important;--bg2:#ffffff!important;--bg3:#f5f8fc!important;--bg4:#edf1f7!important;
-  --border:#d0dce8!important;--border2:#b8cfe0!important;--text:#2a3f55!important;--dim:#7a9ab8!important;
-  --bright:#0d1b2a!important;--shadow:rgba(0,0,0,.12)!important;
-}
-@media(prefers-color-scheme:light){:root:not([data-theme]){
-  --bg:#f0f4f8!important;--bg2:#ffffff!important;--bg3:#f5f8fc!important;--bg4:#edf1f7!important;
-  --border:#d0dce8!important;--border2:#b8cfe0!important;--text:#2a3f55!important;--dim:#7a9ab8!important;
-  --bright:#0d1b2a!important;--shadow:rgba(0,0,0,.12)!important;
-}}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
-
-/* ── TOP NAV ── */
-.top-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:44px;flex-shrink:0}
-.nav-brand{color:var(--bright);font-weight:800;font-size:0.9rem;letter-spacing:0.05em;margin-right:8px}
-.nav-brand span{color:var(--yellow)}
-.nav-link{color:var(--dim);text-decoration:none;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;transition:color .15s}
-.nav-link:hover{color:var(--text)}
-.nav-link.mm{color:var(--green)}
-.nav-link.mm:hover{color:#00ffaa}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.user-pill{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 6px;cursor:pointer;transition:border-color .15s}
-.user-pill:hover{border-color:var(--border2)}
-.user-avatar{width:26px;height:26px;border-radius:50%;object-fit:cover}
-.user-name{font-size:0.78rem;font-weight:600;color:var(--text);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.signout-btn{font-size:0.7rem;color:var(--dim);background:none;border:none;cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:.07em;transition:color .15s}
-.signout-btn:hover{color:var(--red)}
-.theme-btns{display:flex;gap:4px}
-.tnb{background:none;border:1px solid transparent;border-radius:5px;color:var(--dim);font-size:0.8rem;cursor:pointer;padding:3px 6px;transition:all .15s}
-.tnb:hover,.tnb.active{border-color:var(--border2);color:var(--bright)}
-
-/* ── AUTH GATE ── */
-#auth-gate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:0;padding:40px 24px}
-.auth-logo{font-size:3rem;margin-bottom:16px}
-.auth-title{font-size:2.2rem;font-weight:800;color:var(--bright);margin-bottom:8px;text-align:center}
-.auth-title span{color:var(--yellow)}
-.auth-sub{color:var(--dim);font-size:0.95rem;margin-bottom:36px;text-align:center;max-width:380px;line-height:1.6}
-.google-btn{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px 28px;cursor:pointer;transition:all .2s;font-size:0.95rem;font-weight:600;color:var(--bright)}
-.google-btn:hover{border-color:var(--blue);background:var(--bg3);transform:translateY(-1px);box-shadow:0 4px 20px var(--shadow)}
-.google-btn svg{width:22px;height:22px;flex-shrink:0}
-.auth-note{margin-top:20px;font-size:0.78rem;color:var(--dim);text-align:center;max-width:320px;line-height:1.5}
-.auth-error{margin-top:16px;color:var(--red);font-size:0.85rem;text-align:center;display:none}
-
-/* ── MAIN HUB ── */
-#hub{display:none}
-.hub-header{padding:40px 32px 0}
-.hub-greeting{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--yellow);margin-bottom:8px}
-.hub-title{font-size:2.4rem;font-weight:800;color:var(--bright);margin-bottom:6px}
-.hub-sub{color:var(--dim);font-size:0.92rem;margin-bottom:32px}
-.hub-mm-banner{background:linear-gradient(135deg,rgba(0,216,136,.08),rgba(58,144,255,.06));border:1px solid rgba(0,216,136,.25);border-radius:12px;padding:16px 22px;display:flex;align-items:center;gap:16px;margin-bottom:36px;cursor:pointer;transition:border-color .2s}
-.hub-mm-banner:hover{border-color:rgba(0,216,136,.5)}
-.banner-icon{font-size:2rem}
-.banner-text h3{font-size:0.95rem;font-weight:700;color:var(--green);margin-bottom:3px}
-.banner-text p{font-size:0.82rem;color:var(--dim)}
-.banner-arrow{margin-left:auto;font-size:1.2rem;color:var(--green)}
-
-/* ── GAME GRID ── */
-.section-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:14px;padding:0 32px}
-.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:0 32px 32px}
-.game-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
-.game-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 24px var(--shadow)}
-.card-emoji{font-size:1.6rem;margin-bottom:10px}
-.card-badge{display:inline-block;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:2px 8px;border-radius:4px;margin-bottom:10px}
-.badge-solo{background:rgba(58,144,255,.15);color:var(--blue);border:1px solid rgba(58,144,255,.25)}
-.badge-collab{background:rgba(157,96,255,.15);color:var(--purple);border:1px solid rgba(157,96,255,.25)}
-.badge-theory{background:rgba(255,200,64,.12);color:var(--yellow);border:1px solid rgba(255,200,64,.2)}
-.card-title{font-size:1rem;font-weight:700;color:var(--bright);margin-bottom:4px}
-.card-desc{font-size:0.8rem;color:var(--dim);line-height:1.5}
-.card-tag{margin-top:10px;font-size:0.7rem;font-weight:600;color:var(--dim);font-family:'DM Mono',monospace}
-.hub-footer{padding:16px 32px 40px;border-top:1px solid var(--border);margin-top:8px;text-align:center;color:var(--dim);font-size:0.78rem}
-
-/* ── SPINNER ── */
-#loading{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{color:var(--dim);font-size:0.88rem}
+  .section-title::before {
+    content:''; display:block; width:3px; height:14px; border-radius:2px;
+    background:linear-gradient(var(--accent),var(--accent2));
+  }
+  .daily-brief {
+    background:linear-gradient(135deg,rgba(19,28,46,0.9),rgba(26,37,64,0.9));
+    border:1px solid rgba(102,126,234,0.2); border-radius:16px; padding:24px;
+    margin-bottom:32px; display:grid; grid-template-columns:1fr auto;
+    gap:24px; align-items:center; position:relative; overflow:hidden;
+  }
+  .daily-brief::before {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:200px; height:200px;
+    background:radial-gradient(circle,rgba(102,126,234,0.08),transparent 70%);
+    pointer-events:none;
+  }
+  .brief-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .brief-badge {
+    font-size:11px; font-weight:700; letter-spacing:0.5px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; padding:3px 10px; border-radius:12px;
+  }
+  .brief-date { font-size:12px; color:var(--dim); }
+  .brief-headline { font-size:20px; font-weight:800; color:#e8f0fe; margin-bottom:8px; line-height:1.3; }
+  .brief-desc { font-size:13px; color:var(--dim); line-height:1.5; }
+  .brief-instruments { display:flex; flex-direction:column; gap:10px; min-width:240px; }
+  .brief-inst-card {
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:10px;
+  }
+  .brief-inst-emoji { font-size:22px; }
+  .brief-inst-info { flex:1; }
+  .brief-inst-name { font-size:13px; font-weight:700; color:#e8f0fe; }
+  .brief-inst-desc { font-size:11px; color:var(--dim); margin-top:2px; }
+  .brief-inst-stat { text-align:right; }
+  .brief-inst-vol { font-size:11px; color:var(--accent); }
+  .brief-inst-risk { font-size:10px; color:var(--dim); }
+  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:36px; }
+  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 20px; }
+  .stat-label { font-size:11px; color:var(--dim); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .stat-value { font-size:24px; font-weight:800; color:#e8f0fe; }
+  .stat-sub { font-size:11px; color:var(--dim); margin-top:2px; }
+  .desk-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:16px; margin-bottom:36px;
+  }
+  .desk-card {
+    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px;
+    cursor:pointer; text-decoration:none; display:block;
+    transition:all .2s cubic-bezier(0.4,0,0.2,1);
+    position:relative; overflow:hidden;
+  }
+  .desk-card::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg,transparent,rgba(102,126,234,0.03));
+    opacity:0; transition:opacity .2s;
+  }
+  .desk-card:hover {
+    border-color:rgba(102,126,234,0.35); background:var(--card2);
+    transform:translateY(-2px);
+    box-shadow:0 8px 32px rgba(0,0,0,0.3),0 0 0 1px rgba(102,126,234,0.1);
+  }
+  .desk-card:hover::before { opacity:1; }
+  .desk-card.locked { opacity:0.42; cursor:not-allowed; pointer-events:none; }
+  .desk-card.locked::after { content:'locked'; position:absolute; top:12px; right:12px; font-size:11px; color:var(--dim); background:rgba(0,0,0,0.5); padding:2px 7px; border-radius:8px; }
+  .desk-card.featured { border-color:rgba(245,158,11,0.25); }
+  .desk-card.featured:hover { border-color:rgba(245,158,11,0.45); box-shadow:0 8px 32px rgba(0,0,0,0.3),0 0 0 1px rgba(245,158,11,0.15); }
+  .desk-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:12px; }
+  .desk-icon {
+    font-size:26px; width:48px; height:48px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .desk-meta { flex:1; }
+  .desk-name { font-size:14px; font-weight:700; color:#e8f0fe; margin-bottom:4px; }
+  .desk-tags { display:flex; gap:5px; flex-wrap:wrap; }
+  .desk-tag {
+    font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px;
+    background:rgba(102,126,234,0.12); color:var(--accent); border:1px solid rgba(102,126,234,0.2);
+  }
+  .desk-tag.green { background:rgba(34,197,94,0.1); color:#4ade80; border-color:rgba(34,197,94,0.2); }
+  .desk-tag.gold  { background:rgba(245,158,11,0.1); color:#fbbf24; border-color:rgba(245,158,11,0.2); }
+  .desk-desc { font-size:12px; color:var(--dim); line-height:1.5; margin-bottom:14px; }
+  .desk-footer { display:flex; align-items:center; justify-content:space-between; }
+  .desk-level-req { font-size:11px; color:var(--dim); }
+  .desk-level-req.met { color:var(--green); }
+  .desk-cta { font-size:11px; font-weight:700; color:var(--accent); opacity:0.7; transition:opacity .2s; }
+  .desk-card:hover .desk-cta { opacity:1; }
+  .desk-instrument { font-size:11px; color:var(--dim); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+  .desk-instrument span { color:#e8f0fe; font-weight:600; }
+  .missions-panel { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:32px; }
+  .mission-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; margin-top:16px; }
+  .mission-item {
+    background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;
+  }
+  .mission-item.done { background:rgba(34,197,94,0.05); border-color:rgba(34,197,94,0.2); opacity:0.6; }
+  .mission-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+  .mission-body { flex:1; }
+  .mission-title { font-size:12px; font-weight:700; color:#e8f0fe; margin-bottom:2px; }
+  .mission-desc  { font-size:11px; color:var(--dim); }
+  .mission-xp { font-size:11px; font-weight:700; color:var(--accent); white-space:nowrap; }
+  .mission-progress { margin-top:6px; background:rgba(255,255,255,0.06); border-radius:3px; height:3px; overflow:hidden; }
+  .mission-progress-fill { height:100%; background:var(--accent); border-radius:3px; transition:width .4s; }
+  .footer {
+    border-top:1px solid var(--border); padding:20px 40px;
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:11px; color:var(--dim);
+  }
+  .footer a { color:var(--dim); text-decoration:none; }
+  .footer a:hover { color:var(--accent); }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
+  @media (max-width:900px) {
+    .header,.career-bar,.footer { padding:16px 20px; }
+    .main { padding:20px; }
+    .stats-row { grid-template-columns:repeat(2,1fr); }
+    .desk-grid { grid-template-columns:1fr; }
+    .daily-brief { grid-template-columns:1fr; }
+    .brief-instruments { flex-direction:row; min-width:unset; }
+  }
 </style>
 </head>
-<body>
+<body data-desk="index">
 
-<!-- Loading state -->
-<div id="loading">
-  <div class="spinner"></div>
-  <div class="loading-text">Checking session…</div>
-</div>
+<script src="instruments.js"></script>
+<script src="lexie-core.js"></script>
 
-<!-- Auth gate (shown when signed out) -->
-<div id="auth-gate" style="display:none">
-  <div class="auth-logo">📈</div>
-  <h1 class="auth-title">LeXie <span>Trading Suite</span></h1>
-  <p class="auth-sub">13 games to sharpen your quant trading skills — from market making to algo strategies. Sign in to begin.</p>
-  <button class="google-btn" id="sign-in-btn" onclick="signInWithGoogle()">
-    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-      <path fill="none" d="M0 0h48v48H0z"/>
-    </svg>
-    Continue with Google
-  </button>
-  <p class="auth-note">Access is restricted to signed-in users. Your Google account is used for authentication only — no data is stored.</p>
-  <p class="auth-error" id="auth-error"></p>
-</div>
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">&#x1F3E6;</div>
+    <div class="logo-text">
+      <h1>LeXie Capital</h1>
+      <p>QUANTITATIVE TRADING TRAINING FLOOR</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="time-chip" id="clock">--:--:-- UTC</div>
+    <nav class="nav-links">
+      <a class="nav-link" href="#desks">Desks</a>
+      <a class="nav-link" href="#missions">Missions</a>
+      <a class="nav-link" href="terminal.html">&#x1F5A5; Terminal</a>
+    </nav>
+  </div>
+</header>
 
-<!-- Main hub (shown when signed in) -->
-<div id="hub" style="display:none">
-  <nav class="top-nav">
-    <span class="nav-brand">📈 LeXie <span>Trading</span> Suite</span>
-    <a href="https://lexie-marketmakerbaos.onrender.com" target="_blank" class="nav-link mm">⚡ Market Maker ↗</a>
-    <a href="terminal.html" class="nav-link" style="color:var(--blue)">⌨ Terminal</a>
-    <div class="nav-right">
-      <div class="theme-btns">
-        <button class="tnb" data-t="light" onclick="setTheme('light',true)" title="Light">☀</button>
-        <button class="tnb" data-t="system" onclick="setTheme('system',true)" title="System">⊙</button>
-        <button class="tnb" data-t="dark" onclick="setTheme('dark',true)" title="Dark">☾</button>
+<div class="career-bar">
+  <div class="career-inner">
+    <div class="career-badge" id="career-badge">&#x1F393;</div>
+    <div class="career-info">
+      <div class="career-title-row">
+        <span class="career-title" id="career-title">Intern</span>
+        <span class="career-xp" id="career-xp">0 XP</span>
       </div>
-      <div class="user-pill" onclick="toggleSignout()">
-        <img class="user-avatar" id="user-avatar" src="" alt="">
-        <span class="user-name" id="user-name"></span>
+      <div class="career-bar-track">
+        <div class="career-bar-fill" id="career-bar-fill" style="width:0%"></div>
       </div>
-      <button class="signout-btn" id="signout-btn" onclick="signOut()" style="display:none">Sign out</button>
+      <div class="career-bar-label" id="career-bar-label">0 / 500 XP to Junior Analyst</div>
     </div>
-  </nav>
-
-  <div style="padding:0 32px;max-width:1200px;margin:0 auto">
-    <div class="hub-header" style="padding-left:0;padding-right:0">
-      <div class="hub-greeting" id="hub-greeting">Welcome back</div>
-      <h1 class="hub-title">Trading Suite</h1>
-      <p class="hub-sub">13 interactive games · solo challenges · collaborative sims · theory drills</p>
-      <a href="https://lexie-marketmakerbaos.onrender.com" target="_blank" class="hub-mm-banner" style="text-decoration:none">
-        <span class="banner-icon">⚡</span>
-        <div class="banner-text">
-          <h3>Market Maker Game</h3>
-          <p>Live multiplayer market making simulation — trade with other players in real time</p>
-        </div>
-        <span class="banner-arrow">↗</span>
-      </a>
-    </div>
-
-    <p class="section-label" style="padding-left:0">Solo Challenges</p>
-    <div class="game-grid" style="padding-left:0;padding-right:0">
-      <a href="momentum-trainer.html" class="game-card">
-        <div class="card-emoji">📈</div>
-        <span class="card-badge badge-solo">Solo</span>
-        <div class="card-title">Momentum Trainer</div>
-        <div class="card-desc">Read SMA crossover signals and ride trends. Learn the basics of momentum strategies.</div>
-        <div class="card-tag">SMA · Trend Following · Beginner</div>
-      </a>
-      <a href="spread-trader.html" class="game-card">
-        <div class="card-emoji">⚖️</div>
-        <span class="card-badge badge-solo">Solo</span>
-        <div class="card-title">Spread Trader</div>
-        <div class="card-desc">Pairs trading via mean reversion. Spot divergences and trade the spread back to equilibrium.</div>
-        <div class="card-tag">Mean Reversion · Z-score · Pairs</div>
-      </a>
-      <a href="regime-rider.html" class="game-card">
-        <div class="card-emoji">🌀</div>
-        <span class="card-badge badge-solo">Solo</span>
-        <div class="card-title">Regime Rider</div>
-        <div class="card-desc">Classify market regimes and deploy the right strategy. Trending, ranging, or volatile.</div>
-        <div class="card-tag">Regime Detection · Adaptive Strategy</div>
-      </a>
-      <a href="algo-blitz.html" class="game-card">
-        <div class="card-emoji">⚡</div>
-        <span class="card-badge badge-solo">Solo</span>
-        <div class="card-title">Algo Blitz</div>
-        <div class="card-desc">20 rapid-fire quant problems under time pressure. Test your mental maths and algo intuition.</div>
-        <div class="card-tag">Speed · Mental Maths · Theory</div>
-      </a>
-      <a href="arbitrage-sprint.html" class="game-card">
-        <div class="card-emoji">🏃</div>
-        <span class="card-badge badge-solo">Solo</span>
-        <div class="card-title">Arbitrage Sprint</div>
-        <div class="card-desc">5-round Prosperity-style manual trading. Spot mispricings and capture arbitrage before they close.</div>
-        <div class="card-tag">Arbitrage · Manual Trading · LeXie Style</div>
-      </a>
-      <a href="basket-blitz.html" class="game-card">
-        <div class="card-emoji">🧺</div>
-        <span class="card-badge badge-solo">Solo</span>
-        <div class="card-title">Basket Blitz</div>
-        <div class="card-desc">ETF arbitrage race. Reconstruct basket fair value and trade when ETF drifts from NAV.</div>
-        <div class="card-tag">ETF · NAV · Basket Arbitrage</div>
-      </a>
-      <a href="options-outcry.html" class="game-card">
-        <div class="card-emoji">📣</div>
-        <span class="card-badge badge-solo">Solo</span>
-        <div class="card-title">Options Outcry</div>
-        <div class="card-desc">Derivatives desk simulation. Price options, manage Greeks, and hedge your book under pressure.</div>
-        <div class="card-tag">Options · Greeks · Delta Hedging</div>
-      </a>
-      <a href="quant-relay.html" class="game-card">
-        <div class="card-emoji">🔬</div>
-        <span class="card-badge badge-theory">Theory</span>
-        <div class="card-title">Quant Relay</div>
-        <div class="card-desc">4-stage quant research pipeline. Hypothesis → signal → backtest → deploy. Beat the clock.</div>
-        <div class="card-tag">Research · Backtesting · Signal Alpha</div>
-      </a>
-      <a href="alpha-factory.html" class="game-card">
-        <div class="card-emoji">🏭</div>
-        <span class="card-badge badge-theory">Theory</span>
-        <div class="card-title">Alpha Factory</div>
-        <div class="card-desc">Build and combine alpha signals. Sharpe ratio optimisation across a multi-signal portfolio.</div>
-        <div class="card-tag">Alpha · Sharpe · Portfolio Construction</div>
-      </a>
-    </div>
-
-
-    <p class="section-label" style="padding-left:0;margin-top:8px">Research Lab</p>
-    <div class="game-grid" style="padding-left:0;padding-right:0">
-      <a href="terminal.html" class="game-card" style="border-color:rgba(0,140,255,.3);background:linear-gradient(135deg,var(--bg2),rgba(0,140,255,.05))">
-        <div class="card-emoji">⌨️</div>
-        <span class="card-badge" style="background:rgba(0,140,255,.15);color:var(--blue);border:1px solid rgba(0,140,255,.25)">Research</span>
-        <div class="card-title" style="color:var(--blue)">Research Terminal</div>
-        <div class="card-desc">Write and backtest alpha signals in-browser. Kaggle/Jane Street-style market environment with live simulation, feature engine, IC analysis, and a global leaderboard.</div>
-        <div class="card-tag">Signal Building · Backtest · IC · Leaderboard</div>
-      </a>
-    </div>
-
-    <p class="section-label" style="padding-left:0;margin-top:8px">Multiplayer Simulations</p>
-    <div class="game-grid" style="padding-left:0;padding-right:0">
-      <a href="price-war.html" class="game-card">
-        <div class="card-emoji">⚔️</div>
-        <span class="card-badge badge-collab">Multiplayer</span>
-        <div class="card-title">Price War</div>
-        <div class="card-desc">Live market making battle. Compete to provide the tightest spreads while managing inventory risk.</div>
-        <div class="card-tag">Market Making · Spread · Inventory</div>
-      </a>
-      <a href="bot-builder.html" class="game-card">
-        <div class="card-emoji">🤖</div>
-        <span class="card-badge badge-collab">Multiplayer</span>
-        <div class="card-title">Bot Builder</div>
-        <div class="card-desc">Program your trading bot in a live sprint. Compete against other bots in real-time markets.</div>
-        <div class="card-tag">Algo · Bot · Live Competition</div>
-      </a>
-      <a href="cmi-challenge.html" class="game-card">
-        <div class="card-emoji">🏆</div>
-        <span class="card-badge badge-collab">Multiplayer</span>
-        <div class="card-title">Asset Manager Challenge</div>
-        <div class="card-desc">Full asset manager simulation. Multi-round trading challenge with live leaderboard.</div>
-        <div class="card-tag">Asset Mgr · Full Sim · Leaderboard</div>
-      </a>
-    </div>
-
-    <div class="hub-footer">
-      <p>LeXie Trading Suite · Built for Warwick Finance &amp; Quant Soc · LeXie</p>
+    <div class="career-right">
+      <div class="career-stat">
+        <div class="career-stat-value" id="stat-runs">0</div>
+        <div class="career-stat-label">Runs</div>
+      </div>
+      <div class="career-stat">
+        <div class="career-stat-value" id="stat-sharpe">-</div>
+        <div class="career-stat-label">Best Sharpe</div>
+      </div>
+      <div class="career-stat">
+        <div class="career-stat-value" id="stat-missions">0</div>
+        <div class="career-stat-label">Missions</div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Firebase -->
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+<div class="ticker-bar">
+  <div class="ticker-scroll" id="ticker"></div>
+</div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDPNaHsWtignrwVrUI-0KcTc6HQzV9sck0",
-  authDomain: "market-maker-game-68184.firebaseapp.com",
-  projectId: "market-maker-game-68184",
-  storageBucket: "market-maker-game-68184.firebasestorage.app",
-  messagingSenderId: "317566731846",
-  appId: "1:317566731846:web:bd5cc5f2d62bedaf58ec47",
-  measurementId: "G-Q5G8JDYNPS"
-};
+<main class="main">
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+  <div style="margin-bottom:32px">
+    <div class="section-header" style="margin-bottom:16px">
+      <div class="section-title">Today's Market Brief</div>
+      <a href="terminal.html" style="font-size:12px;color:var(--accent);text-decoration:none">Open Terminal &rarr;</a>
+    </div>
+    <div class="daily-brief">
+      <div>
+        <div class="brief-top">
+          <span class="brief-badge">TODAY'S FOCUS</span>
+          <span class="brief-date" id="brief-date"></span>
+        </div>
+        <div class="brief-headline" id="brief-headline">Loading today's research brief...</div>
+        <div class="brief-desc" id="brief-desc"></div>
+      </div>
+      <div class="brief-instruments" id="brief-instruments"></div>
+    </div>
+  </div>
 
-// expose to window for onclick handlers
-window.signInWithGoogle = async () => {
-  const errEl = document.getElementById('auth-error');
-  errEl.style.display = 'none';
-  try {
-    await signInWithPopup(auth, provider);
-  } catch(e) {
-    errEl.textContent = e.message || 'Sign-in failed. Please try again.';
-    errEl.style.display = 'block';
-  }
-};
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total XP</div>
+      <div class="stat-value" id="total-xp">0</div>
+      <div class="stat-sub">Run strategies to earn</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Desks Visited</div>
+      <div class="stat-value" id="desks-visited">0 / 13</div>
+      <div class="stat-sub">Explore the floor</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Best Sharpe</div>
+      <div class="stat-value" id="best-sharpe">-</div>
+      <div class="stat-sub">From all backtests</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Daily Streak</div>
+      <div class="stat-value" id="daily-streak">0</div>
+      <div class="stat-sub">Complete daily challenges</div>
+    </div>
+  </div>
 
-window.signOut = async () => {
-  await fbSignOut(auth);
-};
+  <div id="desks" style="margin-bottom:12px">
+    <div class="section-header">
+      <div class="section-title">Trading Desks</div>
+      <div style="font-size:12px;color:var(--dim)">13 desks &bull; level up to unlock all</div>
+    </div>
+    <div class="desk-grid" id="desk-grid"></div>
+  </div>
 
-window.toggleSignout = () => {
-  const btn = document.getElementById('signout-btn');
-  btn.style.display = btn.style.display === 'none' ? 'inline' : 'none';
-};
+  <div id="missions" style="margin-bottom:32px">
+    <div class="section-header">
+      <div class="section-title">Missions</div>
+      <div id="missions-summary" style="font-size:12px;color:var(--dim)">Loading...</div>
+    </div>
+    <div class="missions-panel">
+      <div class="mission-list" id="mission-list"></div>
+    </div>
+  </div>
 
-onAuthStateChanged(auth, user => {
-  document.getElementById('loading').style.display = 'none';
-  if (user) {
-    // Show hub
-    document.getElementById('auth-gate').style.display = 'none';
-    document.getElementById('hub').style.display = 'block';
-    // Populate user info
-    const name = user.displayName || user.email || 'Trader';
-    const firstName = name.split(' ')[0];
-    document.getElementById('hub-greeting').textContent = `Welcome back, ${firstName}`;
-    document.getElementById('user-name').textContent = firstName;
-    const avatar = document.getElementById('user-avatar');
-    if (user.photoURL) {
-      avatar.src = user.photoURL;
-      avatar.style.display = 'block';
-    } else {
-      avatar.style.display = 'none';
-    }
-  } else {
-    // Show auth gate
-    document.getElementById('hub').style.display = 'none';
-    document.getElementById('auth-gate').style.display = 'flex';
-  }
-});
-</script>
+</main>
+
+<footer class="footer">
+  <div>&copy; 2025 LeXie Capital &mdash; Training Simulation &bull; No real money involved</div>
+  <div style="display:flex;gap:16px">
+    <a href="terminal.html">Terminal</a>
+    <a href="#" onclick="if(confirm('Reset all career progress?'))LX._reset()">Reset Progress</a>
+  </div>
+</footer>
 
 <script>
-// Theme
-function setTheme(t, save) {
-  const root = document.documentElement;
-  if (t === 'light') root.setAttribute('data-theme','light');
-  else if (t === 'dark') root.setAttribute('data-theme','dark');
-  else root.removeAttribute('data-theme');
-  document.querySelectorAll('.tnb').forEach(b => b.classList.toggle('active', b.dataset.t === t));
-  if (save) localStorage.setItem('imc-theme', t);
+/* ── Clock ── */
+function updateClock() {
+  var now = new Date();
+  var h = String(now.getUTCHours()).padStart(2,'0');
+  var m = String(now.getUTCMinutes()).padStart(2,'0');
+  var s = String(now.getUTCSeconds()).padStart(2,'0');
+  var el = document.getElementById('clock');
+  if (el) el.textContent = h+':'+m+':'+s+' UTC';
 }
-const saved = localStorage.getItem('imc-theme') || 'dark';
-setTheme(saved, false);
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ── Ticker ── */
+var TICKER_SNAP = [
+  {ticker:'AAPL',emoji:'&#x1F34E;',price:182.4,chg:+0.8},
+  {ticker:'NVDA',emoji:'&#x1F7E2;',price:875.2,chg:+2.3},
+  {ticker:'TSLA',emoji:'&#x26A1;',price:241.6,chg:-1.4},
+  {ticker:'BTC',emoji:'&#x20BF;',price:67420,chg:+1.9},
+  {ticker:'ETH',emoji:'&#x1F537;',price:3540,chg:+0.7},
+  {ticker:'GOLD',emoji:'&#x1F947;',price:2340,chg:+0.3},
+  {ticker:'OIL',emoji:'&#x1F6E2;',price:82.4,chg:-0.6},
+  {ticker:'EURUSD',emoji:'&#x1F4B1;',price:1.082,chg:+0.04},
+  {ticker:'SPX',emoji:'&#x1F4C8;',price:5240,chg:+0.5},
+  {ticker:'VIX',emoji:'&#x1F631;',price:16.2,chg:-3.1},
+  {ticker:'TLT',emoji:'&#x1F3DB;',price:94.8,chg:-0.2},
+  {ticker:'SOL',emoji:'&#x2600;',price:158,chg:+3.4},
+  {ticker:'GLD',emoji:'&#x2728;',price:218.4,chg:+0.3},
+  {ticker:'WHEAT',emoji:'&#x1F33E;',price:590,chg:-0.4},
+  {ticker:'MSFT',emoji:'&#x1FA9F;',price:412.5,chg:+0.6}
+];
+
+function buildTicker() {
+  var t = document.getElementById('ticker');
+  if (!t) return;
+  var all = TICKER_SNAP.concat(TICKER_SNAP);
+  t.innerHTML = all.map(function(d) {
+    var sign = d.chg >= 0 ? '+' : '';
+    var cls  = d.chg >= 0 ? 'up' : 'dn';
+    var pfmt = d.price >= 1000 ? d.price.toLocaleString('en',{maximumFractionDigits:0})
+             : d.price >= 10   ? d.price.toFixed(1)
+             : d.price.toFixed(3);
+    return '<div class="ticker-item"><span>'+d.emoji+'</span><span class="ticker-name">'+d.ticker+'</span><span class="ticker-price">'+pfmt+'</span><span class="ticker-change '+cls+'">'+sign+d.chg+'%</span></div>';
+  }).join('');
+}
+buildTicker();
+
+/* ── Career UI ── */
+function updateCareerUI() {
+  if (!window.LX) return;
+  var info  = LX.getLevelInfo();
+  var state = LX.getState();
+  document.getElementById('career-badge').textContent = info.badge;
+  document.getElementById('career-title').textContent = info.title;
+  document.getElementById('career-xp').textContent = info.xp.toLocaleString()+' XP';
+  document.getElementById('career-bar-fill').style.width = info.pct+'%';
+  document.getElementById('career-bar-label').textContent = info.next
+    ? info.xpInLevel.toLocaleString()+' / '+info.xpToNext.toLocaleString()+' XP to '+info.next.title
+    : 'MAX LEVEL REACHED';
+  document.getElementById('stat-runs').textContent    = state.terminalRuns;
+  document.getElementById('stat-sharpe').textContent  = state.bestSharpe > 0 ? state.bestSharpe.toFixed(2) : '-';
+  document.getElementById('stat-missions').textContent = state.missionsCompleted.length;
+  document.getElementById('total-xp').textContent     = info.xp.toLocaleString();
+  document.getElementById('desks-visited').textContent= (state.desksVisited ? [...state.desksVisited].length : 0)+' / 13';
+  document.getElementById('best-sharpe').textContent  = state.bestSharpe > 0 ? state.bestSharpe.toFixed(2) : '-';
+  document.getElementById('daily-streak').textContent = (state.dailyStreak || 0)+' 🔥';
+}
+
+/* ── Desk grid ── */
+var DESK_EXTRA = {
+  'terminal':         {tags:['Alpha Factors','Backtesting','Walk-Forward'],featured:true},
+  'spread-trader':    {tags:['Pairs Research','Mean Reversion','Z-Score']},
+  'momentum-trainer': {tags:['Momentum','Multi-TF','Regime']},
+  'regime-rider':     {tags:['Macro','Rates','Risk-Off']},
+  'price-war':        {tags:['Market Making','Inventory','Bid-Ask']},
+  'algo-blitz':       {tags:['Coding','Signals','Interview']},
+  'arbitrage-sprint': {tags:['Arb','Relative Value','Mispricing']},
+  'bot-builder':      {tags:['Execution','Logic','Automation']},
+  'cmi-challenge':    {tags:['Portfolio','Risk Limits','Drawdown']},
+  'quant-relay':      {tags:['Factor Research','Sprints','IC']},
+  'alpha-factory':    {tags:['Alt Data','IC Decay','Signals']},
+  'basket-blitz':     {tags:['ETF','Factor Exposure','Hedging']},
+  'options-outcry':   {tags:['Options','Greeks','Volatility']}
+};
+
+function buildDeskGrid() {
+  var grid = document.getElementById('desk-grid');
+  if (!grid || !window.LX || !window.LX_DESKS) return;
+  var daily      = window.lxDailyState ? lxDailyState() : null;
+  var levelIndex = LX.getLevelInfo().index;
+  var html = LX_DESKS.map(function(desk) {
+    var extra    = DESK_EXTRA[desk.id] || {};
+    var locked   = levelIndex < desk.minLevel;
+    var reqLevel = LX_LEVELS[desk.minLevel];
+    var tags     = (extra.tags || []).map(function(t,i){
+      return '<span class="desk-tag '+(i===0?'green':i===1?'gold':'')+'">'+t+'</span>';
+    }).join('');
+    var isDaily  = daily && daily.instrument && desk.id === 'terminal';
+    var instNote = (isDaily && daily.instrument)
+      ? '<div class="desk-instrument">Today: <span>'+daily.instrument.emoji+' '+daily.instrument.name+'</span></div>'
+      : '';
+    var lockNote = locked
+      ? '<span class="desk-level-req">'+reqLevel.badge+' '+reqLevel.title+' required</span>'
+      : '<span class="desk-level-req met">&#x2713; Accessible</span>';
+    return '<a href="'+(locked?'#':desk.file)+'" class="desk-card'+(locked?' locked':'')+(extra.featured?' featured':'')+'">'+
+      '<div class="desk-header"><div class="desk-icon">'+desk.icon+'</div>'+
+      '<div class="desk-meta"><div class="desk-name">'+desk.name+'</div><div class="desk-tags">'+tags+'</div></div></div>'+
+      '<div class="desk-desc">'+desk.desc+'</div>'+instNote+
+      '<div class="desk-footer">'+lockNote+'<span class="desk-cta">'+(locked?'Locked':'Enter &rarr;')+'</span></div>'+
+      '</a>';
+  }).join('');
+  grid.innerHTML = html;
+}
+
+/* ── Daily brief ── */
+var BRIEF_THEMES = [
+  {headline:'Equity Momentum vs Mean Reversion',desc:'Technology stocks showing strong price continuation. Cross-sectional momentum diverges from short-term mean-reversion. Research signal decay at different horizons in the Terminal.'},
+  {headline:'Macro Regime Shift: Risk-Off Signals',desc:'VIX elevated, credit spreads widening. Bond-equity correlation flipping. Test how strategies perform across regimes using attribution tools.'},
+  {headline:'Pairs Opportunity: Gold vs Long Bonds',desc:'Historical correlation between gold and long-duration bonds elevated. Spread has diverged over 2 standard deviations. Research entry timing on the Pairs Desk.'},
+  {headline:'Crypto Momentum: BTC Leading ETH',desc:'Bitcoin dominance at 52%. ETH underperforming on 5-day basis. Research cross-asset lead-lag relationships and IC at multiple horizons.'},
+  {headline:'Factor Rotation: Quality Over Momentum',desc:'Rate-sensitive factor rotation underway. Quality and low-volatility factors outperforming. Explore regime-specific alpha construction in the Lab.'},
+  {headline:'Commodity Supply Premium Building',desc:'WTI-Brent spread widening. Energy sector volatility elevated. Research commodity correlation structures and carry signals.'},
+  {headline:'FX Carry Under Pressure',desc:'USD strength compressing carry trade returns. AUDUSD and EURUSD mean-reversion signals triggering. Test currency signal construction in the Terminal.'}
+];
+
+function buildDailyBrief() {
+  var dateNum = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''));
+  var theme   = BRIEF_THEMES[dateNum % BRIEF_THEMES.length];
+  var dateStr = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('brief-date').textContent     = dateStr;
+  document.getElementById('brief-headline').textContent = theme.headline;
+  document.getElementById('brief-desc').textContent     = theme.desc;
+
+  var daily  = window.lxDailyState ? lxDailyState() : null;
+  var instEl = document.getElementById('brief-instruments');
+  if (!daily || !instEl) return;
+  var cards = [];
+  if (daily.instrument) {
+    var inst = daily.instrument;
+    cards.push('<div class="brief-inst-card"><div class="brief-inst-emoji">'+inst.emoji+'</div><div class="brief-inst-info"><div class="brief-inst-name">'+inst.name+'</div><div class="brief-inst-desc">'+(inst.microDesc||inst.desc||'').slice(0,70)+'</div></div><div class="brief-inst-stat"><div class="brief-inst-vol">&sigma; '+(inst.vol*100).toFixed(0)+'%</div><div class="brief-inst-risk">'+(inst.risk||'')+'</div></div></div>');
+  }
+  if (daily.pair) {
+    var p = daily.pair;
+    cards.push('<div class="brief-inst-card"><div class="brief-inst-emoji">&#x2696;</div><div class="brief-inst-info"><div class="brief-inst-name">'+p.nameA+' / '+p.nameB+'</div><div class="brief-inst-desc">'+(p.thesis||'Pairs spread opportunity').slice(0,70)+'</div></div><div class="brief-inst-stat"><div class="brief-inst-vol">Spread</div><div class="brief-inst-risk">Arb</div></div></div>');
+  }
+  instEl.innerHTML = cards.join('');
+}
+
+/* ── Missions ── */
+function buildMissions() {
+  var list    = document.getElementById('mission-list');
+  var summary = document.getElementById('missions-summary');
+  if (!list || !window.LX) return;
+  var missions = LX.getMissions();
+  var done  = missions.filter(function(m){return m.completed;}).length;
+  var total = missions.length;
+  if (summary) summary.textContent = done+' / '+total+' completed';
+  var show = missions.filter(function(m){return !m.completed;}).slice(0,9)
+    .concat(missions.filter(function(m){return m.completed;}).slice(0,3));
+  list.innerHTML = show.map(function(m) {
+    var prog    = m.progress;
+    var progBar = prog ? '<div class="mission-progress"><div class="mission-progress-fill" style="width:'+Math.min(100,Math.floor(prog[0]/prog[1]*100))+'%"></div></div>' : '';
+    var progNote= (prog && !m.completed) ? '<div style="font-size:10px;color:var(--dim);margin-top:2px">'+prog[0]+' / '+prog[1]+'</div>' : '';
+    return '<div class="mission-item'+(m.completed?' done':'')+'"><div class="mission-icon">'+(m.completed?'&#x2705;':m.icon)+'</div><div class="mission-body"><div class="mission-title">'+m.title+'</div><div class="mission-desc">'+m.desc+'</div>'+progBar+progNote+'</div><div class="mission-xp">+'+m.xp+'</div></div>';
+  }).join('');
+}
+
+window.addEventListener('lx:update', function() {
+  updateCareerUI(); buildDeskGrid(); buildMissions();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  updateCareerUI(); buildDeskGrid(); buildDailyBrief(); buildMissions();
+});
 </script>
 </body>
 </html>
