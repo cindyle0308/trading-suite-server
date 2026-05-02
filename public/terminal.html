@@ -97,9 +97,10 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .try-btn:hover{background:rgba(88,166,255,.2);}
 
 /* ── CONSOLE ── */
-.console-bar{height:28px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:8px;flex-shrink:0;}
+.console-bar{height:60px;background:var(--bg2);border-top:1px solid var(--border);padding:4px 10px;flex-shrink:0;display:flex;flex-direction:column;gap:0;}
+.console-header{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
 .console-label{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);}
-.console-output{font-family:'DM Mono',monospace;font-size:10px;color:var(--teal);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.console-output{font-family:'DM Mono',monospace;font-size:10px;color:var(--teal);flex:1;overflow-y:auto;white-space:pre-wrap;line-height:1.55;}
 .score-pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.25);}
 
 /* Scrollbar */
@@ -132,11 +133,11 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
   <div class="sidebar">
     <div class="sidebar-section">
       <div class="sidebar-label">Market</div>
-      <button class="sidebar-btn active" onclick="setScenario('trend')"><span class="icon">📈</span> Trending</button>
-      <button class="sidebar-btn" onclick="setScenario('mean_rev')"><span class="icon">⚖️</span> Mean-Rev</button>
-      <button class="sidebar-btn" onclick="setScenario('volatile')"><span class="icon">🌩</span> Volatile</button>
-      <button class="sidebar-btn" onclick="setScenario('regime')"><span class="icon">🌀</span> Regime-Switch</button>
-      <button class="sidebar-btn" onclick="setScenario('multi')"><span class="icon">🔗</span> Multi-Asset</button>
+      <button class="sidebar-btn active" data-scenario="trend" onclick="setScenario('trend')"><span class="icon">📈</span> Trending</button>
+      <button class="sidebar-btn" data-scenario="mean_rev" onclick="setScenario('mean_rev')"><span class="icon">⚖️</span> Mean-Rev</button>
+      <button class="sidebar-btn" data-scenario="volatile" onclick="setScenario('volatile')"><span class="icon">🌩</span> Volatile</button>
+      <button class="sidebar-btn" data-scenario="regime" onclick="setScenario('regime')"><span class="icon">🌀</span> Regime-Switch</button>
+      <button class="sidebar-btn" data-scenario="multi" onclick="setScenario('multi')"><span class="icon">🔗</span> Multi-Asset</button>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Signals</div>
@@ -197,8 +198,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       </div>
     </div>
     <div class="console-bar">
-      <span class="console-label">Console</span>
-      <span class="console-output" id="console-out">Ready. Press Run to execute strategy.</span>
+      <div class="console-header"><span class="console-label">Console</span><span id="score-display-inline" class="score-pill" style="display:none;"></span><button onclick="clearConsole()" style="margin-left:auto;background:none;border:none;color:var(--dim);font-size:9px;cursor:pointer;font-family:'DM Mono',monospace;">clear</button></div>
+      <div class="console-output" id="console-out">▶ Ready. Select a scenario, load a signal snippet, then press Run.</div>
     </div>
   </div>
 
@@ -334,9 +335,20 @@ class MarketSim {
       t: this.prices.length - 1
     });
     
+    // Cap array sizes to prevent memory leak
+    if (this.prices.length > 600) {
+      const trim = this.prices.length - 600;
+      this.prices.splice(0, trim);
+      this.bids.splice(0, trim);
+      this.asks.splice(0, trim);
+      this.volumes.splice(0, trim);
+      this.regimeHistory.splice(0, trim);
+      this.trades.splice(0, trim);
+    }
+
     // Correlated assets
     for (let i = 0; i < 3; i++) {
-      const rho = this.corrMatrix[0][i+1] ?? 0.5;
+      const rho = (i < this.corrMatrix[0].length - 1) ? this.corrMatrix[0][i+1] : 0.5;
       const noise = Math.sqrt(1 - rho*rho) * randNorm();
       const corr_dP = rho * dP + noise * c.sigma;
       this.correlatedPrices[i] = Math.max(10, this.correlatedPrices[i] * (1 + corr_dP));
@@ -562,58 +574,69 @@ function buildCtx(m) {
 function runInWorker(code, ctxData) {
   return new Promise((resolve, reject) => {
     const workerCode = `
+      // ── Embedded Feature Engine ──
+      const _FE = {
+        sma(arr,n){return arr.map((_,i)=>{if(i<n-1)return null;return arr.slice(i-n+1,i+1).reduce((a,b)=>a+b,0)/n;});},
+        ema(arr,n){const k=2/(n+1);let e=arr[0];return arr.map(v=>{e=v*k+e*(1-k);return e;});},
+        rsi(arr,n=14){const o=Array(arr.length).fill(null);for(let i=n;i<arr.length;i++){let g=0,l=0;for(let j=i-n+1;j<=i;j++){const d=arr[j]-arr[j-1];if(d>0)g+=d;else l+=Math.abs(d);}const rs=g/(l||0.001);o[i]=100-100/(1+rs);}return o;},
+        zscore(arr,n=20){return arr.map((v,i)=>{if(i<n-1)return 0;const sl=arr.slice(i-n+1,i+1);const mu=sl.reduce((a,b)=>a+b,0)/n;const sigma=Math.sqrt(sl.reduce((a,b)=>a+(b-mu)**2,0)/n);return sigma<1e-9?0:(v-mu)/sigma;});},
+        bollinger(arr,n=20,k=2){return arr.map((v,i)=>{if(i<n-1)return{upper:v,lower:v,mid:v,pct:0.5};const sl=arr.slice(i-n+1,i+1);const mid=sl.reduce((a,b)=>a+b,0)/n;const sigma=Math.sqrt(sl.reduce((a,b)=>a+(b-mid)**2,0)/n);const upper=mid+k*sigma,lower=mid-k*sigma;return{upper,lower,mid,pct:sigma<1e-9?0.5:(v-lower)/(upper-lower)};});},
+        momentum(arr,n=10){return arr.map((v,i)=>i<n?0:(v-arr[i-n])/arr[i-n]);},
+        hurst(arr){if(arr.length<20)return 0.5;const n=Math.min(arr.length,100);const sl=arr.slice(-n);const mean=sl.reduce((a,b)=>a+b,0)/n;const dev=sl.map(v=>v-mean);let cum=0,maxC=-Infinity,minC=Infinity;for(const d of dev){cum+=d;if(cum>maxC)maxC=cum;if(cum<minC)minC=cum;}const R=maxC-minC;const S=Math.sqrt(sl.reduce((a,v)=>a+(v-mean)**2,0)/n);if(S<1e-9)return 0.5;return Math.log(R/S)/Math.log(n/2);},
+        ic(sig,fwd){const n=Math.min(sig.length,fwd.length);const si=[...sig.slice(0,n)].map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map((x,r)=>({...x,r})).sort((a,b)=>a.i-b.i).map(x=>x.r);const fi=[...fwd.slice(0,n)].map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map((x,r)=>({...x,r})).sort((a,b)=>a.i-b.i).map(x=>x.r);const d2=si.reduce((a,_,i)=>a+(si[i]-fi[i])**2,0);return 1-6*d2/(n*(n*n-1));},
+        rollingIC(sig,prices,horizon=5,window=30){const fwd=prices.map((_,i)=>i+horizon<prices.length?(prices[i+horizon]-prices[i])/prices[i]:null).slice(0,-horizon);const s=sig.slice(0,fwd.length);const out=[];for(let i=window;i<s.length;i++){const sv=s.slice(i-window,i),fv=fwd.slice(i-window,i);if(sv.every(v=>v!=null)&&fv.every(v=>v!=null))out.push(_FE.ic(sv,fv));}return out;},
+        halfLife(arr){const n=arr.length;if(n<10)return NaN;const y=arr.slice(1).map((v,i)=>v-arr[i]);const x=arr.slice(0,-1);const mx=x.reduce((a,b)=>a+b,0)/x.length;const my=y.reduce((a,b)=>a+b,0)/y.length;const cov=x.reduce((a,v,i)=>a+(v-mx)*(y[i]-my),0);const varx=x.reduce((a,v)=>a+(v-mx)**2,0);const beta=varx<1e-12?0:cov/varx;return beta<0?Math.log(2)/Math.abs(beta):NaN;},
+      };
+
       self.onmessage = function(e) {
         const { code, ctxData } = e.data;
+        const prices = ctxData.prices;
+        const returns = ctxData.returns;
+        const fwdReturns = ctxData.fwdReturns;
         const _plots = []; const _logs = [];
+
+        const _ic = (sig, h=5) => {
+          const fwd = h === 5 ? fwdReturns : prices.map((_,i)=>i+h<prices.length?(prices[i+h]-prices[i])/prices[i]:0);
+          return _FE.ic(sig, fwd);
+        };
+        const _evalSignal = (sig, horizon=5, tc=0.001) => {
+          const fwd = prices.map((_,i)=>i+horizon<prices.length?(prices[i+horizon]-prices[i])/prices[i]:0);
+          const equity=[0]; let pnl=0;
+          for(let i=0;i<Math.min(sig.length,fwd.length);i++){pnl+=sig[i]*fwd[i]-Math.abs(sig[i])*tc;equity.push(pnl);}
+          const rets=equity.slice(1).map((v,i)=>v-equity[i]);
+          const mu=rets.reduce((a,b)=>a+b,0)/rets.length;
+          const sigma=Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0)/rets.length);
+          const sharpe=sigma<1e-9?0:mu/sigma*Math.sqrt(252);
+          const ic=_ic(sig,horizon);
+          const maxDD=equity.reduce(({peak,dd},v)=>({peak:Math.max(peak,v),dd:Math.min(dd,v-Math.max(peak,v))}),{peak:0,dd:0}).dd;
+          return {sharpe:+sharpe.toFixed(3),ic:+ic.toFixed(3),maxDD:+maxDD.toFixed(4),equity};
+        };
+
         const ctx = {
-          prices: () => ctxData.prices,
-          returns: () => ctxData.returns,
-          ohlcv: (n=50) => ctxData.ohlcv,
-          ticks: (n=50) => ctxData.ticks.slice(-n),
-          features: () => ctxData.features,
-          sma: (n=20) => ctxData.sma[n] || ctxData.sma[20] || [],
-          ema: (n=20) => ctxData.ema[n] || ctxData.ema[20] || [],
-          zscore: (n=20) => ctxData.zscore,
-          momentum: (n=10) => ctxData.momentum,
-          rsi: (n=14) => ctxData.rsi,
-          ofiSeries: () => ctxData.ofi,
-          regime: () => ctxData.regime,
-          ic: (sig, h=5) => {
-            const fwd = ctxData.fwdReturns;
-            const n = Math.min(sig.length, fwd.length);
-            const si = [...sig.slice(0,n)].map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map((x,r)=>({...x,r})).sort((a,b)=>a.i-b.i).map(x=>x.r);
-            const fi = [...fwd.slice(0,n)].map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v).map((x,r)=>({...x,r})).sort((a,b)=>a.i-b.i).map(x=>x.r);
-            const d2 = si.reduce((a,_,i)=>a+(si[i]-fi[i])**2,0);
-            return 1-6*d2/(n*(n*n-1));
-          },
-          halfLife: (series) => {
-            const arr = series || ctxData.prices;
-            const n = arr.length; if(n<10) return NaN;
-            const y=arr.slice(1).map((v,i)=>v-arr[i]);
-            const x=arr.slice(0,-1);
-            const mx=x.reduce((a,b)=>a+b,0)/x.length;
-            const my=y.reduce((a,b)=>a+b,0)/y.length;
-            const cov=x.reduce((a,v,i)=>a+(v-mx)*(y[i]-my),0);
-            const varx=x.reduce((a,v)=>a+(v-mx)**2,0);
-            const beta=varx<1e-12?0:cov/varx;
-            return beta<0?Math.log(2)/Math.abs(beta):NaN;
-          },
-          evalSignal: (sig, horizon=5, tc=0.001) => {
-            const fwd = ctxData.fwdReturns;
-            const equity=[0]; let pnl=0;
-            for(let i=0;i<Math.min(sig.length,fwd.length);i++){
-              pnl+=sig[i]*fwd[i]-Math.abs(sig[i])*tc; equity.push(pnl);
-            }
-            const rets=equity.slice(1).map((v,i)=>v-equity[i]);
-            const mu=rets.reduce((a,b)=>a+b,0)/rets.length;
-            const sigma=Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0)/rets.length);
-            const sharpe=sigma<1e-9?0:mu/sigma*Math.sqrt(252);
-            const ic=ctx.ic(sig,horizon);
-            const maxDD=equity.reduce(({peak,dd},v)=>({peak:Math.max(peak,v),dd:Math.min(dd,v-Math.max(peak,v))}),{peak:0,dd:0}).dd;
-            return {sharpe:+sharpe.toFixed(3),ic:+ic.toFixed(3),maxDD:+maxDD.toFixed(4),equity};
-          },
-          plot: (series, opts={}) => { _plots.push({series,opts}); },
-          log: (...args) => { _logs.push(args.join(' ')); },
+          prices:    ()      => [...prices],
+          returns:   ()      => [...returns],
+          ohlcv:     (n=50)  => ctxData.ohlcv,
+          ticks:     (n=50)  => ctxData.ticks.slice(-n),
+          features:  ()      => ctxData.features,
+          regime:    ()      => ctxData.regime,
+          // Computed series — fully dynamic, any n
+          sma:       (n=20)  => _FE.sma(prices, n),
+          ema:       (n=20)  => _FE.ema(prices, n),
+          rsi:       (n=14)  => _FE.rsi(prices, n),
+          zscore:    (n=20)  => _FE.zscore(prices, n),
+          bollinger: (n=20, k=2) => _FE.bollinger(prices, n, k),
+          momentum:  (n=10)  => _FE.momentum(prices, n),
+          ofiSeries: (n=20)  => ctxData.ofi,
+          hurst:     (n=80)  => _FE.hurst(prices.slice(-Math.min(n, prices.length))),
+          halfLife:  (ser)   => _FE.halfLife(ser || prices.slice(-60)),
+          ic:        (sig, h=5) => _ic(sig, h),
+          rollingIC: (sig, h=5, w=30) => _FE.rollingIC(sig, prices, h, w),
+          evalSignal: _evalSignal,
+          // Output
+          plot:    (series, opts={}) => { _plots.push({type:'line', series, opts}); },
+          scatter: (x, y, opts={})   => { _plots.push({type:'scatter', x, y, opts}); },
+          heatmap: (matrix, labels)  => { _plots.push({type:'heatmap', matrix, labels}); },
+          log: (...args) => { _logs.push(args.map(a=>typeof a==='object'?JSON.stringify(a,null,2):String(a)).join(' ')); },
         };
         try {
           const fn = new Function('ctx', code);
@@ -704,7 +727,13 @@ function initCharts() {
         { label:'SMA20', data:sma20, borderColor:COLORS.signal, borderWidth:1, pointRadius:0, fill:false, tension:0.2, borderDash:[4,2] },
       ]
     },
-    options: { ...chartDefaults }
+    options: {
+      ...chartDefaults,
+      scales: {
+        ...chartDefaults.scales,
+        y2: { display: false, position: 'right', grid: { drawOnChartArea: false } }
+      }
+    }
   });
 
   // Equity — flat until backtest runs
@@ -1035,16 +1064,23 @@ async function runStrategy() {
     if (result.ok) {
       result.logs.forEach(l => consoleLog(l));
       if (result.plots) {
-        result.plots.forEach(p => plotUserSeries(p.series, p.opts));
+        result.plots.forEach(p => {
+          if (p.type === 'scatter') plotScatter(p.x, p.y, p.opts);
+          else if (p.type === 'heatmap') plotHeatmap(p.matrix, p.labels);
+          else plotUserSeries(p.series, p.opts);
+        });
       }
       if (result.result && result.result.equity) {
         updateEquityChart(result.result.equity);
         const s = result.result;
-        const el = document.getElementById('score-display');
-        el.style.display = '';
-        el.textContent = `Sharpe ${s.sharpe} · IC ${s.ic}`;
-        el.style.background = s.sharpe > 0.5 ? 'rgba(63,185,80,.15)' : s.sharpe > 0 ? 'rgba(227,179,65,.15)' : 'rgba(248,81,73,.15)';
-        el.style.color = s.sharpe > 0.5 ? 'var(--green)' : s.sharpe > 0 ? 'var(--yellow)' : 'var(--red)';
+        ['score-display','score-display-inline'].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.style.display = '';
+          el.textContent = `Sharpe ${s.sharpe} · IC ${s.ic}`;
+          el.style.background = s.sharpe > 0.5 ? 'rgba(63,185,80,.15)' : s.sharpe > 0 ? 'rgba(227,179,65,.15)' : 'rgba(248,81,73,.15)';
+          el.style.color = s.sharpe > 0.5 ? 'var(--green)' : s.sharpe > 0 ? 'var(--yellow)' : 'var(--red)';
+        });
       }
     } else {
       consoleLog('❌ ' + result.error);
@@ -1057,7 +1093,7 @@ async function runStrategy() {
 }
 
 async function runBacktest() {
-  consoleLog('Running backtest (Monte Carlo 20 seeds)...');
+  consoleLog('⏱ Backtest starting — 20 Monte Carlo seeds...');
   const code = monacoEditor?.getValue() || CODE_SNIPPETS.strategy;
   const results = [];
   const seedBase = Date.now();
@@ -1081,9 +1117,19 @@ async function runBacktest() {
   }
 }
 
+const _consoleLogs = [];
 function consoleLog(msg) {
-  document.getElementById('console-out').textContent = msg;
+  _consoleLogs.push(msg);
+  if (_consoleLogs.length > 8) _consoleLogs.shift();
+  const el = document.getElementById('console-out');
+  el.textContent = _consoleLogs.join('\n');
+  el.scrollTop = el.scrollHeight;
 }
+function clearConsole() {
+  _consoleLogs.length = 0;
+  document.getElementById('console-out').textContent = '▶ Console cleared.';
+}
+window.clearConsole = clearConsole;
 
 // ═══════════════════════════════════════════════════
 //  TEACHING MODULES
@@ -1273,13 +1319,8 @@ function setScenario(s) {
   market = new MarketSim(s);
   initCharts();
   consoleLog(`Market: ${s} — ${market.prices.length} bars generated`);
-  document.querySelectorAll('.sidebar-btn').forEach(b => {
-    if (b.textContent.trim().includes(
-      {trend:'Trending',mean_rev:'Mean-Rev',volatile:'Volatile',regime:'Regime',multi:'Multi'}[s]||'')) {
-      b.classList.add('active');
-    } else if (['Trending','Mean-Rev','Volatile','Regime-Switch','Multi-Asset'].some(n=>b.textContent.includes(n))) {
-      b.classList.remove('active');
-    }
+  document.querySelectorAll('[data-scenario]').forEach(b => {
+    b.classList.toggle('active', b.dataset.scenario === s);
   });
 }
 
@@ -1294,9 +1335,17 @@ function setEditorTab(tab) {
 }
 
 function switchMode(m) {
-  // placeholder for tab switching
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   event.currentTarget.classList.add('active');
+  if (m === 'explorer') {
+    consoleLog('📊 Data Explorer: Use explore.js tab or load a Signal snippet from the sidebar to explore features.');
+    consoleLog('   Try: ctx.features() to see all computed features, ctx.scatter() to plot correlations.');
+    document.querySelectorAll('.editor-tab').forEach(t => { if (t.textContent.includes('explore')) t.click(); });
+  } else if (m === 'composer') {
+    consoleLog('🧩 Signal Composer: Load the Composite snippet from the sidebar to combine multiple signals.');
+    consoleLog('   IC-weighted combination: momentum + mean-reversion + OFI.');
+    document.querySelectorAll('.editor-tab').forEach(t => { if (t.textContent.includes('notebook')) t.click(); });
+  }
 }
 
 let tick = 0;
@@ -1322,24 +1371,47 @@ function toggleTheme() {
   const isLight = r.getAttribute('data-theme') === 'light';
   r.setAttribute('data-theme', isLight ? 'dark' : 'light');
   if (monacoEditor) monaco.editor.setTheme(isLight ? 'vs-dark' : 'vs');
-  localStorage.setItem('imc-theme', isLight ? 'dark' : 'light');
+  localStorage.setItem('lexie-theme', isLight ? 'dark' : 'light');
+}
+
+// ═══════════════════════════════════════════════════
+//  MONACO FALLBACK — plain textarea if CDN fails
+// ═══════════════════════════════════════════════════
+function installFallbackEditor() {
+  const container = document.getElementById('monaco-container');
+  container.style.padding = '0';
+  const ta = document.createElement('textarea');
+  ta.id = 'fallback-editor';
+  ta.style.cssText = 'width:100%;height:100%;background:var(--bg);color:var(--text);font-family:"DM Mono",monospace;font-size:12px;border:none;outline:none;resize:none;padding:10px;box-sizing:border-box;';
+  ta.value = CODE_SNIPPETS.strategy;
+  container.appendChild(ta);
+  monacoEditor = {
+    getValue: () => ta.value,
+    setValue: (v) => { ta.value = v; },
+  };
+  consoleLog('⚠ Monaco editor unavailable — using plain text editor. Run still works.');
 }
 
 // ═══════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('imc-theme') || 'dark';
+  const saved = localStorage.getItem('lexie-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
   
   market = new MarketSim('trend');
   initCharts();
   renderLesson();
   
-  // Load Monaco
+  // Load Monaco with fallback textarea
+  const monacoTimeout = setTimeout(() => {
+    if (!monacoEditor) installFallbackEditor();
+  }, 6000);
+
   const script = document.createElement('script');
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js';
-  script.onload = initMonaco;
+  script.onload = () => { clearTimeout(monacoTimeout); initMonaco(); };
+  script.onerror = () => { clearTimeout(monacoTimeout); installFallbackEditor(); };
   document.head.appendChild(script);
   
   // Live market ticks every 800ms
