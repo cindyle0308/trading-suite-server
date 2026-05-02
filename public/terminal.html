@@ -78,6 +78,72 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .chart-tooltip-aim{color:var(--green);margin-top:6px;font-size:10px;}
 .chart-tooltip-bad{color:var(--red);font-size:10px;}
 
+/* Strategy library */
+.lib-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.lib-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:520px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;}
+.lib-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.lib-title{font-size:14px;font-weight:800;color:var(--bright);}
+.lib-save-row{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.lib-save-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--bright);font-family:inherit;}
+.lib-save-input:focus{outline:none;border-color:var(--blue);}
+.lib-save-btn{background:var(--blue);color:#000;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;}
+.lib-list{overflow-y:auto;flex:1;padding:8px;}
+.lib-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:background .12s;}
+.lib-item:hover{background:var(--bg3);}
+.lib-item-info{flex:1;min-width:0;}
+.lib-item-name{font-size:11px;font-weight:700;color:var(--bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lib-item-meta{font-size:9px;color:var(--dim);margin-top:1px;}
+.lib-item-sharpe{font-size:11px;font-weight:700;min-width:40px;text-align:right;}
+.lib-item-del{background:none;border:none;color:var(--dim);cursor:pointer;padding:2px 5px;border-radius:4px;font-size:11px;}
+.lib-item-del:hover{color:var(--red);background:rgba(248,81,73,.1);}
+.lib-empty{padding:24px;text-align:center;color:var(--dim);font-size:11px;}
+
+/* Missions */
+.mission-item{display:flex;align-items:flex-start;gap:8px;padding:7px 12px;border-radius:6px;cursor:pointer;transition:background .12s;}
+.mission-item:hover{background:var(--bg3);}
+.mission-icon{width:22px;height:22px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;}
+.mission-icon.locked{color:var(--dim);}
+.mission-icon.done{color:var(--green);background:rgba(63,185,80,.15);}
+.mission-icon.active{color:var(--yellow);}
+.mission-body{flex:1;}
+.mission-name{font-size:11px;font-weight:700;color:var(--text);}
+.mission-desc{font-size:9px;color:var(--dim);line-height:1.4;margin-top:1px;}
+.mission-progress{font-size:8px;color:var(--yellow);margin-top:2px;font-weight:600;}
+
+/* IC horizon table */
+.ic-horizon-table{width:100%;border-collapse:collapse;font-size:10px;margin-top:6px;}
+.ic-horizon-table th{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);padding:3px 6px;text-align:center;}
+.ic-horizon-table td{padding:4px 6px;text-align:center;border-top:1px solid var(--border);}
+.ic-pos{color:var(--green);font-weight:700;}
+.ic-neg{color:var(--red);font-weight:700;}
+.ic-zero{color:var(--dim);}
+
+/* Scenario comparison */
+.scenario-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:8px;}
+.scenario-table th{font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);padding:4px 8px;text-align:left;border-bottom:1px solid var(--border);}
+.scenario-table td{padding:5px 8px;border-bottom:1px solid var(--border);}
+.scenario-table tr:hover td{background:var(--bg3);}
+
+/* Manual trading panel */
+.manual-panel{flex:1;display:none;flex-direction:column;overflow:hidden;background:var(--bg);}
+.manual-chart-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
+.manual-chart-wrap canvas{position:absolute;inset:0;width:100%;height:100%;}
+.manual-controls{height:56px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;}
+.manual-buy-btn{background:var(--green);color:#000;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:800;cursor:pointer;}
+.manual-sell-btn{background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:800;cursor:pointer;}
+.manual-flat-btn{background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;}
+.manual-stat{display:flex;flex-direction:column;align-items:center;margin-left:10px;}
+.manual-stat-val{font-size:16px;font-weight:800;font-family:"DM Mono",monospace;}
+.manual-stat-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);}
+.manual-hint{font-size:10px;color:var(--dim);margin-left:auto;}
+
+/* Replay */
+.replay-btn{background:rgba(188,140,255,.12);border:1px solid rgba(188,140,255,.25);color:var(--purple);border-radius:5px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;margin-left:4px;}
+.replay-btn:hover{background:rgba(188,140,255,.22);}
+
+/* Daily challenge badge */
+.daily-badge{display:inline-block;font-size:8px;font-weight:800;padding:1px 5px;border-radius:3px;background:rgba(227,179,65,.15);color:var(--yellow);margin-left:4px;vertical-align:middle;}
+
 /* Pipeline strip */
 .pipeline-strip{display:flex;align-items:center;padding:0 14px;height:28px;background:var(--bg2);border-bottom:1px solid var(--border);gap:0;flex-shrink:0;overflow:hidden;}
 .pipe-step{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:600;color:var(--dim);padding:0 8px;cursor:pointer;transition:color .15s;white-space:nowrap;}
@@ -294,6 +360,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
   <span class="logo">LeXie <span>Research Terminal</span></span>
   <div class="nav-sep"></div>
   <button class="nav-tab active" onclick="switchMode('terminal')">⌨ Terminal</button>
+  <button class="nav-tab" onclick="switchMode('manual')">🖱 Manual Trade</button>
   <button class="nav-tab" onclick="switchMode('explorer')">🔬 Data Explorer</button>
   <button class="nav-tab" onclick="switchMode('composer')">🧩 Signal Composer</button>
   <button class="nav-tab" onclick="window.location.href='index.html'">⌂ Hub</button>
@@ -350,6 +417,45 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="sidebar-btn" onclick="setLesson(3)"><span class="icon">🌀</span> Regime Detection</button>
       <button class="sidebar-btn" onclick="setLesson(4)"><span class="icon">🎯</span> Alpha Decay</button>
       <button class="sidebar-btn" onclick="setLesson(5)"><span class="icon">⚠️</span> False Discovery</button>
+    </div>
+    <div class="sidebar-section" id="missions-section">
+      <div class="sidebar-label">Missions <span style="font-size:8px;color:var(--dim);font-weight:400;text-transform:none;letter-spacing:0">— complete to unlock rounds</span></div>
+      <div class="mission-item" id="mission-1-item" onclick="showMissionDetail(1)">
+        <div class="mission-icon active" id="mission-1-icon">1</div>
+        <div class="mission-body">
+          <div class="mission-name">First Signal</div>
+          <div class="mission-desc">Write any signal and achieve IC &gt; 0 on any market</div>
+          <div class="mission-progress" id="mission-1-prog">Not started</div>
+        </div>
+      </div>
+      <div class="mission-item" id="mission-2-item" onclick="showMissionDetail(2)">
+        <div class="mission-icon locked" id="mission-2-icon">2</div>
+        <div class="mission-body">
+          <div class="mission-name">Mean Rev Master</div>
+          <div class="mission-desc">Achieve Sharpe &ge; 0.5 on the Mean-Reverting scenario</div>
+          <div class="mission-progress" id="mission-2-prog">Complete Mission 1 first</div>
+        </div>
+      </div>
+      <div class="mission-item" id="mission-3-item" onclick="showMissionDetail(3)">
+        <div class="mission-icon locked" id="mission-3-icon">3</div>
+        <div class="mission-body">
+          <div class="mission-name">Overfit Slayer</div>
+          <div class="mission-desc">Pass Walk-Forward validation (OOS Sharpe &gt; 0)</div>
+          <div class="mission-progress" id="mission-3-prog">Complete Mission 2 first</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">My Strategies</div>
+      <button class="sidebar-btn" onclick="openStrategyLibrary()"><span class="icon">💾</span> Strategy Library</button>
+      <button class="sidebar-btn" onclick="runScenarioComparison()"><span class="icon">🔀</span> Test All Scenarios</button>
+      <button class="sidebar-btn" onclick="replayLastRun()" id="replay-btn" style="display:none"><span class="icon">▶️</span> Replay Last Run</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Daily Challenge <span class="daily-badge">TODAY</span></div>
+      <div style="font-size:9px;color:var(--dim);padding:0 12px 4px;line-height:1.4;" id="daily-desc">A fresh market scenario every day. Beat the daily leaderboard.</div>
+      <button class="sidebar-btn" onclick="startDailyChallenge()" style="color:var(--yellow);font-weight:700;"><span class="icon">⭐</span> Start Daily Challenge</button>
+      <div style="font-size:9px;color:var(--dim);padding:0 12px 4px;" id="daily-timer"></div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Competition Rounds</div>
@@ -546,6 +652,41 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
   </div>
 
 </div>
+
+<!-- MANUAL TRADING PANEL -->
+  <div class="manual-panel" id="manual-panel" style="display:none;">
+    <div style="padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <span style="font-size:12px;font-weight:800;color:var(--bright);">🖱 Manual Trading</span>
+      <span style="font-size:10px;color:var(--dim);">Trade the live market — keyboard: B=buy, S=sell, F=flat</span>
+      <button onclick="resetManualTrading()" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:5px;color:var(--dim);font-size:10px;padding:3px 9px;cursor:pointer;">↺ Reset</button>
+      <button onclick="switchMode('terminal')" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--blue);font-size:10px;padding:3px 9px;cursor:pointer;">→ Terminal</button>
+    </div>
+    <div class="manual-chart-wrap">
+      <canvas id="manual-chart"></canvas>
+    </div>
+    <div class="manual-controls">
+      <button class="manual-buy-btn" onclick="manualTrade(1)" title="Buy (B key)">▲ BUY</button>
+      <button class="manual-flat-btn" onclick="manualTrade(0)" title="Flat (F key)">■ FLAT</button>
+      <button class="manual-sell-btn" onclick="manualTrade(-1)" title="Sell (S key)">▼ SELL</button>
+      <div class="manual-stat" style="margin-left:20px;">
+        <div class="manual-stat-val" id="manual-pnl" style="color:var(--green);">+0.00</div>
+        <div class="manual-stat-lbl">P&amp;L (bps)</div>
+      </div>
+      <div class="manual-stat">
+        <div class="manual-stat-val" id="manual-pos" style="color:var(--dim);">FLAT</div>
+        <div class="manual-stat-lbl">Position</div>
+      </div>
+      <div class="manual-stat">
+        <div class="manual-stat-val" id="manual-price" style="color:var(--blue);">—</div>
+        <div class="manual-stat-lbl">Price</div>
+      </div>
+      <div class="manual-stat">
+        <div class="manual-stat-val" id="manual-trades" style="color:var(--dim);">0</div>
+        <div class="manual-stat-lbl">Trades</div>
+      </div>
+      <div class="manual-hint">Spot the regime first — then trade. B/S/F keys work too.</div>
+    </div>
+  </div>
 
 <!-- Firebase -->
 <script type="module">
@@ -939,14 +1080,32 @@ function runInWorker(code, ctxData) {
           sig = sig.map(v => Math.max(-maxPos, Math.min(maxPos, v || 0)));
           const fwd = prices.map((_,i)=>i+horizon<prices.length?(prices[i+horizon]-prices[i])/prices[i]:0);
           const equity=[0]; let pnl=0;
-          for(let i=0;i<Math.min(sig.length,fwd.length);i++){pnl+=sig[i]*fwd[i]-Math.abs(sig[i])*tc;equity.push(pnl);}
+          const barPnl=[];
+          for(let i=0;i<Math.min(sig.length,fwd.length);i++){
+            const p=sig[i]*fwd[i]-Math.abs(sig[i])*tc; pnl+=p; equity.push(pnl); barPnl.push(p);
+          }
           const rets=equity.slice(1).map((v,i)=>v-equity[i]);
           const mu=rets.reduce((a,b)=>a+b,0)/rets.length;
           const sigma=Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0)/rets.length);
           const sharpe=sigma<1e-9?0:mu/sigma*Math.sqrt(252);
           const ic=_ic(sig,horizon);
           const maxDD=equity.reduce(({peak,dd},v)=>({peak:Math.max(peak,v),dd:Math.min(dd,v-Math.max(peak,v))}),{peak:0,dd:0}).dd;
-          return {sharpe:+sharpe.toFixed(3),ic:+ic.toFixed(3),maxDD:+maxDD.toFixed(4),equity};
+          // IC at multiple horizons
+          const icH={};
+          [1,3,5,10,20].forEach(h=>{
+            const f2=prices.map((_,i)=>i+h<prices.length?(prices[i+h]-prices[i])/prices[i]:0);
+            icH[h]=+_FE.ic(sig,f2).toFixed(3);
+          });
+          // Regime P&L attribution using rolling Hurst
+          const regimePnl={trend:0,mean_rev:0,random:0};
+          const regimeCnt={trend:0,mean_rev:0,random:0};
+          for(let i=40;i<barPnl.length;i++){
+            const h=_FE.hurst(prices.slice(Math.max(0,i-40),i+1));
+            const reg=h>0.55?'trend':h<0.45?'mean_rev':'random';
+            regimePnl[reg]+=barPnl[i]; regimeCnt[reg]++;
+          }
+          Object.keys(regimePnl).forEach(k=>{regimePnl[k]=+regimePnl[k].toFixed(4);});
+          return {sharpe:+sharpe.toFixed(3),ic:+ic.toFixed(3),maxDD:+maxDD.toFixed(4),equity,icHorizons:icH,regimePnl,regimeCnt,signal:[...sig]};
         };
 
         const ctx = {
@@ -1664,9 +1823,17 @@ async function runStrategy() {
           el.style.background = s.sharpe > 0.5 ? 'rgba(63,185,80,.15)' : s.sharpe > 0 ? 'rgba(227,179,65,.15)' : 'rgba(248,81,73,.15)';
           el.style.color = s.sharpe > 0.5 ? 'var(--green)' : s.sharpe > 0 ? 'var(--yellow)' : 'var(--red)';
         });
-        // Show rich result panel
+        // Cache result for replay + library
+        _lastResult = s;
+        _lastEquity = s.equity ? [...s.equity] : null;
+        // Show replay button
+        const replayBtn = document.getElementById('replay-btn');
+        if (replayBtn && _lastEquity) replayBtn.style.display = '';
+        // Check missions
+        checkMissions(s, currentScenario, null);
+        // Show rich result panel (with IC horizons and regime)
         showResultTab_Result(s, currentScenario);
-        // Advance pipeline to step 3 (ran) or 4 (if decent)
+        // Advance pipeline
         setPipelineStep(s.sharpe >= 0.3 ? 4 : 3);
       }
     } else {
@@ -2419,6 +2586,7 @@ async function runWalkForward() {
         <div class="interp-body">${verdict.interp}</div>
         <div class="interp-next">${verdict.next}</div>
       </div>`;
+    checkMissions(_lastResult, currentScenario, {oosSharpe});
     showResultTab('result');
     setPipelineStep(oosSharpe > 0 ? 5 : 3);
 
@@ -2637,6 +2805,11 @@ function exportComposerCode() {
   if (!localStorage.getItem('lexie-onboarded')) {
     setTimeout(showOnboarding, 800);
   }
+  // Init missions UI
+  updateMissionUI();
+  // Init daily challenge timer
+  updateDailyTimer();
+  setInterval(updateDailyTimer, 60000);
   consoleLog('✅ Composer signal exported to editor. Press Run to test.');
 }
 
@@ -2655,6 +2828,437 @@ window.runComposerSignal = runComposerSignal;
 // ═══════════════════════════════════════════════════
 //  LEADERBOARD
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+//  STRATEGY LIBRARY (save / load)
+// ═══════════════════════════════════════════════════
+const LIB_KEY = 'lexie-strategies';
+let _lastResult = null; // cache last run result
+
+function saveStrategyToLib(name) {
+  const code = monacoEditor?.getValue() || '';
+  if (!code.trim()) return;
+  const lib = JSON.parse(localStorage.getItem(LIB_KEY) || '[]');
+  const entry = { name, code, sharpe: _lastResult?.sharpe ?? null, ic: _lastResult?.ic ?? null, scenario: currentScenario, date: new Date().toLocaleDateString() };
+  lib.unshift(entry);
+  if (lib.length > 30) lib.pop();
+  localStorage.setItem(LIB_KEY, JSON.stringify(lib));
+  consoleLog('💾 Saved strategy: "' + name + '"');
+}
+
+function openStrategyLibrary() {
+  if (document.getElementById('lib-modal')) return;
+  const lib = JSON.parse(localStorage.getItem(LIB_KEY) || '[]');
+  const modal = document.createElement('div');
+  modal.className = 'lib-modal'; modal.id = 'lib-modal';
+  const items = lib.length ? lib.map((s,i) => `
+    <div class="lib-item" onclick="loadLibStrategy(${i})">
+      <div class="lib-item-info">
+        <div class="lib-item-name">${escHtml(s.name)}</div>
+        <div class="lib-item-meta">${s.scenario || ''} · ${s.date || ''}</div>
+      </div>
+      <div class="lib-item-sharpe" style="color:${s.sharpe>=0.5?'var(--green)':s.sharpe>=0?'var(--yellow)':'var(--red)'}">${s.sharpe != null ? s.sharpe : '—'}</div>
+      <button class="lib-item-del" onclick="event.stopPropagation();deleteLibStrategy(${i})">✕</button>
+    </div>`).join('') : '<div class="lib-empty">No saved strategies yet.<br>Run a strategy and use Save below.</div>';
+  modal.innerHTML = `<div class="lib-box">
+    <div class="lib-header">
+      <span class="lib-title">💾 Strategy Library</span>
+      <button onclick="document.getElementById('lib-modal').remove()" style="margin-left:auto;background:none;border:none;color:var(--dim);font-size:16px;cursor:pointer;">✕</button>
+    </div>
+    <div class="lib-save-row">
+      <input class="lib-save-input" id="lib-save-name" placeholder="Strategy name…" value="Strategy ${lib.length+1}">
+      <button class="lib-save-btn" onclick="saveFromLibModal()">💾 Save current</button>
+    </div>
+    <div class="lib-list" id="lib-list">${items}</div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function saveFromLibModal() {
+  const name = document.getElementById('lib-save-name')?.value.trim() || 'Strategy';
+  saveStrategyToLib(name);
+  document.getElementById('lib-modal')?.remove();
+  openStrategyLibrary();
+}
+
+function loadLibStrategy(i) {
+  const lib = JSON.parse(localStorage.getItem(LIB_KEY) || '[]');
+  if (!lib[i]) return;
+  if (monacoEditor) monacoEditor.setValue(lib[i].code);
+  if (lib[i].scenario) setScenario(lib[i].scenario);
+  document.getElementById('lib-modal')?.remove();
+  consoleLog('📂 Loaded: "' + lib[i].name + '"');
+}
+
+function deleteLibStrategy(i) {
+  const lib = JSON.parse(localStorage.getItem(LIB_KEY) || '[]');
+  lib.splice(i,1);
+  localStorage.setItem(LIB_KEY, JSON.stringify(lib));
+  document.getElementById('lib-modal')?.remove();
+  openStrategyLibrary();
+}
+
+window.openStrategyLibrary = openStrategyLibrary;
+window.saveFromLibModal = saveFromLibModal;
+window.loadLibStrategy = loadLibStrategy;
+window.deleteLibStrategy = deleteLibStrategy;
+
+// ═══════════════════════════════════════════════════
+//  MISSIONS SYSTEM
+// ═══════════════════════════════════════════════════
+const MISSIONS_KEY = 'lexie-missions';
+
+function getMissionState() {
+  return JSON.parse(localStorage.getItem(MISSIONS_KEY) || '{}');
+}
+function setMissionDone(id) {
+  const s = getMissionState();
+  s['m'+id] = true;
+  localStorage.setItem(MISSIONS_KEY, JSON.stringify(s));
+  updateMissionUI();
+  consoleLog('🎖 Mission ' + id + ' complete! ' + ['','First Signal','Mean Rev Master','Overfit Slayer'][id]);
+}
+function updateMissionUI() {
+  const s = getMissionState();
+  const d1=s.m1, d2=s.m2, d3=s.m3;
+  const icons = [null, document.getElementById('mission-1-icon'), document.getElementById('mission-2-icon'), document.getElementById('mission-3-icon')];
+  const progs = [null, document.getElementById('mission-1-prog'), document.getElementById('mission-2-prog'), document.getElementById('mission-3-prog')];
+  if (icons[1]) { icons[1].className = 'mission-icon ' + (d1?'done':'active'); icons[1].textContent = d1?'✓':'1'; }
+  if (icons[2]) { icons[2].className = 'mission-icon ' + (d2?'done':d1?'active':'locked'); icons[2].textContent = d2?'✓':'2'; }
+  if (icons[3]) { icons[3].className = 'mission-icon ' + (d3?'done':d2?'active':'locked'); icons[3].textContent = d3?'✓':'3'; }
+  if (progs[1]) progs[1].textContent = d1 ? '✓ Complete' : 'Run any signal with IC > 0';
+  if (progs[2]) progs[2].textContent = d2 ? '✓ Complete' : d1 ? 'Switch to Mean-Rev, get Sharpe >= 0.5' : 'Complete Mission 1 first';
+  if (progs[3]) progs[3].textContent = d3 ? '✓ Complete' : d2 ? 'Run Walk-Fwd, achieve OOS Sharpe > 0' : 'Complete Mission 2 first';
+}
+function checkMissions(result, scenario, oosResult) {
+  const s = getMissionState();
+  if (!s.m1 && result?.ic > 0) setMissionDone(1);
+  if (!s.m2 && s.m1 && result?.sharpe >= 0.5 && scenario === 'mean_rev') setMissionDone(2);
+  if (!s.m3 && s.m2 && oosResult?.oosSharpe > 0) setMissionDone(3);
+}
+function showMissionDetail(id) {
+  const s = getMissionState();
+  const unlocked = id===1 || (id===2 && s.m1) || (id===3 && s.m2);
+  const descs = {
+    1:{t:'First Signal',d:'Write any strategy that calls ctx.evalSignal() and achieves IC > 0. IC > 0 means your signal has at least some predictive power — it is pointing in the right direction.',hint:'Load the Momentum snippet from the sidebar. Press Run. If IC > 0, mission complete!'},
+    2:{t:'Mean Rev Master',d:'Switch to the Mean-Reverting scenario (sidebar left), then write a signal that achieves Sharpe >= 0.5. Mean-reverting markets reward contrarian signals.',hint:'Load the Mean Reversion snippet. The Z-score signal (buy when Z < -1.5, sell when Z > 1.5) is highly effective in this scenario.'},
+    3:{t:'Overfit Slayer',d:'Run Walk-Forward validation and achieve OOS Sharpe > 0. This proves your signal generalises to data it has never seen — a key test before trading real capital.',hint:'Write a simple signal (not too many parameters), then click Walk-Fwd. Simple signals generalise better.'},
+  };
+  const info = descs[id];
+  const el = document.createElement('div');
+  el.className = 'briefing-overlay';
+  el.innerHTML = `<div class="briefing-box" style="max-width:420px">
+    <div class="briefing-badge" style="background:rgba(88,166,255,.1);color:var(--blue)">Mission ${id}</div>
+    <div class="briefing-title">${info.t}</div>
+    <div class="briefing-section"><div class="briefing-section-label">Objective</div><div class="briefing-section-body">${info.d}</div></div>
+    ${unlocked ? '<div class="briefing-hint">💡 <strong>Hint:</strong> ' + info.hint + '</div>' : '<div class="briefing-hint" style="border-color:rgba(248,81,73,.3);color:var(--red);background:rgba(248,81,73,.05)">🔒 Complete the previous mission first to unlock this one.</div>'}
+    <button class="briefing-start-btn" ${unlocked?'':'disabled style="opacity:.4"'} onclick="this.closest('.briefing-overlay').remove()${unlocked?';setPipelineStep(2)':''}">
+      ${unlocked ? 'Start Mission ' + id : 'Locked'}
+    </button>
+    <span class="briefing-skip" onclick="this.closest('.briefing-overlay').remove()">close</span>
+  </div>`;
+  document.body.appendChild(el);
+}
+window.showMissionDetail = showMissionDetail;
+window.updateMissionUI = updateMissionUI;
+window.checkMissions = checkMissions;
+
+// ═══════════════════════════════════════════════════
+//  SCENARIO COMPARISON
+// ═══════════════════════════════════════════════════
+async function runScenarioComparison() {
+  const code = monacoEditor?.getValue();
+  if (!code?.trim()) { consoleLog('❌ Write a strategy first.'); return; }
+  const scenarios = ['trend','mean_rev','volatile','regime','multi'];
+  const names     = {trend:'Trending',mean_rev:'Mean-Rev',volatile:'Volatile',regime:'Regime-Switch',multi:'Multi-Asset'};
+  consoleLog('🔀 Testing across all 5 scenarios...');
+  const savedScenario = currentScenario;
+  const results = [];
+  for (const sc of scenarios) {
+    rng = mulberry32(daySeed + sc.length * 31337);
+    market = new MarketSim(sc);
+    const r = await runInWorker(code, {});
+    results.push({ sc, name: names[sc], sharpe: r.ok ? (r.result?.sharpe??null) : null, ic: r.ok ? (r.result?.ic??null) : null, error: r.ok ? null : r.error });
+  }
+  // Restore original market
+  rng = mulberry32(daySeed);
+  market = new MarketSim(savedScenario);
+  initCharts();
+  currentScenario = savedScenario;
+
+  // Show comparison table in modal
+  const rows = results.map(r => {
+    const sc = r.sharpe; const ok = sc != null;
+    const color = ok ? (sc>=0.5?'var(--green)':sc>=0?'var(--yellow)':'var(--red)') : 'var(--dim)';
+    const grade = ok ? (sc>=1?'Excellent':sc>=0.5?'Good':sc>=0?'Weak':'Negative') : 'Error';
+    return `<tr>
+      <td style="font-weight:700">${r.name}</td>
+      <td style="color:${color};font-weight:800;text-align:right">${ok?sc:'—'}</td>
+      <td style="color:${ok&&r.ic>=0.03?'var(--green)':'var(--dim)'};text-align:right">${ok&&r.ic!=null?r.ic:'—'}</td>
+      <td style="color:${color}">${grade}</td>
+    </tr>`;
+  }).join('');
+  const avgSharpe = results.filter(r=>r.sharpe!=null).reduce((a,r)=>a+r.sharpe,0) / results.filter(r=>r.sharpe!=null).length;
+  const works = results.filter(r=>r.sharpe>=0.5).map(r=>r.name).join(', ');
+
+  const modal = document.createElement('div');
+  modal.className = 'lib-modal';
+  modal.innerHTML = `<div class="lib-box" style="width:460px">
+    <div class="lib-header">
+      <span class="lib-title">🔀 Scenario Comparison</span>
+      <button onclick="this.closest('.lib-modal').remove()" style="margin-left:auto;background:none;border:none;color:var(--dim);font-size:16px;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:14px">
+      <table class="scenario-table">
+        <thead><tr><th>Scenario</th><th style="text-align:right">Sharpe</th><th style="text-align:right">IC</th><th>Verdict</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:7px;font-size:10.5px;line-height:1.6;">
+        <strong>Average Sharpe:</strong> ${avgSharpe.toFixed(3)}<br>
+        ${works ? '<strong style="color:var(--green)">Works best in:</strong> ' + works : '<span style="color:var(--yellow)">Signal does not exceed Sharpe 0.5 in any scenario — consider a more adaptive approach.</span>'}
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target===modal) modal.remove(); });
+  consoleLog('📊 Comparison done. Average Sharpe: ' + avgSharpe.toFixed(3));
+}
+window.runScenarioComparison = runScenarioComparison;
+
+// ═══════════════════════════════════════════════════
+//  DAILY CHALLENGE
+// ═══════════════════════════════════════════════════
+const dailySeed2 = Math.floor(Date.now() / 86400000) * 777;
+const DAILY_SCENARIOS = ['trend','mean_rev','volatile','regime','multi'];
+const todayScenario = DAILY_SCENARIOS[Math.floor(Date.now() / 86400000) % 5];
+const DAILY_TARGETS = {trend:0.9, mean_rev:0.7, volatile:0.6, regime:0.8, multi:0.75};
+
+function startDailyChallenge() {
+  const target = DAILY_TARGETS[todayScenario];
+  rng = mulberry32(dailySeed2);
+  market = new MarketSim(todayScenario);
+  initCharts();
+  currentRound = { id:'daily', name:'Daily Challenge', target, maxPos:1.0, tc:0.001, scenario:todayScenario };
+  currentMaxPos = 1.0;
+  const banner = document.getElementById('round-banner');
+  banner.style.display = 'block';
+  banner.style.background = 'rgba(227,179,65,.07)';
+  document.getElementById('rb-name').textContent = '⭐ Daily Challenge';
+  document.getElementById('rb-desc').textContent = 'Scenario: ' + todayScenario + ' · ' + new Date().toLocaleDateString();
+  document.getElementById('rb-target').textContent = 'Target Sharpe >= ' + target;
+  document.getElementById('rb-badge').style.display = 'none';
+  document.getElementById('rb-progress-wrap').style.display = 'none';
+  switchMode('terminal');
+  consoleLog('⭐ Daily Challenge started! Scenario: ' + todayScenario + ' | Target Sharpe >= ' + target);
+  consoleLog('💡 All players compete on the same market today. Submit your best score!');
+  updateDailyTimer();
+}
+
+function updateDailyTimer() {
+  const msUntilNext = 86400000 - (Date.now() % 86400000);
+  const h = Math.floor(msUntilNext/3600000);
+  const m = Math.floor((msUntilNext%3600000)/60000);
+  const el = document.getElementById('daily-timer');
+  if (el) el.textContent = 'Resets in ' + h + 'h ' + m + 'm';
+  const descEl = document.getElementById('daily-desc');
+  if (descEl) descEl.textContent = "Today: " + todayScenario.replace('_','-') + " market | Target Sharpe >= " + DAILY_TARGETS[todayScenario];
+}
+window.startDailyChallenge = startDailyChallenge;
+
+// ═══════════════════════════════════════════════════
+//  STRATEGY REPLAY
+// ═══════════════════════════════════════════════════
+let _lastEquity = null;
+let _replayInterval = null;
+
+function replayLastRun() {
+  if (!_lastEquity || _lastEquity.length < 2) {
+    consoleLog('❌ Run a strategy first to replay.');
+    return;
+  }
+  const chart = charts['chart-equity'];
+  if (!chart) return;
+  if (_replayInterval) { clearInterval(_replayInterval); _replayInterval = null; }
+  const equity = _lastEquity;
+  let i = 0;
+  chart.data.labels = [];
+  chart.data.datasets[0].data = [];
+  chart.update('none');
+  const btn = document.getElementById('replay-btn');
+  if (btn) btn.textContent = '⏹ Stop';
+  _replayInterval = setInterval(() => {
+    if (i >= equity.length) {
+      clearInterval(_replayInterval); _replayInterval = null;
+      if (btn) btn.textContent = '▶️ Replay Last Run';
+      return;
+    }
+    chart.data.labels.push(i);
+    chart.data.datasets[0].data.push(equity[i]);
+    if (i % 5 === 0) chart.update('none');
+    i += 2;
+  }, 30);
+}
+window.replayLastRun = replayLastRun;
+
+// ═══════════════════════════════════════════════════
+//  IC HORIZON TABLE + REGIME ATTRIBUTION — shown in results
+// ═══════════════════════════════════════════════════
+function buildICHorizonHTML(icH) {
+  if (!icH) return '';
+  const horizons = [1,3,5,10,20];
+  const cells = horizons.map(h => {
+    const v = icH[h]; if (v==null) return '<td class="ic-zero">—</td>';
+    const cls = v >= 0.05 ? 'ic-pos' : v >= 0 ? '' : 'ic-neg';
+    const bar = '█'.repeat(Math.round(Math.min(Math.abs(v)*50, 5)));
+    return `<td class="${cls}" title="${h}-bar IC">${v}</td>`;
+  }).join('');
+  const optH = horizons.reduce((best,h) => (Math.abs(icH[h]||0) > Math.abs(icH[best]||0) ? h : best), 1);
+  return `<div class="interpretation-card" style="min-width:200px">
+    <div class="interp-title">IC at Multiple Horizons</div>
+    <table class="ic-horizon-table">
+      <thead><tr><th>Horizon</th>${horizons.map(h=>'<th>'+h+' bar</th>').join('')}</tr></thead>
+      <tbody><tr><th>IC</th>${cells}</tr></tbody>
+    </table>
+    <div style="font-size:9.5px;color:var(--blue);margin-top:5px">
+      Optimal holding period: ~${optH} bar${optH>1?'s':''}
+      ${icH[optH] > 0 ? ' (signal fades after this)' : ' (signal may be inverted)'}
+    </div>
+  </div>`;
+}
+
+function buildRegimeHTML(regimePnl, regimeCnt) {
+  if (!regimePnl) return '';
+  const total = Object.values(regimePnl).reduce((a,v)=>a+v,0) || 1;
+  const rows = Object.entries(regimePnl).map(([reg, pnl]) => {
+    const cnt = regimeCnt?.[reg] || 0;
+    const pct = total ? +((pnl/Math.abs(total))*100).toFixed(0) : 0;
+    const color = pnl > 0 ? 'var(--green)' : pnl < 0 ? 'var(--red)' : 'var(--dim)';
+    const label = {trend:'📈 Trend',mean_rev:'⚖️ Mean-Rev',random:'〰️ Random'}[reg] || reg;
+    return `<div style="display:flex;align-items:center;gap:6px;margin:3px 0;font-size:10px">
+      <span style="width:70px;color:var(--text)">${label}</span>
+      <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden">
+        <div style="width:${Math.min(100,Math.abs(pct))}%;height:100%;background:${color};border-radius:3px"></div>
+      </div>
+      <span style="color:${color};font-weight:700;width:45px;text-align:right">${(pnl*10000).toFixed(0)}bps</span>
+      <span style="color:var(--dim);width:40px;text-align:right">${cnt} bars</span>
+    </div>`;
+  }).join('');
+  return `<div class="interpretation-card" style="min-width:200px">
+    <div class="interp-title">P&amp;L by Regime</div>
+    ${rows}
+    <div style="font-size:9px;color:var(--dim);margin-top:4px">Based on rolling Hurst exponent per bar</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  MANUAL TRADING MODE
+// ═══════════════════════════════════════════════════
+let _manualPos = 0;
+let _manualPnl = 0;
+let _manualTrades = 0;
+let _manualEntry = null;
+let _manualPriceHistory = [];
+let _manualEquity = [0];
+let _manualChart = null;
+const MANUAL_TC = 0.0005;
+
+function initManualTrading() {
+  _manualPos = 0; _manualPnl = 0; _manualTrades = 0;
+  _manualEntry = null; _manualPriceHistory = []; _manualEquity = [0];
+  const canvas = document.getElementById('manual-chart');
+  if (!canvas) return;
+  if (_manualChart) { _manualChart.destroy(); _manualChart = null; }
+  _manualChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: [0],
+      datasets: [
+        { label:'Price', data:[market?.prices?.at(-1)||100], borderColor:'rgba(88,166,255,.8)', borderWidth:1.5, pointRadius:0, yAxisID:'y', fill:false, tension:0 },
+        { label:'Your P&L', data:[0], borderColor:'rgba(63,185,80,.8)', borderWidth:2, pointRadius:0, yAxisID:'y2', fill:false, tension:0 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{ legend:{display:true,labels:{color:textColor(),font:{size:9},boxWidth:8}} },
+      scales:{
+        x:{ display:false },
+        y:{ position:'left', grid:{color:gridColor()}, ticks:{color:textColor(),font:{size:9}} },
+        y2:{ position:'right', grid:{display:false}, ticks:{color:textColor(),font:{size:9}} }
+      }
+    }
+  });
+  updateManualDisplay();
+}
+
+function manualTrade(pos) {
+  if (!market) return;
+  const price = market.prices.at(-1);
+  const prevPos = _manualPos;
+  const delta = pos - prevPos;
+  if (delta !== 0) {
+    const cost = Math.abs(delta) * price * MANUAL_TC;
+    _manualPnl -= cost;
+    _manualTrades++;
+    _manualEntry = price;
+  }
+  _manualPos = pos;
+  updateManualDisplay();
+}
+
+function tickManualTrading(price) {
+  if (!_manualChart) return;
+  _manualPriceHistory.push(price);
+  if (_manualPos !== 0 && _manualPriceHistory.length > 1) {
+    const prev = _manualPriceHistory.at(-2);
+    _manualPnl += _manualPos * (price - prev) / prev;
+  }
+  _manualEquity.push(+_manualPnl.toFixed(6));
+  const chart = _manualChart;
+  const maxBars = 200;
+  const labels = chart.data.labels;
+  const priceData = chart.data.datasets[0].data;
+  const pnlData   = chart.data.datasets[1].data;
+  labels.push(labels.length);
+  priceData.push(price);
+  pnlData.push(+(_manualPnl * 10000).toFixed(2));
+  if (labels.length > maxBars) { labels.shift(); priceData.shift(); pnlData.shift(); }
+  chart.update('none');
+  updateManualDisplay();
+}
+
+function updateManualDisplay() {
+  const price = market?.prices?.at(-1);
+  const pnlBps = +(_manualPnl * 10000).toFixed(2);
+  const posEl = document.getElementById('manual-pos');
+  const pnlEl = document.getElementById('manual-pnl');
+  const priceEl = document.getElementById('manual-price');
+  const tradesEl = document.getElementById('manual-trades');
+  if (posEl) { posEl.textContent = _manualPos > 0 ? 'LONG' : _manualPos < 0 ? 'SHORT' : 'FLAT'; posEl.style.color = _manualPos > 0 ? 'var(--green)' : _manualPos < 0 ? 'var(--red)' : 'var(--dim)'; }
+  if (pnlEl) { pnlEl.textContent = (pnlBps >= 0 ? '+' : '') + pnlBps; pnlEl.style.color = pnlBps >= 0 ? 'var(--green)' : 'var(--red)'; }
+  if (priceEl && price) priceEl.textContent = price.toFixed(2);
+  if (tradesEl) tradesEl.textContent = _manualTrades;
+}
+
+function resetManualTrading() {
+  _manualPos = 0; _manualPnl = 0; _manualTrades = 0; _manualPriceHistory = []; _manualEquity = [0];
+  initManualTrading();
+  consoleLog('↺ Manual trading reset');
+}
+
+// Key bindings for manual trading
+document.addEventListener('keydown', e => {
+  const panel = document.getElementById('manual-panel');
+  if (!panel || panel.style.display === 'none') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'b' || e.key === 'B') manualTrade(1);
+  else if (e.key === 's' || e.key === 'S') manualTrade(-1);
+  else if (e.key === 'f' || e.key === 'F') manualTrade(0);
+});
+
+window.manualTrade = manualTrade;
+window.resetManualTrading = resetManualTrading;
+window.initManualTrading = initManualTrading;
+
 // ═══════════════════════════════════════════════════
 //  CHART INFO TOOLTIPS
 // ═══════════════════════════════════════════════════
@@ -2785,7 +3389,9 @@ function showResultTab_Result(stats, scenario) {
       <div class="interp-title">What this means</div>
       <div class="interp-body">${interp}</div>
       <div class="interp-next">${nextStep}</div>
-    </div>`;
+    </div>
+    ${buildICHorizonHTML(s.icHorizons)}
+    ${buildRegimeHTML(s.regimePnl, s.regimeCnt)}`;
 }
 window.showResultTab = showResultTab;
 
@@ -3028,22 +3634,27 @@ function switchMode(m) {
   if (event?.currentTarget) event.currentTarget.classList.add('active');
   else document.querySelectorAll('.nav-tab').forEach(t => { if (t.textContent.toLowerCase().includes(m)) t.classList.add('active'); });
 
-  const editorArea = document.querySelector('.editor-area');
-  const dePanel    = document.getElementById('de-panel');
-  const scPanel    = document.getElementById('sc-panel');
+  const editorArea   = document.querySelector('.editor-area');
+  const dePanel      = document.getElementById('de-panel');
+  const scPanel      = document.getElementById('sc-panel');
+  const manualPanel  = document.getElementById('manual-panel');
 
-  // Hide all panels first
-  editorArea.style.display = 'none';
-  dePanel.style.display    = 'none';
-  scPanel.style.display    = 'none';
+  editorArea.style.display  = 'none';
+  dePanel.style.display     = 'none';
+  scPanel.style.display     = 'none';
+  manualPanel.style.display = 'none';
 
   if (m === 'explorer') {
     dePanel.style.display = 'flex';
     runDataExplorer();
   } else if (m === 'composer') {
     scPanel.style.display = 'flex';
-    composerSignals = []; // recompute on open
+    composerSignals = [];
     initComposer();
+  } else if (m === 'manual') {
+    manualPanel.style.display = 'flex';
+    manualPanel.style.flexDirection = 'column';
+    setTimeout(initManualTrading, 50);
   } else {
     editorArea.style.display = '';
   }
@@ -3055,6 +3666,11 @@ function marketTick() {
   market.step();
   tick++;
   document.getElementById('market-clock').textContent = `T+${tick}`;
+  // Feed price to manual trading if active
+  const manPanel = document.getElementById('manual-panel');
+  if (manPanel && manPanel.style.display !== 'none') {
+    tickManualTrading(market.prices.at(-1));
+  }
   // Update price chart last point live
   if (charts['chart-price']) {
     const c = charts['chart-price'];
@@ -3163,6 +3779,9 @@ window.showResultTab = showResultTab;
 window.setPipelineStep = setPipelineStep;
 window.showBacktestDistribution = showBacktestDistribution;
 window.showBacktestResult = showBacktestResult;
+window.runScenarioComparison = runScenarioComparison;
+window.startDailyChallenge = startDailyChallenge;
+window.replayLastRun = replayLastRun;
 window.setEditorTab = setEditorTab;
 window.runStrategy = runStrategy;
 window.runBacktest = runBacktest;
