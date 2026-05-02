@@ -70,6 +70,72 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .chart-cell{background:var(--bg);position:relative;overflow:hidden;}
 .chart-cell canvas{position:absolute;inset:4px;}
 .chart-label{position:absolute;top:5px;left:8px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);z-index:2;pointer-events:none;}
+.chart-aim{position:absolute;bottom:5px;left:8px;font-size:8px;color:var(--dim);z-index:2;pointer-events:none;opacity:.7;}
+.chart-info-btn{position:absolute;top:4px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--dim);font-size:9px;font-weight:700;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;}
+.chart-info-btn:hover{background:var(--bg4);color:var(--bright);border-color:var(--border2);}
+.chart-tooltip{position:fixed;z-index:999;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;max-width:220px;font-size:10.5px;line-height:1.6;box-shadow:0 8px 24px var(--shadow);pointer-events:none;}
+.chart-tooltip-title{font-weight:800;color:var(--bright);margin-bottom:4px;font-size:11px;}
+.chart-tooltip-aim{color:var(--green);margin-top:6px;font-size:10px;}
+.chart-tooltip-bad{color:var(--red);font-size:10px;}
+
+/* Pipeline strip */
+.pipeline-strip{display:flex;align-items:center;padding:0 14px;height:28px;background:var(--bg2);border-bottom:1px solid var(--border);gap:0;flex-shrink:0;overflow:hidden;}
+.pipe-step{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:600;color:var(--dim);padding:0 8px;cursor:pointer;transition:color .15s;white-space:nowrap;}
+.pipe-step:hover{color:var(--text);}
+.pipe-step.active{color:var(--blue);}
+.pipe-step.done{color:var(--green);}
+.pipe-num{width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;flex-shrink:0;}
+.pipe-sep{color:var(--border2);font-size:11px;margin:0 2px;}
+
+/* Result panel */
+.result-panel{flex-shrink:0;border-top:1px solid var(--border);background:var(--bg2);max-height:160px;overflow:hidden;display:flex;flex-direction:column;}
+.result-header{display:flex;align-items:center;padding:5px 12px;gap:8px;flex-shrink:0;}
+.result-label{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);}
+.result-tabs{display:flex;gap:2px;margin-left:auto;}
+.result-tab{font-size:9px;padding:2px 7px;border-radius:4px;border:none;background:none;color:var(--dim);cursor:pointer;font-weight:600;}
+.result-tab.active{background:var(--bg4);color:var(--bright);}
+.result-body{flex:1;overflow:hidden;display:flex;}
+.console-output{flex:1;padding:6px 12px 8px;font-family:'DM Mono',monospace;font-size:10px;line-height:1.6;color:var(--text);overflow-y:auto;white-space:pre-wrap;word-break:break-word;}
+.result-cards{flex:1;padding:6px 10px 8px;display:flex;gap:8px;overflow-x:auto;align-items:flex-start;}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;min-width:90px;text-align:center;flex-shrink:0;}
+.stat-value{font-size:20px;font-weight:900;letter-spacing:-.02em;line-height:1;}
+.stat-name{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-top:2px;}
+.stat-grade{font-size:8.5px;font-weight:700;margin-top:3px;}
+.stat-grade.good{color:var(--green);}
+.stat-grade.ok{color:var(--yellow);}
+.stat-grade.bad{color:var(--red);}
+.interpretation-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;flex:1;min-width:160px;}
+.interp-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:4px;}
+.interp-body{font-size:10.5px;line-height:1.5;color:var(--text);}
+.interp-next{font-size:9.5px;color:var(--blue);margin-top:5px;line-height:1.4;}
+
+/* Round progress bar */
+.round-progress-wrap{margin-left:auto;display:flex;align-items:center;gap:6px;}
+.round-progress-bar{width:80px;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.round-progress-fill{height:100%;background:var(--yellow);border-radius:3px;transition:width .4s;}
+.round-progress-label{font-size:9px;color:var(--dim);}
+
+/* Round briefing modal */
+.briefing-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.briefing-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px 32px;max-width:540px;width:90%;max-height:85vh;overflow-y:auto;}
+.briefing-badge{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:4px;margin-bottom:10px;}
+.briefing-title{font-size:18px;font-weight:900;color:var(--bright);margin-bottom:8px;}
+.briefing-section{margin:12px 0;}
+.briefing-section-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:4px;}
+.briefing-section-body{font-size:11px;line-height:1.6;color:var(--text);}
+.briefing-constraints{display:flex;gap:10px;flex-wrap:wrap;}
+.briefing-pill{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:10.5px;font-weight:600;color:var(--text);}
+.briefing-pill span{color:var(--yellow);font-weight:800;}
+.briefing-hint{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:8px;padding:10px 12px;font-size:10.5px;color:var(--blue);line-height:1.5;}
+.briefing-start-btn{width:100%;margin-top:18px;padding:11px;background:var(--green);color:#000;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;transition:opacity .15s;}
+.briefing-start-btn:hover{opacity:.85;}
+.briefing-skip{display:block;text-align:center;margin-top:8px;font-size:10px;color:var(--dim);cursor:pointer;}
+.briefing-skip:hover{color:var(--text);}
+
+/* Toolbar button labels */
+.action-group{display:flex;flex-direction:column;align-items:center;gap:1px;margin-left:4px;}
+.action-sublabel{font-size:7.5px;color:var(--dim);letter-spacing:.03em;line-height:1;}
+
 
 /* ── TEACH PANEL ── */
 .teach-panel{width:320px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
@@ -305,19 +371,65 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 
   <!-- EDITOR + CHARTS -->
   <div class="editor-area">
+    <div class="pipeline-strip" id="pipeline-strip">
+      <div class="pipe-step done" id="ps-1" onclick="setEditorTab('explore')" title="Explore the market data and compute feature ICs">
+        <div class="pipe-num">1</div><span>Explore</span>
+      </div>
+      <span class="pipe-sep">›</span>
+      <div class="pipe-step" id="ps-2" onclick="setEditorTab('strategy')" title="Write a signal — values between -1 (short) and +1 (long)">
+        <div class="pipe-num">2</div><span>Signal</span>
+      </div>
+      <span class="pipe-sep">›</span>
+      <div class="pipe-step" id="ps-3" title="Press Run (Ctrl+Enter) — tests your signal once on the current market">
+        <div class="pipe-num">3</div><span>Run Once</span>
+      </div>
+      <span class="pipe-sep">›</span>
+      <div class="pipe-step" id="ps-4" title="Backtest across 20 random markets. Walk-Fwd checks out-of-sample performance">
+        <div class="pipe-num">4</div><span>Validate</span>
+      </div>
+      <span class="pipe-sep">›</span>
+      <div class="pipe-step" id="ps-5" title="Enter a Competition Round — beat the target Sharpe to score on the leaderboard">
+        <div class="pipe-num">5</div><span>Compete</span>
+      </div>
+      <div style="margin-left:auto;font-size:8.5px;color:var(--dim);" id="pipeline-hint">← follow these steps</div>
+    </div>
     <div class="editor-topbar">
       <button class="editor-tab active" onclick="setEditorTab('strategy')">strategy.js</button>
       <button class="editor-tab" onclick="setEditorTab('explore')">explore.js</button>
       <button class="editor-tab" onclick="setEditorTab('notebook')">notebook.js</button>
       <button class="editor-tab" id="tick-tab" onclick="setEditorTab('tick')">⚡ tick.js</button>
-      <button class="run-btn" id="run-btn" onclick="runStrategy()">▶ Run</button>
-      <button class="bt-btn" onclick="runBacktest()">⏱ Backtest</button>
-      <button class="wf-btn" onclick="runWalkForward()">🔀 Walk-Fwd</button>
-      <button class="clear-plots-btn" onclick="clearUserPlots()" title="Clear overlays">✕ plots</button>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+          <button class="run-btn" id="run-btn" onclick="runStrategy()" title="Run your strategy once on the current market. Ctrl+Enter">▶ Run</button>
+          <span style="font-size:7.5px;color:var(--dim)">test once</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+          <button class="bt-btn" onclick="runBacktest()" title="Monte Carlo: runs your strategy on 20 different random markets to measure robustness">⏱ Backtest</button>
+          <span style="font-size:7.5px;color:var(--dim)">20 markets</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+          <button class="wf-btn" onclick="runWalkForward()" title="Walk-Forward: splits data 60/40. Checks if your signal works on data it never saw">🔀 Walk-Fwd</button>
+          <span style="font-size:7.5px;color:var(--dim)">out-of-sample</span>
+        </div>
+      </span>
+      <button class="clear-plots-btn" onclick="clearUserPlots()" title="Clear chart overlays">✕</button>
       <span class="tick-pill" id="tick-pill">⚡ TICK</span>
       <span class="kbd-hint">Ctrl+↵</span>
     </div>
-    <div class="round-banner" id="round-banner"><div class="round-banner-inner"><span class="round-name" id="rb-name"></span><span class="round-desc" id="rb-desc"></span><span class="round-target" id="rb-target"></span><span class="round-badge" id="rb-badge" style="display:none">✓ Cleared</span><button class="round-close" onclick="closeRound()">✕</button></div></div>
+    <div class="round-banner" id="round-banner">
+  <div class="round-banner-inner">
+    <span class="round-name" id="rb-name"></span>
+    <span class="round-desc" id="rb-desc"></span>
+    <span class="round-target" id="rb-target"></span>
+    <span class="round-badge" id="rb-badge" style="display:none">✓ Cleared</span>
+    <div class="round-progress-wrap" id="rb-progress-wrap" style="display:none;">
+      <span class="round-progress-label">Best: <span id="rb-best-val">—</span></span>
+      <div class="round-progress-bar"><div class="round-progress-fill" id="rb-progress-fill" style="width:0%"></div></div>
+      <span class="round-progress-label" id="rb-target-label"></span>
+    </div>
+    <button class="round-close" onclick="closeRound()">✕</button>
+  </div>
+</div>
     <div class="editor-charts">
       <div class="editor-pane">
         <div id="monaco-container"></div>
@@ -325,25 +437,44 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <div class="charts-pane">
         <div class="chart-cell">
           <div class="chart-label">Price + Signal</div>
+          <div class="chart-aim">ctx.plot() overlays here</div>
+          <button class="chart-info-btn" onclick="showChartInfo(event,'price')">?</button>
           <canvas id="chart-price"></canvas>
         </div>
         <div class="chart-cell">
           <div class="chart-label">Equity Curve</div>
+          <div class="chart-aim">aim: smooth upward slope</div>
+          <button class="chart-info-btn" onclick="showChartInfo(event,'equity')">?</button>
           <canvas id="chart-equity"></canvas>
         </div>
         <div class="chart-cell">
-          <div class="chart-label">Signal IC Over Time</div>
+          <div class="chart-label">Rolling IC</div>
+          <div class="chart-aim">aim: consistently above 0</div>
+          <button class="chart-info-btn" onclick="showChartInfo(event,'ic')">?</button>
           <canvas id="chart-ic"></canvas>
         </div>
         <div class="chart-cell">
           <div class="chart-label">Feature Distribution</div>
+          <div class="chart-aim">use ctx.scatter(x,y) to explore</div>
+          <button class="chart-info-btn" onclick="showChartInfo(event,'dist')">?</button>
           <canvas id="chart-dist"></canvas>
         </div>
       </div>
     </div>
-    <div class="console-bar">
-      <div class="console-header"><span class="console-label">Console</span><span id="score-display-inline" class="score-pill" style="display:none;"></span><button onclick="clearConsole()" style="margin-left:auto;background:none;border:none;color:var(--dim);font-size:9px;cursor:pointer;font-family:'DM Mono',monospace;">clear</button></div>
-      <div class="console-output" id="console-out">▶ Welcome to LeXie Terminal. New here? Click <strong style="color:var(--blue);cursor:pointer" onclick="showOnboarding()">Getting Started</strong> in the sidebar, or: (1) pick a Market scenario on the left → (2) load a Signal snippet → (3) press ▶ Run → (4) read results here.</div>
+    <div class="result-panel" id="result-panel">
+      <div class="result-header">
+        <span class="result-label">Output</span>
+        <span id="score-display-inline" class="score-pill" style="display:none;margin-left:8px;"></span>
+        <div class="result-tabs" style="margin-left:auto;">
+          <button class="result-tab active" id="rtab-console" onclick="showResultTab('console')">Console</button>
+          <button class="result-tab" id="rtab-result" onclick="showResultTab('result')" style="display:none;">📊 Results</button>
+        </div>
+        <button onclick="clearConsole()" style="background:none;border:none;color:var(--dim);font-size:9px;cursor:pointer;font-family:'DM Mono',monospace;margin-left:8px;">clear</button>
+      </div>
+      <div class="result-body">
+        <div class="console-output" id="console-out">▶ Welcome to LeXie Terminal.  Follow the pipeline above ↑ — start with <strong style="color:var(--blue)">Explore</strong> to understand the market, then write a <strong style="color:var(--blue)">Signal</strong>, press <strong style="color:var(--green)">▶ Run</strong>, and read results here.</div>
+        <div class="result-cards" id="result-cards" style="display:none;"></div>
+      </div>
     </div>
   </div>
 
@@ -1521,7 +1652,7 @@ async function runStrategy() {
         // Flash chart pane to signal update
         document.querySelectorAll('.chart-cell').forEach(el => {
           el.classList.remove('chart-flash');
-          void el.offsetWidth; // reflow
+          void el.offsetWidth;
           el.classList.add('chart-flash');
         });
         const s = result.result;
@@ -1533,6 +1664,10 @@ async function runStrategy() {
           el.style.background = s.sharpe > 0.5 ? 'rgba(63,185,80,.15)' : s.sharpe > 0 ? 'rgba(227,179,65,.15)' : 'rgba(248,81,73,.15)';
           el.style.color = s.sharpe > 0.5 ? 'var(--green)' : s.sharpe > 0 ? 'var(--yellow)' : 'var(--red)';
         });
+        // Show rich result panel
+        showResultTab_Result(s, currentScenario);
+        // Advance pipeline to step 3 (ran) or 4 (if decent)
+        setPipelineStep(s.sharpe >= 0.3 ? 4 : 3);
       }
     } else {
       consoleLog('❌ ' + result.error);
@@ -1630,23 +1765,130 @@ const ROUNDS = [
 let currentRound = null;
 let currentMaxPos = 1.0;
 
-function startRound(n) {
+const ROUND_BRIEFINGS = {
+  1: {
+    badge:'Round 1', color:'var(--blue)',
+    market:'Trending Market',
+    marketDesc:'Price exhibits strong directional momentum. Once a trend starts, it persists for 20-50 bars. Volume confirms direction.',
+    objective:'Build a trend-following signal that catches and holds directional moves.',
+    approaches:'<strong>SMA Crossover:</strong> Fast SMA > Slow SMA → long. Simple and effective.<br><strong>Momentum:</strong> ctx.momentum(20) → tanh to soft-clip. Captures sustained moves.<br><strong>EMA Trend:</strong> Price above EMA(50) = long bias.',
+    constraints:[{k:'Target Sharpe',v:'≥ 0.8'},{k:'Max Position',v:'±1.0'},{k:'Trans. Cost',v:'10 bps'},{k:'Bars',v:'~300'}],
+    hint:'Start with the Momentum snippet from the sidebar. Trending markets reward patience — use a 20-30 bar lookback.',
+    snippet:'momentum',
+  },
+  2: {
+    badge:'Round 2', color:'var(--green)',
+    market:'Mean-Reverting Market',
+    marketDesc:'Price oscillates around a long-run equilibrium. Deviations are temporary — the further it moves away, the stronger the pull back.',
+    objective:'Exploit mean-reversion: short when price is extended up, long when extended down.',
+    approaches:'<strong>Z-Score:</strong> ctx.zscore(20) → -tanh(z). Most reliable in this regime.<br><strong>Bollinger Bands:</strong> ctx.bollinger(20,2) → short above upper, long below lower.<br><strong>Half-Life sizing:</strong> Scale position by 1/halfLife for optimal mean-rev sizing.',
+    constraints:[{k:'Target Sharpe',v:'≥ 0.6'},{k:'Max Position',v:'±0.8'},{k:'Trans. Cost',v:'5 bps'},{k:'Half-life',v:'~10 bars'}],
+    hint:'The Z-score snippet from the sidebar is perfect for this. Check ctx.halfLife() first — if halfLife > 50 bars the reversion is slow.',
+    snippet:'mean_rev',
+  },
+  3: {
+    badge:'Round 3', color:'var(--purple)',
+    market:'Trending with Flow Signals',
+    marketDesc:'Trends exist, but with tight position limits you cannot just buy and hold. Microstructure edge (order flow) is critical to time entries precisely.',
+    objective:'Use order flow imbalance (OFI) to time trend entries and reduce drawdowns.',
+    approaches:'<strong>OFI + Trend:</strong> Only long when OFI > 0 AND price > SMA(20).<br><strong>Pure OFI:</strong> ctx.ofiSeries(20) → tanh. OFI predicts short-term price direction.<br><strong>Spread awareness:</strong> Check bid/ask spread before entering.',
+    constraints:[{k:'Target Sharpe',v:'≥ 0.5'},{k:'Max Position',v:'±0.5'},{k:'Trans. Cost',v:'5 bps'},{k:'Tight limits!',v:''}],
+    hint:'Try the OFI snippet. The tight ±0.5 position limit means you need HIGH IC to compensate — OFI often has IC > 0.06 in trending markets.',
+    snippet:'ofi',
+  },
+  4: {
+    badge:'Round 4', color:'var(--orange)',
+    market:'Regime-Switching Market',
+    marketDesc:'The market randomly switches between trending and mean-reverting phases. No single signal works all the time — you must detect the current regime and switch strategy.',
+    objective:'Build an adaptive signal that applies momentum during trends and mean-reversion during reversals.',
+    approaches:'<strong>Regime detection:</strong> ctx.regime() → "trend" or "mean_rev".<br><strong>Hurst routing:</strong> H > 0.55 → use momentum, H < 0.45 → use zscore.<br><strong>Blended:</strong> weight = tanh(H - 0.5) * mom + -tanh(H - 0.5) * zscore.',
+    constraints:[{k:'Target Sharpe',v:'≥ 0.7'},{k:'Max Position',v:'±1.0'},{k:'Trans. Cost',v:'10 bps'},{k:'Regime switch',v:'every ~50 bars'}],
+    hint:'Load the Regime Filter snippet. The key insight: do not fight the regime. ctx.features().hurst tells you the current state.',
+    snippet:'regime_sig',
+  },
+  5: {
+    badge:'Round 5', color:'var(--yellow)',
+    market:'Alpha Fusion — Multi-Signal',
+    marketDesc:'Full complexity: mixed regime with all signal types active. No single signal dominates. The edge comes from combining uncorrelated signals with IC-optimal weights.',
+    objective:'Build a composite signal combining 3+ sources with IC-weighted combination.',
+    approaches:'<strong>IC weighting:</strong> weight each signal by its rolling IC (last 30 bars).<br><strong>Signal correlation:</strong> orthogonalise signals so you are not doubling up.<br><strong>Ensemble:</strong> average zscore, momentum, OFI with tanh normalisation.',
+    constraints:[{k:'Target Sharpe',v:'≥ 1.0'},{k:'Max Position',v:'±1.5'},{k:'Trans. Cost',v:'10 bps'},{k:'Max horizon',v:'5 bars'}],
+    hint:'Load the Composite snippet. Then try the 🧩 Signal Composer tab (top nav) to visually tune IC weights before copying code back.',
+    snippet:'composite',
+  },
+  6: {
+    badge:'Round 6', color:'var(--teal)',
+    market:'Multi-Asset Correlated Portfolio',
+    marketDesc:'Four correlated assets (ρ = 0.72, 0.41, 0.65). Price moves spill over between assets. Correlation breakdowns create pairs trading opportunities.',
+    objective:'Trade a portfolio of 4 correlated assets using ctx.evalMultiAsset(). Exploit spread dislocations.',
+    approaches:'<strong>Spread trading:</strong> when Asset A leads, fade the lagging assets.<br><strong>Correlation signal:</strong> when ρ is high, trade the spread. When ρ drops, trend-follow each asset independently.<br><strong>Portfolio Z-score:</strong> compute spread = priceA - β·priceB, Z-score the spread.',
+    constraints:[{k:'Target Sharpe',v:'≥ 0.8'},{k:'Max Position',v:'±1.0 per asset'},{k:'Trans. Cost',v:'10 bps'},{k:'Assets',v:'main, B, C, D'}],
+    hint:'Load the Pairs Trade snippet to get started with multi-asset. Use ctx.assets() for B, C, D price histories.',
+    snippet:'pairs',
+  },
+};
+
+function showRoundBriefing(n) {
   const r = ROUNDS[n-1];
+  const b = ROUND_BRIEFINGS[n];
+  const cleared = getRoundCleared(n);
+  const el = document.createElement('div');
+  el.className = 'briefing-overlay';
+  el.id = 'briefing-overlay';
+  const constraintPills = b.constraints.map(c =>
+    `<div class="briefing-pill">${c.k}: <span>${c.v}</span></div>`).join('');
+  el.innerHTML = `
+    <div class="briefing-box">
+      <div class="briefing-badge" style="background:${b.color}22;color:${b.color};">${b.badge}${cleared?' · ✓ Cleared':''}</div>
+      <div class="briefing-title">${r.name}</div>
+      <div class="briefing-section">
+        <div class="briefing-section-label">Market</div>
+        <div class="briefing-section-body"><strong>${b.market}</strong><br>${b.marketDesc}</div>
+      </div>
+      <div class="briefing-section">
+        <div class="briefing-section-label">Objective</div>
+        <div class="briefing-section-body">${b.objective}</div>
+      </div>
+      <div class="briefing-section">
+        <div class="briefing-section-label">Suggested approaches</div>
+        <div class="briefing-section-body">${b.approaches}</div>
+      </div>
+      <div class="briefing-section">
+        <div class="briefing-section-label">Constraints</div>
+        <div class="briefing-constraints">${constraintPills}</div>
+      </div>
+      <div class="briefing-hint">💡 <strong>Starting hint:</strong> ${b.hint}</div>
+      <button class="briefing-start-btn" onclick="launchRound(${n})">▶ Start Round ${n}</button>
+      <span class="briefing-skip" onclick="document.getElementById('briefing-overlay')?.remove()">← back</span>
+    </div>`;
+  document.body.appendChild(el);
+}
+window.showRoundBriefing = showRoundBriefing;
+
+function launchRound(n) {
+  document.getElementById('briefing-overlay')?.remove();
+  const r = ROUNDS[n-1];
+  const b = ROUND_BRIEFINGS[n];
   currentRound = r;
   currentMaxPos = r.maxPos;
   setScenario(r.scenario);
-  // Show banner
   document.getElementById('round-banner').style.display = 'block';
   document.getElementById('rb-name').textContent = r.name;
   document.getElementById('rb-desc').textContent = r.desc;
-  document.getElementById('rb-target').textContent = `Target: Sharpe ≥ ${r.target} | MaxPos: ±${r.maxPos} | TC: ${r.tc}`;
+  document.getElementById('rb-target').textContent = `Target Sharpe ≥ ${r.target}`;
   const cleared = getRoundCleared(n);
   document.getElementById('rb-badge').style.display = cleared ? '' : 'none';
-  // Switch to terminal mode
+  document.getElementById('rb-progress-wrap').style.display = 'none';
   if (document.getElementById('de-panel').style.display !== 'none') switchMode('terminal');
-  // Load hint
-  consoleLog(`🏁 ${r.name} — ${r.hint}`);
-  consoleLog(`   Position limit: ±${r.maxPos} | TC: ${r.tc*100}bps | Target Sharpe: ${r.target}`);
+  if (b.snippet && CODE_SNIPPETS[b.snippet]) loadSnippet(b.snippet);
+  consoleLog(`🏁 ${r.name} started. Target Sharpe ≥ ${r.target} | MaxPos ±${r.maxPos} | TC ${r.tc*100}bps`);
+  consoleLog(`💡 ${b.hint}`);
+  setPipelineStep(2); // Start at signal step
+}
+window.launchRound = launchRound;
+
+function startRound(n) {
+  showRoundBriefing(n);
 }
 
 function closeRound() {
@@ -2188,6 +2430,157 @@ window.runComposerSignal = runComposerSignal;
 // ═══════════════════════════════════════════════════
 //  LEADERBOARD
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+//  CHART INFO TOOLTIPS
+// ═══════════════════════════════════════════════════
+const CHART_INFO = {
+  price: {
+    title: '📈 Price + Signal Overlay',
+    body: 'Shows the raw price history for the selected market scenario. After pressing Run, your ctx.plot() overlays (indicators like SMA, Z-score bands) appear here.',
+    aim: 'Aim for: your signal overlays firing BEFORE price moves in that direction.',
+    bad: 'Red flag: your indicator is always lagging far behind price turns.',
+  },
+  equity: {
+    title: '💰 Equity Curve',
+    body: 'Cumulative P&L of your strategy over time. Each bar represents one period of holding your signal position. Assumes realistic transaction costs.',
+    aim: 'Aim for: smooth, consistently upward-sloping line. Good Sharpe > 0.5.',
+    bad: 'Red flag: large drawdowns (drops), or a flat line (signal has no edge).',
+  },
+  ic: {
+    title: '📐 Rolling Information Coefficient',
+    body: 'IC = Spearman rank-correlation of your signal vs the actual forward return k bars later. Rolling window shows how consistent your edge is over time.',
+    aim: 'Aim for: consistently above 0. IC > 0.05 is useful. IC > 0.10 is strong.',
+    bad: 'Red flag: IC oscillates around 0 (just noise) or is consistently negative (signal is backwards — try inverting it).',
+  },
+  dist: {
+    title: '🔬 Feature Distribution / Scatter',
+    body: 'Default: histogram of bar returns (should look roughly normal). After ctx.scatter(x, y): shows your signal vs forward returns — a positive slope means your signal predicts direction.',
+    aim: 'Aim for (scatter): a clear positive slope. More spread = lower IC.',
+    bad: 'Red flag: completely flat scatter (signal has no predictive power at any horizon).',
+  },
+};
+
+let _chartTooltipEl = null;
+function showChartInfo(event, key) {
+  event.stopPropagation();
+  removeChartTooltip();
+  const info = CHART_INFO[key]; if (!info) return;
+  const el = document.createElement('div');
+  el.className = 'chart-tooltip';
+  el.id = 'chart-tooltip';
+  el.innerHTML = `<div class="chart-tooltip-title">${info.title}</div>
+    <div>${info.body}</div>
+    <div class="chart-tooltip-aim">✓ ${info.aim}</div>
+    <div class="chart-tooltip-bad">✗ ${info.bad}</div>`;
+  document.body.appendChild(el);
+  _chartTooltipEl = el;
+  // Position near button
+  const rect = event.target.getBoundingClientRect();
+  const left = Math.min(rect.left - 230, window.innerWidth - 240);
+  el.style.left = Math.max(8, left) + 'px';
+  el.style.top  = (rect.bottom + 6) + 'px';
+  // Auto-dismiss
+  setTimeout(() => document.addEventListener('click', removeChartTooltip, {once:true}), 10);
+}
+function removeChartTooltip() {
+  if (_chartTooltipEl) { _chartTooltipEl.remove(); _chartTooltipEl = null; }
+}
+window.showChartInfo = showChartInfo;
+
+// ═══════════════════════════════════════════════════
+//  RESULT PANEL
+// ═══════════════════════════════════════════════════
+let _currentResultTab = 'console';
+function showResultTab(tab) {
+  _currentResultTab = tab;
+  document.getElementById('console-out').style.display    = tab === 'console' ? '' : 'none';
+  document.getElementById('result-cards').style.display   = tab === 'result'  ? '' : 'none';
+  document.getElementById('rtab-console').classList.toggle('active', tab === 'console');
+  document.getElementById('rtab-result').classList.toggle('active',  tab === 'result');
+}
+function showResultTab_Result(stats, scenario) {
+  const rtab = document.getElementById('rtab-result');
+  if (rtab) rtab.style.display = '';
+  showResultTab('result');
+  const s = stats;
+  const sharpeGrade = s.sharpe >= 1.0 ? {label:'Excellent',cls:'good'} : s.sharpe >= 0.5 ? {label:'Decent',cls:'ok'} : s.sharpe >= 0 ? {label:'Weak',cls:'bad'} : {label:'Negative',cls:'bad'};
+  const icGrade     = s.ic >= 0.08 ? {label:'Strong',cls:'good'} : s.ic >= 0.03 ? {label:'Useful',cls:'ok'} : s.ic >= 0 ? {label:'Marginal',cls:'bad'} : {label:'Inverted?',cls:'bad'};
+  const ddGrade     = s.maxDD > -0.02 ? {label:'Good',cls:'good'} : s.maxDD > -0.05 ? {label:'Moderate',cls:'ok'} : {label:'Large',cls:'bad'};
+
+  // Plain-English interpretation
+  let interp = '';
+  let nextStep = '';
+  if (s.sharpe < 0) {
+    interp = 'Your strategy lost money on this market. The signal is pointing in the wrong direction or transaction costs are eating the edge.';
+    nextStep = s.ic < 0 ? '💡 Try inverting your signal: signal.map(v => -v)' : '💡 Reduce transaction cost by lowering turnover, or try a longer holding period in ctx.evalSignal(signal, 10).';
+  } else if (s.sharpe < 0.5) {
+    interp = 'A small positive edge, but not yet tradeable. The signal has some predictive power but it is being overwhelmed by noise and costs.';
+    nextStep = s.ic < 0.03 ? '💡 Your IC is very low. Try a stronger signal: combine momentum + Z-score, or use ctx.ofiSeries(20).' : '💡 IC looks OK but Sharpe is low — you may be overtrading. Try a longer horizon: ctx.evalSignal(signal, 10).';
+  } else if (s.sharpe < 1.0) {
+    interp = 'Decent alpha. This would be a viable signal in a real quant fund. Press ⏱ Backtest to check if it holds across different market conditions.';
+    nextStep = '💡 Now validate: press ⏱ Backtest (20 Monte Carlo seeds) to check robustness, then 🔀 Walk-Fwd to verify out-of-sample performance.';
+  } else {
+    interp = 'Strong alpha! Sharpe > 1.0 in backtesting is excellent. Be careful — this could indicate overfitting. Walk-Forward validation is essential.';
+    nextStep = '💡 Run 🔀 Walk-Fwd now. If OOS Sharpe is still > 0.5, enter a Competition Round to score on the leaderboard!';
+  }
+  if (currentRound) {
+    const gap = currentRound.target - s.sharpe;
+    if (gap <= 0) nextStep = '🏆 You have beaten the target! Run ⏱ Backtest to confirm, then submit.';
+    else nextStep = `🎯 Round target: ${currentRound.target}. You need ${gap.toFixed(2)} more Sharpe. ${nextStep.replace(/^💡 /,'')}`;
+    // Update progress bar
+    const pct = Math.min(100, (s.sharpe / currentRound.target) * 100);
+    const fill = document.getElementById('rb-progress-fill');
+    const best = document.getElementById('rb-best-val');
+    const wrap = document.getElementById('rb-progress-wrap');
+    const tgt  = document.getElementById('rb-target-label');
+    if (fill) fill.style.width = pct + '%';
+    if (fill) fill.style.background = pct >= 100 ? 'var(--green)' : pct >= 70 ? 'var(--yellow)' : 'var(--red)';
+    if (best) best.textContent = s.sharpe.toFixed(2);
+    if (wrap) wrap.style.display = '';
+    if (tgt)  tgt.textContent = `/ ${currentRound.target} target`;
+  }
+  const cards = document.getElementById('result-cards');
+  cards.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value" style="color:${s.sharpe>=0.5?'var(--green)':s.sharpe>=0?'var(--yellow)':'var(--red)'};">${s.sharpe}</div>
+      <div class="stat-name">Sharpe</div>
+      <div class="stat-grade ${sharpeGrade.cls}">${sharpeGrade.label}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:${s.ic>=0.03?'var(--green)':s.ic>=0?'var(--yellow)':'var(--red)'};">${s.ic}</div>
+      <div class="stat-name">IC (5-bar)</div>
+      <div class="stat-grade ${icGrade.cls}">${icGrade.label}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:${s.maxDD>-0.02?'var(--green)':s.maxDD>-0.05?'var(--yellow)':'var(--red)'};">${(s.maxDD*100).toFixed(1)}%</div>
+      <div class="stat-name">Max Drawdown</div>
+      <div class="stat-grade ${ddGrade.cls}">${ddGrade.label}</div>
+    </div>
+    <div class="interpretation-card">
+      <div class="interp-title">What this means</div>
+      <div class="interp-body">${interp}</div>
+      <div class="interp-next">${nextStep}</div>
+    </div>`;
+}
+window.showResultTab = showResultTab;
+
+// ═══════════════════════════════════════════════════
+//  PIPELINE STEPS
+// ═══════════════════════════════════════════════════
+function setPipelineStep(n) {
+  for (let i=1;i<=5;i++) {
+    const el = document.getElementById('ps-'+i);
+    if (!el) continue;
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  }
+  const hints = ['Explore the data first — check ICs and features.','Now write your signal — values between -1 and +1.','Press ▶ Run or Ctrl+Enter to test your signal.','Validate: use Backtest (robustness) and Walk-Fwd (overfit check).','Great! Enter a Competition Round to score.'];
+  const hint = document.getElementById('pipeline-hint');
+  if (hint) hint.textContent = hints[n-1] || '';
+}
+window.setPipelineStep = setPipelineStep;
+
 function showLearnPanel() {
   ['tab-learn','tab-api','tab-lb'].forEach(id => document.getElementById(id)?.classList.remove('active'));
   document.getElementById('tab-learn').classList.add('active');
@@ -2393,6 +2786,9 @@ function loadSnippet(key) {
 
 let _tickModeActive = false;
 function setEditorTab(tab) {
+  // Advance pipeline
+  if (tab === 'explore') setPipelineStep(1);
+  else if (tab === 'strategy' || tab === 'tick') setPipelineStep(2);
   document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
   event.currentTarget.classList.add('active');
   _tickModeActive = tab === 'tick';
@@ -2535,6 +2931,11 @@ window.switchMode = switchMode;
 window.showApiDocs = showApiDocs;
 window.showOnboarding = showOnboarding;
 window.dismissOnboarding = dismissOnboarding;
+window.showRoundBriefing = showRoundBriefing;
+window.launchRound = launchRound;
+window.showChartInfo = showChartInfo;
+window.showResultTab = showResultTab;
+window.setPipelineStep = setPipelineStep;
 window.setEditorTab = setEditorTab;
 window.runStrategy = runStrategy;
 window.runBacktest = runBacktest;
