@@ -159,6 +159,44 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .wf-btn{background:rgba(188,140,255,.1);border:1px solid rgba(188,140,255,.25);color:var(--purple);border-radius:6px;padding:4px 12px;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;margin-left:4px;}
 .wf-btn:hover{background:rgba(188,140,255,.2);}
 
+
+/* ── SIGNAL COMPOSER ── */
+.sc-panel{flex:1;overflow-y:auto;background:var(--bg);display:none;flex-direction:column;}
+.sc-header{height:36px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0;}
+.sc-title{font-size:11px;font-weight:700;color:var(--bright);}
+.sc-export-btn{margin-left:auto;background:rgba(227,179,65,.1);border:1px solid rgba(227,179,65,.25);color:var(--yellow);font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;cursor:pointer;}
+.sc-export-btn:hover{background:rgba(227,179,65,.2);}
+.sc-run-btn{background:var(--green);color:#000;border:none;border-radius:5px;padding:3px 12px;font-size:10px;font-weight:700;cursor:pointer;}
+.sc-body{flex:1;overflow-y:auto;padding:14px;}
+.sc-table{width:100%;border-collapse:collapse;margin-bottom:14px;}
+.sc-table th{text-align:left;font-size:8.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:5px 8px;border-bottom:1px solid var(--border);}
+.sc-table td{padding:6px 8px;border-bottom:1px solid var(--border);}
+.sc-sig-name{font-size:11px;font-weight:600;color:var(--text);min-width:120px;}
+.sc-slider-wrap{display:flex;align-items:center;gap:6px;min-width:180px;}
+.sc-slider{flex:1;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:linear-gradient(to right,var(--border) 0%,var(--border) 100%);outline:none;cursor:pointer;}
+.sc-slider::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--blue);cursor:pointer;border:2px solid var(--bg);}
+.sc-weight-val{font-family:'DM Mono',monospace;font-size:10px;width:38px;text-align:right;color:var(--bright);}
+.sc-ic-val{font-family:'DM Mono',monospace;font-size:10px;width:48px;text-align:center;}
+.sc-bar{display:inline-block;height:7px;border-radius:2px;margin-left:4px;vertical-align:middle;transition:width .15s;}
+.sc-toggle{width:28px;height:16px;border-radius:8px;border:none;cursor:pointer;position:relative;transition:background .15s;flex-shrink:0;}
+.sc-toggle.on{background:var(--blue);}
+.sc-toggle.off{background:var(--border2);}
+.sc-footer{padding:14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+.sc-stats{display:flex;gap:20px;margin-bottom:10px;}
+.sc-stat{font-size:11px;color:var(--dim);}
+.sc-stat strong{color:var(--bright);font-family:'DM Mono',monospace;margin-left:4px;}
+.sc-chart-wrap{height:80px;position:relative;}
+/* ── TICK MODE INDICATOR ── */
+.tick-pill{display:none;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(251,143,68,.15);color:var(--orange);border:1px solid rgba(251,143,68,.3);margin-left:6px;}
+.tick-pill.visible{display:inline-block;}
+/* ── SCENARIO STATUS ── */
+.scenario-status{font-size:10px;color:var(--dim);margin-left:8px;font-family:'DM Mono',monospace;}
+/* ── CLEAR PLOTS BUTTON ── */
+.clear-plots-btn{background:none;border:1px solid var(--border);border-radius:5px;color:var(--dim);font-size:9px;cursor:pointer;padding:2px 7px;font-family:'DM Mono',monospace;transition:all .15s;}
+.clear-plots-btn:hover{border-color:var(--red);color:var(--red);}
+/* ── KEYBOARD HINT ── */
+.kbd-hint{font-size:8.5px;color:var(--dim);font-family:'DM Mono',monospace;padding:2px 5px;border:1px solid var(--border);border-radius:3px;}
+
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
@@ -175,6 +213,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
   <button class="nav-tab" onclick="switchMode('composer')">🧩 Signal Composer</button>
   <button class="nav-tab" onclick="window.location.href='index.html'">⌂ Hub</button>
   <div class="nav-right">
+    <span class="scenario-status" id="scenario-status">trend</span>
+    <div class="nav-sep"></div>
     <div class="status-dot" title="Market live"></div>
     <span id="market-clock" style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);">T+0</span>
     <span id="score-display" class="score-pill" style="display:none;"></span>
@@ -220,6 +260,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="round-item" id="ri-3" data-round="3" onclick="startRound(3)"><span class="ri-num">03</span> Flow Hunt<span class="ri-check" id="rc-3"></span></button>
       <button class="round-item" id="ri-4" data-round="4" onclick="startRound(4)"><span class="ri-num">04</span> Regime Adapt<span class="ri-check" id="rc-4"></span></button>
       <button class="round-item" id="ri-5" data-round="5" onclick="startRound(5)"><span class="ri-num">05</span> Alpha Fusion<span class="ri-check" id="rc-5"></span></button>
+      <button class="round-item" id="ri-6" data-round="6" onclick="startRound(6)"><span class="ri-num">06</span> Multi-Asset<span class="ri-check" id="rc-6"></span></button>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Tools</div>
@@ -235,9 +276,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="editor-tab active" onclick="setEditorTab('strategy')">strategy.js</button>
       <button class="editor-tab" onclick="setEditorTab('explore')">explore.js</button>
       <button class="editor-tab" onclick="setEditorTab('notebook')">notebook.js</button>
+      <button class="editor-tab" id="tick-tab" onclick="setEditorTab('tick')">⚡ tick.js</button>
       <button class="run-btn" id="run-btn" onclick="runStrategy()">▶ Run</button>
       <button class="bt-btn" onclick="runBacktest()">⏱ Backtest</button>
       <button class="wf-btn" onclick="runWalkForward()">🔀 Walk-Fwd</button>
+      <button class="clear-plots-btn" onclick="clearUserPlots()" title="Clear overlays">✕ plots</button>
+      <span class="tick-pill" id="tick-pill">⚡ TICK</span>
+      <span class="kbd-hint">Ctrl+↵</span>
     </div>
     <div class="round-banner" id="round-banner"><div class="round-banner-inner"><span class="round-name" id="rb-name"></span><span class="round-desc" id="rb-desc"></span><span class="round-target" id="rb-target"></span><span class="round-badge" id="rb-badge" style="display:none">✓ Cleared</span><button class="round-close" onclick="closeRound()">✕</button></div></div>
     <div class="editor-charts">
@@ -297,6 +342,30 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <thead><tr><th>Asset</th><th>Current Price</th><th>ρ vs Main</th><th>Momentum(20)</th></tr></thead>
       <tbody id="de-assets-body"></tbody>
     </table>
+  </div>
+
+  <!-- SIGNAL COMPOSER PANEL -->
+  <div class="sc-panel" id="sc-panel">
+    <div class="sc-header">
+      <span class="sc-title">🧩 Signal Composer</span>
+      <span style="font-size:10px;color:var(--dim);margin-left:4px;">IC-weighted alpha builder</span>
+      <button class="sc-export-btn" onclick="exportComposerCode()">⬇ Export Code</button>
+      <button class="sc-run-btn" onclick="runComposerSignal()">▶ Run</button>
+    </div>
+    <div class="sc-body">
+      <table class="sc-table">
+        <thead><tr><th>Signal</th><th>Weight</th><th style="width:52px">IC@5</th><th style="width:52px">IC@10</th><th style="width:28px">On</th></tr></thead>
+        <tbody id="sc-rows"></tbody>
+      </table>
+    </div>
+    <div class="sc-footer">
+      <div class="sc-stats">
+        <div class="sc-stat">Composite IC@5 <strong id="sc-ic5">—</strong></div>
+        <div class="sc-stat">IC@10 <strong id="sc-ic10">—</strong></div>
+        <div class="sc-stat">Est. Sharpe <strong id="sc-sharpe">—</strong></div>
+      </div>
+      <div class="sc-chart-wrap"><canvas id="sc-chart"></canvas></div>
+    </div>
   </div>
 
   <!-- TEACH PANEL -->
@@ -389,7 +458,8 @@ class MarketSim {
     this.regimeHistory = [];
     this.currentRegime = cfg.regime === 'switching' ? 'trend' : cfg.regime;
     this.regimeDuration = 0;
-    this.correlatedPrices = [100, 100, 100]; // 3 correlated assets
+    this.correlatedPrices = [100, 100, 100]; // 3 correlated assets (current)
+    this.correlatedPriceHistory = [[], [], []]; // full time series
     this.corrMatrix = [[1,.72,.41],[.72,1,.65],[.41,.65,1]];
     this.generate(300);
   }
@@ -450,6 +520,8 @@ class MarketSim {
       const noise = Math.sqrt(1 - rho*rho) * randNorm();
       const corr_dP = rho * dP + noise * c.sigma;
       this.correlatedPrices[i] = Math.max(10, this.correlatedPrices[i] * (1 + corr_dP));
+      this.correlatedPriceHistory[i].push(+this.correlatedPrices[i].toFixed(4));
+      if (this.correlatedPriceHistory[i].length > 600) this.correlatedPriceHistory[i].splice(0, 1);
     }
     
     return {
@@ -733,12 +805,114 @@ function runInWorker(code, ctxData) {
           ic:        (sig, h=5) => _ic(sig, h),
           rollingIC: (sig, h=5, w=30) => _FE.rollingIC(sig, prices, h, w),
           evalSignal: _evalSignal,
+          // Multi-asset evaluation
+          evalMultiAsset: (signalMap, opts={}) => {
+            const { tc=ctxData.tc||0.001, maxPos=ctxData.maxPos||1.0 } = opts;
+            const results = {};
+            let combinedEquity = null;
+            const assetList = [
+              { prices: ctxData.prices, name:'main' },
+              ...ctxData.assets.map((a,i) => ({ prices: a.prices, name:['B','C','D'][i] }))
+            ];
+            let totalSharpe = 0; let count = 0;
+            for (const [key, sig] of Object.entries(signalMap)) {
+              const assetData = assetList.find(a=>a.name===key) || assetList[0];
+              const ap = assetData.prices;
+              const fwd = ap.map((_,i)=>i+5<ap.length?(ap[i+5]-ap[i])/ap[i]:0);
+              const clamped = sig.map(v=>Math.max(-maxPos,Math.min(maxPos,v||0)));
+              const equity=[0]; let pnl=0;
+              for(let i=0;i<Math.min(clamped.length,fwd.length);i++){
+                pnl+=clamped[i]*fwd[i]-Math.abs(clamped[i])*tc; equity.push(pnl);
+              }
+              const rets=equity.slice(1).map((v,i)=>v-equity[i]);
+              const mu=rets.reduce((a,b)=>a+b,0)/rets.length;
+              const sigma=Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0)/rets.length);
+              const sharpe=sigma<1e-9?0:+(mu/sigma*Math.sqrt(252)).toFixed(3);
+              const ic=_ic(clamped.slice(0,fwd.length),5);
+              results[key]={sharpe,ic,equity};
+              totalSharpe+=sharpe; count++;
+              if(!combinedEquity) combinedEquity=[...equity];
+              else combinedEquity=combinedEquity.map((v,i)=>v+(equity[i]||0));
+            }
+            const avgSharpe=count?+(totalSharpe/count).toFixed(3):0;
+            return {sharpe:avgSharpe,results,equity:combinedEquity||[0]};
+          },
+          // Direct FE access for arbitrary price series
+          fe: {
+            sma: (arr,n) => _FE.sma(arr,n),
+            ema: (arr,n) => _FE.ema(arr,n),
+            rsi: (arr,n) => _FE.rsi(arr,n),
+            zscore: (arr,n) => _FE.zscore(arr,n),
+            bollinger: (arr,n,k) => _FE.bollinger(arr,n,k),
+            momentum: (arr,n) => _FE.momentum(arr,n),
+            hurst: (arr) => _FE.hurst(arr),
+            halfLife: (arr) => _FE.halfLife(arr),
+            ic: (sig,fwd) => _FE.ic(sig,fwd),
+          },
           // Output
           plot:    (series, opts={}) => { _plots.push({type:'line', series, opts}); },
           scatter: (x, y, opts={})   => { _plots.push({type:'scatter', x, y, opts}); },
           heatmap: (matrix, labels)  => { _plots.push({type:'heatmap', matrix, labels}); },
           log: (...args) => { _logs.push(args.map(a=>typeof a==='object'?JSON.stringify(a,null,2):String(a)).join(' ')); },
         };
+        // ── TICK MODE ─────────────────────────────────────
+        if (ctxData.mode === 'tick') {
+          try {
+            const stratFn = new Function('ctx', code);
+            const maxPos = ctxData.maxPos || 1.0;
+            const tc = ctxData.tc || 0.001;
+            const equity = [0]; let pos = 0;
+            const allPrices = prices;
+            for (let t = 1; t < allPrices.length - 1; t++) {
+              const pSlice = allPrices.slice(0, t + 1);
+              const tickCtx = {
+                price:   allPrices[t],
+                bid:     ctxData.bids[t] || allPrices[t] * 0.9995,
+                ask:     ctxData.asks[t] || allPrices[t] * 1.0005,
+                pos,
+                bar:     t,
+                prices:  () => [...pSlice],
+                sma:     (n=20) => { const r=_FE.sma(pSlice,n); return r[r.length-1]??null; },
+                ema:     (n=20) => { const r=_FE.ema(pSlice,n); return r[r.length-1]??null; },
+                zscore:  (n=20) => { const r=_FE.zscore(pSlice,n); return r[r.length-1]??0; },
+                rsi:     (n=14) => { const r=_FE.rsi(pSlice,n); return r[r.length-1]??50; },
+                momentum:(n=10) => { const r=_FE.momentum(pSlice,n); return r[r.length-1]??0; },
+                features:() => ({
+                  momentum_5:  _FE.momentum(pSlice,5).at(-1)||0,
+                  momentum_20: _FE.momentum(pSlice,20).at(-1)||0,
+                  zscore_20:   _FE.zscore(pSlice,20).at(-1)||0,
+                  rsi_14:      _FE.rsi(pSlice,14).at(-1)||50,
+                  hurst:       _FE.hurst(pSlice.slice(-80)),
+                }),
+                log: (...args) => { if(_logs.length<10) _logs.push('T'+t+': '+args.join(' ')); },
+              };
+              let targetPos;
+              try { targetPos = stratFn(tickCtx) ?? 0; } catch(e) { targetPos = 0; }
+              if (isNaN(targetPos)) targetPos = 0;
+              targetPos = Math.max(-maxPos, Math.min(maxPos, +targetPos));
+              const delta = targetPos - pos;
+              const fillPrice = delta > 0
+                ? (ctxData.asks[t] || allPrices[t] * 1.0005)
+                : (ctxData.bids[t] || allPrices[t] * 0.9995);
+              const cost = Math.abs(delta) * Math.abs(fillPrice) * tc;
+              pos = targetPos;
+              const pnl = pos * (allPrices[t+1] - allPrices[t]) - cost;
+              equity.push(equity[equity.length-1] + pnl);
+            }
+            const rets = equity.slice(1).map((v,i)=>v-equity[i]);
+            const mu   = rets.reduce((a,b)=>a+b,0)/rets.length;
+            const sig  = Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0)/rets.length);
+            const sharpe = sig<1e-9?0:+(mu/sig*Math.sqrt(252)).toFixed(3);
+            const maxDD  = equity.reduce(({peak,dd},v)=>({peak:Math.max(peak,v),dd:Math.min(dd,v-Math.max(peak,v))}),{peak:0,dd:0}).dd;
+            const ic = _ic(equity.map((v,i)=>i===0?0:v-equity[i-1]).slice(1), 5);
+            self.postMessage({ ok:true, plots:_plots, logs:_logs,
+              result:{sharpe, ic:+ic.toFixed(3), maxDD:+maxDD.toFixed(4), equity, mode:'tick'} });
+          } catch(e) {
+            self.postMessage({ ok:false, error:e.message, logs:_logs });
+          }
+          return;
+        }
+        // ── BATCH MODE ────────────────────────────────────
         try {
           const fn = new Function('ctx', code);
           const result = fn(ctx);
@@ -772,7 +946,15 @@ function runInWorker(code, ctxData) {
       ofi: FE.ofi(m.trades, 20),
       regime: m.currentRegime,
       maxPos: currentMaxPos,
-      assets: m.correlatedPrices.map((p,i) => ({ prices: [], currentPrice: p, rho: m.corrMatrix[0][Math.min(i+1,2)] })),
+      bids: [...m.bids],
+      asks: [...m.asks],
+      assets: m.correlatedPriceHistory.map((hist, i) => ({
+        prices: [...hist],
+        currentPrice: m.correlatedPrices[i],
+        rho: m.corrMatrix[0][Math.min(i+1,2)],
+      })),
+      tc: currentRound ? currentRound.tc : 0.001,
+      mode: _tickModeActive ? 'tick' : 'batch',
     };
     
     worker.onmessage = e => {
@@ -1081,6 +1263,50 @@ const signal = prices.map((_, i) => {
 const stats = ctx.evalSignal(signal, 5, 0.001);
 ctx.log('Regime-filtered → Sharpe:', stats.sharpe);
 return stats;`,
+  tick: `// ── Tick Strategy ── called once per bar, like IMC Prosperity
+// ctx: .price .bid .ask .pos .bar
+//      .sma(n) .ema(n) .zscore(n) .rsi(n) .momentum(n) — all return scalars
+//      .prices() — array up to current bar
+//      .features() — feature snapshot at current bar
+// Return a number: target position (−maxPos to +maxPos), or 0 to hold
+
+if (ctx.bar < 20) return 0;  // warmup bars
+
+const z   = ctx.zscore(20);
+const mom = ctx.momentum(10);
+const rsi = ctx.rsi(14);
+
+// Regime-adaptive: mean-reversion when extended, momentum when trending
+if (Math.abs(z) > 1.8)       return -Math.tanh(z) * 0.9;       // mean-rev
+if (Math.abs(mom) > 0.015)   return Math.tanh(mom * 40) * 0.7;  // momentum
+if (rsi < 30)  return  0.5;  // oversold
+if (rsi > 70)  return -0.5;  // overbought
+return 0;`,
+  multiasset: `// Multi-Asset Round — trade 4 correlated instruments
+// ctx.assets() returns [{prices, currentPrice, rho}, ...]
+// ctx.evalMultiAsset({main, B, C, D}, {maxPos, tc}) → combined PnL
+// ctx.fe.zscore(arr, n) — run FE on any price series
+
+const mainPrices = ctx.prices();
+const assets = ctx.assets();
+const pricesB = assets[0]?.prices || mainPrices;
+const pricesC = assets[1]?.prices || mainPrices;
+
+// Build signals per asset
+const sig_main = ctx.zscore(20).map(v => -Math.tanh(v));
+const sig_B    = ctx.fe.zscore(pricesB, 20).map(v => -Math.tanh(v));
+const sig_C    = ctx.fe.momentum(pricesC, 10).map(v => Math.tanh(v * 8));
+
+const result = ctx.evalMultiAsset(
+  { main: sig_main, B: sig_B, C: sig_C },
+  { maxPos: 1.0, tc: 0.001 }
+);
+
+ctx.log('Avg Sharpe:', result.sharpe,
+        '| Main:', result.results.main?.sharpe,
+        '| B:', result.results.B?.sharpe,
+        '| C:', result.results.C?.sharpe);
+return result;`,
   composite: `// Composite alpha: momentum + mean-reversion + OFI
 const prices = ctx.prices();
 const mom   = ctx.momentum(20).map(v => Math.tanh(v * 8));
@@ -1130,9 +1356,12 @@ function initMonaco() {
         plot(series: number[], opts?: {label?:string,color?:string,type?:string}): void;
         scatter(x: number[], y: number[], opts?: {label?:string}): void;
         heatmap(matrix: number[][], labels?: string[]): void;
+        evalMultiAsset(signals: Record<string, number[]>, opts?: {maxPos?:number, tc?:number}): {sharpe:number, results:Record<string,any>, equity:number[]};
+        fe: { sma(a:number[],n:number):number[]; ema(a:number[],n:number):number[]; zscore(a:number[],n:number):number[]; rsi(a:number[],n:number):number[]; momentum(a:number[],n:number):number[]; hurst(a:number[]):number; halfLife(a:number[]):number; ic(sig:number[],fwd:number[]):number; };
+        assets(): Array<{prices:number[], currentPrice:number, rho:number}>;
         log(...args: any[]): void;
       };
-    `, 'lexie-api.d.ts');
+    \`, 'lexie-api.d.ts');
 
     monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
       value: CODE_SNIPPETS.strategy,
@@ -1162,10 +1391,12 @@ async function runStrategy() {
   btn.textContent = '⏳ Running...';
   consoleLog('Running strategy...');
 
-  // Pass current round constraints to worker via ctxData override
-  const _origMaxPos = currentMaxPos;
   try {
-    const result = await runInWorker(code, {});
+    if (_tickModeActive) {
+      // Override mode for tick execution
+      const _origMode = 'tick';
+    }
+    const result = await runInWorker(code, { _mode: _tickModeActive ? 'tick' : 'batch' });
     if (result.ok) {
       result.logs.forEach(l => consoleLog(l));
       if (result.plots) {
@@ -1275,6 +1506,9 @@ const ROUNDS = [
   { id:5, name:'Round 5 — Alpha Fusion', scenario:'multi',    target:1.0,  maxPos:1.5, tc:0.001,
     desc:'Full alpha: combine momentum, mean-reversion, OFI with IC weighting.',
     hint:'Load the Composite snippet. Tune the IC weights.' },
+  { id:6, name:'Round 6 — Multi-Asset',  scenario:'multi',    target:0.8,  maxPos:1.0, tc:0.001,
+    desc:'Trade 4 correlated assets simultaneously. Exploit correlation breakdowns.',
+    hint:'Use ctx.assets() for correlated price series. Use ctx.evalMultiAsset({main, B, C, D}).' },
 ];
 
 let currentRound = null;
@@ -1317,7 +1551,7 @@ function markRoundCleared(n) {
   document.getElementById('rb-badge').style.display = '';
 }
 function initRoundBadges() {
-  for (let i=1;i<=5;i++) {
+  for (let i=1;i<=6;i++) {
     if (getRoundCleared(i)) document.getElementById(`rc-${i}`).textContent = '✓';
   }
 }
@@ -1660,6 +1894,177 @@ async function submitSignal() {
 }
 
 
+
+// ═══════════════════════════════════════════════════
+//  SIGNAL COMPOSER
+// ═══════════════════════════════════════════════════
+const COMPOSER_DEFS = [
+  { key:'mom10',  label:'Momentum(10)', fn: p => FE.momentum(p, 10).map(v => Math.tanh((v||0)*8)) },
+  { key:'mom20',  label:'Momentum(20)', fn: p => FE.momentum(p, 20).map(v => Math.tanh((v||0)*6)) },
+  { key:'zscore', label:'Z-score(20)',  fn: p => FE.zscore(p, 20).map(v => -Math.tanh(v||0)) },
+  { key:'rsi',    label:'RSI(14)',      fn: p => FE.rsi(p, 14).map(v => v!=null ? (50-v)/50 : 0) },
+  { key:'ofi',    label:'OFI(20)',      fn: p => FE.ofi(market.trades, 20).map(v => Math.tanh((v||0)*3)) },
+  { key:'boll',   label:'Bollinger%B', fn: p => FE.bollinger(p, 20).map(b => (b.pct||0.5)-0.5) },
+  { key:'emacx',  label:'EMA(5/20) ✕', fn: p => { const e5=FE.ema(p,5),e20=FE.ema(p,20); return p.map((_,i)=>e20[i]?((e5[i]-e20[i])/e20[i])*10:0); } },
+];
+
+let composerWeights = COMPOSER_DEFS.map(() => 0);
+let composerEnabled = COMPOSER_DEFS.map(() => true);
+let composerSignals = [];
+let scChart = null;
+let _composerDebounce = null;
+
+function initComposer() {
+  const prices = market.prices;
+  composerSignals = COMPOSER_DEFS.map(d => d.fn(prices));
+
+  // Compute individual ICs
+  const fwd5  = prices.map((_,i) => i+5  < prices.length ? (prices[i+5 ]-prices[i])/prices[i] : 0);
+  const fwd10 = prices.map((_,i) => i+10 < prices.length ? (prices[i+10]-prices[i])/prices[i] : 0);
+
+  const tbody = document.getElementById('sc-rows');
+  tbody.innerHTML = COMPOSER_DEFS.map((d, j) => {
+    const ic5  = FE.ic(composerSignals[j], fwd5.slice(0, composerSignals[j].length));
+    const ic10 = FE.ic(composerSignals[j], fwd10.slice(0, composerSignals[j].length));
+    // Auto-set weights from IC
+    composerWeights[j] = +ic5.toFixed(3);
+    const ic5cls  = ic5 > 0.03 ? 'de-val-pos' : ic5 < -0.03 ? 'de-val-neg' : 'de-val-neu';
+    const ic10cls = ic10 > 0.03 ? 'de-val-pos' : ic10 < -0.03 ? 'de-val-neg' : 'de-val-neu';
+    const sliderVal = Math.round(ic5 * 100); // -100 to 100
+
+    return `<tr>
+      <td class="sc-sig-name">${d.label}</td>
+      <td class="sc-slider-wrap">
+        <input type="range" class="sc-slider" id="sc-sl-${j}"
+          min="-100" max="100" value="${sliderVal}"
+          oninput="onComposerSlider(${j},this.value)"
+          style="--val:${50+sliderVal/2}%">
+        <span class="sc-weight-val" id="sc-wv-${j}">${ic5>=0?'+':''}${ic5.toFixed(2)}</span>
+      </td>
+      <td><span class="sc-ic-val ${ic5cls}" id="sc-ic5-${j}">${ic5.toFixed(3)}<span class="sc-bar" style="width:${Math.min(Math.abs(ic5)*200,36)}px;background:${ic5>=0?'var(--green)':'var(--red)'};"></span></span></td>
+      <td><span class="sc-ic-val ${ic10cls}" id="sc-ic10-${j}">${ic10.toFixed(3)}</span></td>
+      <td><button class="sc-toggle on" id="sc-tg-${j}" onclick="toggleComposer(${j})"></button></td>
+    </tr>`;
+  }).join('');
+
+  updateComposerPreview();
+}
+
+function onComposerSlider(j, val) {
+  composerWeights[j] = val / 100;
+  document.getElementById(`sc-wv-${j}`).textContent = (composerWeights[j] >= 0 ? '+' : '') + composerWeights[j].toFixed(2);
+  clearTimeout(_composerDebounce);
+  _composerDebounce = setTimeout(updateComposerPreview, 80);
+}
+
+function toggleComposer(j) {
+  composerEnabled[j] = !composerEnabled[j];
+  const btn = document.getElementById(`sc-tg-${j}`);
+  btn.classList.toggle('on', composerEnabled[j]);
+  btn.classList.toggle('off', !composerEnabled[j]);
+  document.getElementById(`sc-sl-${j}`).disabled = !composerEnabled[j];
+  updateComposerPreview();
+}
+
+function updateComposerPreview() {
+  const prices = market.prices;
+  const fwd5  = prices.map((_,i) => i+5  < prices.length ? (prices[i+5 ]-prices[i])/prices[i] : 0);
+  const fwd10 = prices.map((_,i) => i+10 < prices.length ? (prices[i+10]-prices[i])/prices[i] : 0);
+  const composite = prices.map((_, i) =>
+    COMPOSER_DEFS.reduce((s, _, j) =>
+      s + (composerEnabled[j] ? composerWeights[j] * (composerSignals[j][i] || 0) : 0), 0)
+  );
+  const ic5  = FE.ic(composite, fwd5.slice(0, composite.length));
+  const ic10 = FE.ic(composite, fwd10.slice(0, composite.length));
+  // Quick Sharpe estimate
+  const equity = [0]; let pnl = 0;
+  for (let i = 0; i < Math.min(composite.length, fwd5.length); i++) {
+    pnl += composite[i] * fwd5[i] - Math.abs(composite[i]) * 0.001;
+    equity.push(pnl);
+  }
+  const rets = equity.slice(1).map((v,i)=>v-equity[i]);
+  const mu = rets.reduce((a,b)=>a+b,0)/rets.length;
+  const sigma = Math.sqrt(rets.reduce((a,v)=>a+(v-mu)**2,0)/rets.length);
+  const sharpe = sigma < 1e-9 ? 0 : mu/sigma*Math.sqrt(252);
+
+  const ic5el = document.getElementById('sc-ic5');
+  const ic10el = document.getElementById('sc-ic10');
+  const sharpeEl = document.getElementById('sc-sharpe');
+  if (ic5el) { ic5el.textContent = ic5.toFixed(4); ic5el.style.color = ic5>0.05?'var(--green)':ic5<0?'var(--red)':'var(--yellow)'; }
+  if (ic10el) { ic10el.textContent = ic10.toFixed(4); ic10el.style.color = ic10>0.03?'var(--green)':ic10<0?'var(--red)':'var(--yellow)'; }
+  if (sharpeEl) { sharpeEl.textContent = sharpe.toFixed(2); sharpeEl.style.color = sharpe>0.5?'var(--green)':sharpe>0?'var(--yellow)':'var(--red)'; }
+
+  // Update mini equity chart
+  const canvas = document.getElementById('sc-chart');
+  if (!canvas) return;
+  const ctx2 = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 400, H = canvas.offsetHeight || 80;
+  canvas.width = W; canvas.height = H;
+  ctx2.clearRect(0,0,W,H);
+  if (equity.length < 2) return;
+  const minE = Math.min(...equity), maxE = Math.max(...equity);
+  const range = maxE - minE || 1;
+  ctx2.beginPath();
+  ctx2.strokeStyle = sharpe > 0 ? '#3fb950' : '#f85149';
+  ctx2.lineWidth = 1.5;
+  equity.forEach((v, i) => {
+    const x = (i / (equity.length-1)) * W;
+    const y = H - ((v - minE) / range) * (H - 8) - 4;
+    i === 0 ? ctx2.moveTo(x, y) : ctx2.lineTo(x, y);
+  });
+  ctx2.stroke();
+  // Zero line
+  const zy = H - ((0 - minE) / range) * (H - 8) - 4;
+  ctx2.beginPath(); ctx2.strokeStyle = 'rgba(110,118,129,.4)'; ctx2.lineWidth = 1;
+  ctx2.moveTo(0, zy); ctx2.lineTo(W, zy); ctx2.stroke();
+}
+
+function exportComposerCode() {
+  const activeSignals = COMPOSER_DEFS.filter((_, j) => composerEnabled[j] && composerWeights[j] !== 0);
+  if (!activeSignals.length) { consoleLog('❌ Set at least one non-zero weight.'); return; }
+  const lines = [`const prices = ctx.prices();`];
+  const sigBuilders = {
+    mom10:  `ctx.momentum(10).map(v => Math.tanh((v||0)*8))`,
+    mom20:  `ctx.momentum(20).map(v => Math.tanh((v||0)*6))`,
+    zscore: `ctx.zscore(20).map(v => -Math.tanh(v||0))`,
+    rsi:    `ctx.rsi(14).map(v => v!=null ? (50-v)/50 : 0)`,
+    ofi:    `ctx.ofiSeries(20).map(v => Math.tanh((v||0)*3))`,
+    boll:   `ctx.bollinger(20).map(b => (b?.pct||0.5)-0.5)`,
+    emacx:  `ctx.sma(5).map((v,i) => ctx.sma(20)[i] ? (v-ctx.sma(20)[i])/ctx.sma(20)[i]*10 : 0)`,
+  };
+  activeSignals.forEach(d => {
+    const j = COMPOSER_DEFS.indexOf(d);
+    lines.push(`const ${d.key} = ${sigBuilders[d.key]};`);
+  });
+  lines.push(`\nconst composite = prices.map((_, i) =>`);
+  const parts = activeSignals.map(d => {
+    const j = COMPOSER_DEFS.indexOf(d);
+    const w = composerWeights[j];
+    return `  ${w>=0?'+':''} ${w.toFixed(3)} * (${d.key}[i]||0)`;
+  });
+  lines.push(parts.join('\n') + '\n);');
+  lines.push(`\nconst stats = ctx.evalSignal(composite, 5, 0.001);`);
+  lines.push(`ctx.log('Composer signal — Sharpe:', stats.sharpe, '| IC:', stats.ic);`);
+  lines.push(`ctx.plot(composite.map((v,i)=>prices[i]*(1+v*0.3)), { label:'Composer', color:'#bc8cff' });`);
+  lines.push(`return stats;`);
+  const code = lines.join('\n');
+  if (monacoEditor) monacoEditor.setValue(code);
+  switchMode('terminal');
+  consoleLog('✅ Composer signal exported to editor. Press Run to test.');
+}
+
+async function runComposerSignal() {
+  exportComposerCode();
+  await new Promise(r => setTimeout(r, 100));
+  await runStrategy();
+}
+
+window.initComposer = initComposer;
+window.onComposerSlider = onComposerSlider;
+window.toggleComposer = toggleComposer;
+window.exportComposerCode = exportComposerCode;
+window.runComposerSignal = runComposerSignal;
+
 // ═══════════════════════════════════════════════════
 //  LEADERBOARD
 // ═══════════════════════════════════════════════════
@@ -1737,16 +2142,23 @@ function setScenario(s) {
   document.querySelectorAll('[data-scenario]').forEach(b => {
     b.classList.toggle('active', b.dataset.scenario === s);
   });
+  const statusEl = document.getElementById('scenario-status');
+  if (statusEl) statusEl.textContent = s.replace('_', '-');
 }
 
 function loadSnippet(key) {
   if (monacoEditor && CODE_SNIPPETS[key]) monacoEditor.setValue(CODE_SNIPPETS[key]);
 }
 
+let _tickModeActive = false;
 function setEditorTab(tab) {
   document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
   event.currentTarget.classList.add('active');
+  _tickModeActive = tab === 'tick';
   if (monacoEditor && CODE_SNIPPETS[tab]) monacoEditor.setValue(CODE_SNIPPETS[tab]);
+  const runBtn = document.getElementById('run-btn');
+  if (runBtn) runBtn.textContent = _tickModeActive ? '▶ Run Tick' : '▶ Run';
+  updateTickPill();
 }
 
 function switchMode(m) {
@@ -1756,21 +2168,22 @@ function switchMode(m) {
 
   const editorArea = document.querySelector('.editor-area');
   const dePanel    = document.getElementById('de-panel');
+  const scPanel    = document.getElementById('sc-panel');
+
+  // Hide all panels first
+  editorArea.style.display = 'none';
+  dePanel.style.display    = 'none';
+  scPanel.style.display    = 'none';
 
   if (m === 'explorer') {
-    editorArea.style.display = 'none';
     dePanel.style.display = 'flex';
     runDataExplorer();
   } else if (m === 'composer') {
-    editorArea.style.display = 'none';
-    dePanel.style.display = 'flex';
-    loadSnippet('composite');
-    editorArea.style.display = '';
-    dePanel.style.display = 'none';
-    consoleLog('🧩 Composite snippet loaded → Edit weights, run, then Backtest.');
+    scPanel.style.display = 'flex';
+    composerSignals = []; // recompute on open
+    initComposer();
   } else {
     editorArea.style.display = '';
-    dePanel.style.display = 'none';
   }
 }
 
@@ -1818,6 +2231,34 @@ function installFallbackEditor() {
   consoleLog('⚠ Monaco editor unavailable — using plain text editor. Run still works.');
 }
 
+
+// ═══════════════════════════════════════════════════
+//  UX HELPERS
+// ═══════════════════════════════════════════════════
+function clearUserPlots() {
+  const chart = charts['chart-price'];
+  if (!chart) return;
+  // Keep only the first 2 default datasets (price + SMA20)
+  chart.data.datasets = chart.data.datasets.slice(0, 2);
+  chart.update();
+  consoleLog('✕ User overlays cleared.');
+}
+window.clearUserPlots = clearUserPlots;
+
+// Ctrl+Enter to run
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    runStrategy();
+  }
+});
+
+// Update tick pill visibility whenever editor tab changes
+function updateTickPill() {
+  const pill = document.getElementById('tick-pill');
+  if (pill) pill.classList.toggle('visible', _tickModeActive);
+}
+
 // ═══════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════
@@ -1829,6 +2270,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initCharts();
   renderLesson();
   initRoundBadges();
+  // Pre-warm composer signals lazily (computed on first open)
   
   // Load Monaco with fallback textarea
   const monacoTimeout = setTimeout(() => {
@@ -1865,6 +2307,8 @@ window.showLeaderboard = showLeaderboard;
 window.startRound = startRound;
 window.closeRound = closeRound;
 window.runDataExplorer = runDataExplorer;
+window.clearUserPlots = clearUserPlots;
+window.updateTickPill = updateTickPill;
 </script>
 </body>
 </html>
