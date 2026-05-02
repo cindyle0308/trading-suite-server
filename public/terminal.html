@@ -1681,12 +1681,16 @@ async function runStrategy() {
 
 async function runBacktest() {
   const N = 20;
-  consoleLog(`⏱ Backtest — running ${N} Monte Carlo seeds...`);
   const code = monacoEditor?.getValue() || CODE_SNIPPETS.strategy;
-  const results = []; const sharpes = [];
+  const sharpes = [], ics = [], maxDDs = [], equities = [];
   const seedBase = Date.now();
   const btn = document.querySelector('.bt-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ 0/' + N; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 0/20'; }
+
+  // Show progress in console
+  showResultTab('console');
+  consoleLog(`⏱ Backtest: running 20 Monte Carlo seeds on "${currentScenario}" scenario...`);
+
   for (let i = 0; i < N; i++) {
     rng = mulberry32(seedBase + i * 997);
     market = new MarketSim(currentScenario);
@@ -1694,46 +1698,234 @@ async function runBacktest() {
       const r = await runInWorker(code, {});
       if (r.ok && r.result?.sharpe != null) {
         sharpes.push(r.result.sharpe);
-        results.push(r.result);
+        if (r.result.ic   != null) ics.push(r.result.ic);
+        if (r.result.maxDD != null) maxDDs.push(r.result.maxDD);
+        if (r.result.equity) equities.push(r.result.equity);
       }
-    } catch {}
-    if (btn) btn.textContent = `⏳ ${i+1}/${N}`;
-    await new Promise(r => setTimeout(r, 0)); // yield to UI
+    } catch(e) {}
+    if (btn) btn.textContent = `⏳ ${i+1}/20`;
+    await new Promise(r => setTimeout(r, 0));
   }
+
   if (btn) { btn.disabled = false; btn.textContent = '⏱ Backtest'; }
-  // Restore deterministic market
+
+  // Restore original market
   rng = mulberry32(daySeed);
   market = new MarketSim(currentScenario);
   initCharts();
-  if (sharpes.length) {
-    const avg = sharpes.reduce((a,b)=>a+b,0)/sharpes.length;
-    const std = Math.sqrt(sharpes.reduce((a,v)=>a+(v-avg)**2,0)/sharpes.length);
-    const minS = Math.min(...sharpes), maxS = Math.max(...sharpes);
-    consoleLog(`📊 MC Backtest (n=${N}): Mean Sharpe ${avg.toFixed(2)} ± ${std.toFixed(2)}`);
-    consoleLog(`   Min: ${minS.toFixed(2)} | Max: ${maxS.toFixed(2)} | >0: ${sharpes.filter(s=>s>0).length}/${N}`);
-    // Round completion check
-    if (currentRound && avg >= currentRound.target) {
-      consoleLog(`🏆 Round cleared! Mean Sharpe ${avg.toFixed(2)} ≥ target ${currentRound.target}`);
-      markRoundCleared(currentRound.id);
-    } else if (currentRound) {
-      consoleLog(`   Target: ${currentRound.target} — need ${(currentRound.target - avg).toFixed(2)} more Sharpe`);
-    }
-  } else {
-    consoleLog('Backtest: strategy must return ctx.evalSignal(...) result');
+
+  if (!sharpes.length) {
+    consoleLog('❌ No results — make sure your strategy returns ctx.evalSignal(signal) result.');
+    return;
   }
+
+  const mean  = v => v.reduce((a,b)=>a+b,0)/v.length;
+  const std   = v => { const m=mean(v); return Math.sqrt(v.reduce((a,x)=>a+(x-m)**2,0)/v.length); };
+  const pct   = (v,p) => { const s=[...v].sort((a,b)=>a-b); return s[Math.floor(s.length*p/100)]||0; };
+
+  const avgS  = +mean(sharpes).toFixed(3);
+  const stdS  = +std(sharpes).toFixed(3);
+  const minS  = +Math.min(...sharpes).toFixed(3);
+  const maxS  = +Math.max(...sharpes).toFixed(3);
+  const avgIC = ics.length  ? +mean(ics).toFixed(3)   : null;
+  const avgDD = maxDDs.length ? +mean(maxDDs).toFixed(4) : null;
+  const pctPos = Math.round(sharpes.filter(s=>s>0).length / sharpes.length * 100);
+
+  // Log summary to console
+  consoleLog(`📊 Monte Carlo (n=20): Sharpe ${avgS} ± ${stdS}`);
+  consoleLog(`   Range: [${minS}, ${maxS}] | ${pctPos}% seeds positive`);
+  if (avgIC  != null) consoleLog(`   Mean IC: ${avgIC}`);
+  if (avgDD  != null) consoleLog(`   Mean MaxDD: ${(avgDD*100).toFixed(2)}%`);
+
+  // Robustness verdict
+  const robust = pctPos >= 70 && avgS > 0.3 && stdS < Math.abs(avgS) * 2;
+  const overfit = stdS > Math.abs(avgS) * 1.5;
+  if (avgS < 0) {
+    consoleLog('❌ Mean Sharpe negative — signal does not generalise.');
+  } else if (overfit) {
+    consoleLog('⚠️ High variance across seeds — may be overfitting. Try Walk-Fwd.');
+  } else if (robust) {
+    consoleLog('✅ Robust! Signal works across varied market conditions.');
+  } else {
+    consoleLog(`💡 Moderate robustness. Run 🔀 Walk-Fwd to check out-of-sample.`);
+  }
+
+  // Round check
+  if (currentRound) {
+    if (avgS >= currentRound.target) {
+      consoleLog(`🏆 Round target met! Mean Sharpe ${avgS} ≥ ${currentRound.target}`);
+      markRoundCleared(currentRound.id);
+    } else {
+      consoleLog(`🎯 Target: ${currentRound.target} — gap: ${(currentRound.target - avgS).toFixed(3)}`);
+    }
+  }
+
+  // Plot mean equity curve across seeds on the equity chart
+  if (equities.length) {
+    const len = Math.min(...equities.map(e=>e.length));
+    const meanEq = Array.from({length:len}, (_,i) =>
+      +mean(equities.map(e=>e[i]||0)).toFixed(4));
+    const p10Eq  = Array.from({length:len}, (_,i) =>
+      +pct(equities.map(e=>e[i]||0),10).toFixed(4));
+    const p90Eq  = Array.from({length:len}, (_,i) =>
+      +pct(equities.map(e=>e[i]||0),90).toFixed(4));
+    const chart = charts['chart-equity'];
+    if (chart) {
+      chart.data.labels = meanEq.map((_,i)=>i);
+      chart.data.datasets = [
+        { label:'p90',  data:p90Eq,  borderColor:'rgba(63,185,80,.3)',  borderWidth:1, pointRadius:0, fill:false, tension:0.2 },
+        { label:'Mean', data:meanEq, borderColor:'rgba(63,185,80,.9)',  borderWidth:2, pointRadius:0, fill:false, tension:0.2 },
+        { label:'p10',  data:p10Eq,  borderColor:'rgba(248,81,73,.3)',  borderWidth:1, pointRadius:0, fill:false, tension:0.2 },
+      ];
+      chart.options.plugins.legend = { display:true, labels:{color:textColor(),font:{size:8},boxWidth:8} };
+      chart.update();
+    }
+  }
+
+  // Show distribution of Sharpes in chart-dist
+  showBacktestDistribution(sharpes);
+
+  // Show rich result tab
+  showBacktestResult(avgS, stdS, minS, maxS, avgIC, avgDD, pctPos, robust, overfit);
+  setPipelineStep(avgS >= 0.3 ? 4 : 3);
+}
+
+function showBacktestDistribution(sharpes) {
+  // Plot Sharpe distribution as a bar chart in chart-dist
+  if (charts['chart-dist']) {
+    try { charts['chart-dist'].destroy(); } catch(e) {}
+    charts['chart-dist'] = null;
+  }
+  const canvas = document.getElementById('chart-dist');
+  if (!canvas) return;
+  const distLabel = canvas.closest('.chart-cell')?.querySelector('.chart-label');
+  if (distLabel) distLabel.textContent = 'Sharpe Distribution';
+
+  // Build histogram bins
+  const min = Math.min(...sharpes), max = Math.max(...sharpes);
+  const bins = 10;
+  const binSize = (max - min) / bins || 0.1;
+  const counts = new Array(bins).fill(0);
+  sharpes.forEach(s => {
+    const b = Math.min(bins-1, Math.floor((s - min) / binSize));
+    counts[b]++;
+  });
+  const labels = counts.map((_,i) => (min + i*binSize).toFixed(2));
+  const colors = counts.map((_,i) => {
+    const v = min + i*binSize;
+    return v > 0.5 ? 'rgba(63,185,80,.7)' : v > 0 ? 'rgba(227,179,65,.7)' : 'rgba(248,81,73,.7)';
+  });
+
+  charts['chart-dist'] = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets: [{ label:'Sharpe freq', data:counts, backgroundColor:colors, borderWidth:0 }] },
+    options: { ...chartDefaults,
+      plugins: { legend:{display:false} },
+      scales: {
+        x: { display:true, ticks:{color:textColor(),font:{size:7},maxRotation:45} },
+        y: { display:true, ticks:{color:textColor(),font:{size:8}} }
+      }
+    }
+  });
+}
+
+function showBacktestResult(avgS, stdS, minS, maxS, avgIC, avgDD, pctPos, robust, overfit) {
+  const rtab = document.getElementById('rtab-result');
+  if (rtab) rtab.style.display = '';
+
+  const sGrade = avgS>=1?{l:'Excellent',c:'good'}:avgS>=0.5?{l:'Decent',c:'ok'}:avgS>=0?{l:'Weak',c:'bad'}:{l:'Negative',c:'bad'};
+  const rGrade = robust?{l:'Robust',c:'good'}:overfit?{l:'Unstable',c:'bad'}:{l:'Moderate',c:'ok'};
+  const confInterval = `[${(avgS-stdS).toFixed(2)}, ${(avgS+stdS).toFixed(2)}]`;
+
+  let interpret = '';
+  if (avgS < 0) {
+    interpret = 'Your strategy loses money on average across 20 different markets. The signal logic may be inverted, or transaction costs are too high for your holding period.';
+  } else if (overfit) {
+    interpret = `Mean Sharpe of ${avgS} looks promising, but the high variance (±${stdS}) suggests the edge is unstable. It works on some market types but fails on others — a sign of overfitting to specific price patterns.`;
+  } else if (robust) {
+    interpret = `Strong and consistent: Sharpe ${avgS} with only ±${stdS} variation. ${pctPos}% of seeds were profitable. This signal has a genuine edge that holds across varied market conditions.`;
+  } else {
+    interpret = `Some edge present (Sharpe ${avgS}) but inconsistent. The strategy works on most markets but has meaningful variance. Consider making your signal more adaptive to market regimes.`;
+  }
+
+  const nextStep = robust && avgS >= (currentRound?.target||0.5)
+    ? '🏆 Ready to submit! Run 🔀 Walk-Fwd for final validation, then Submit Signal.'
+    : overfit
+    ? '💡 Run 🔀 Walk-Fwd — if OOS Sharpe drops sharply, your signal is overfitting. Simplify it or reduce lookback.'
+    : avgS < 0.3
+    ? '💡 Your signal needs more work. Try loading a snippet from the sidebar and exploring different scenarios.'
+    : '💡 Getting there. Try combining signals (load Composite snippet) or use ctx.regime() to adapt to market state.';
+
+  const cards = document.getElementById('result-cards');
+  cards.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value" style="color:${avgS>=0.5?'var(--green)':avgS>=0?'var(--yellow)':'var(--red)'};">${avgS}</div>
+      <div class="stat-name">Mean Sharpe</div>
+      <div class="stat-grade ${sGrade.c}">${sGrade.l}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--dim);font-size:14px;">±${stdS}</div>
+      <div class="stat-name">Std Dev</div>
+      <div class="stat-grade ${rGrade.c}">${rGrade.l}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--teal);font-size:16px;">${pctPos}%</div>
+      <div class="stat-name">Seeds Profitable</div>
+      <div class="stat-grade ${pctPos>=70?'good':pctPos>=50?'ok':'bad'}">${pctPos>=70?'Consistent':pctPos>=50?'Mixed':'Unreliable'}</div>
+    </div>
+    ${avgIC!=null?`<div class="stat-card">
+      <div class="stat-value" style="color:${avgIC>=0.03?'var(--green)':'var(--yellow)'};">${avgIC}</div>
+      <div class="stat-name">Mean IC</div>
+      <div class="stat-grade ${avgIC>=0.05?'good':avgIC>=0.02?'ok':'bad'}">${avgIC>=0.05?'Strong':avgIC>=0.02?'Useful':'Weak'}</div>
+    </div>`:''}
+    <div class="interpretation-card">
+      <div class="interp-title">Monte Carlo Summary (n=20)</div>
+      <div class="interp-body">${interpret}</div>
+      <div class="interp-next">${nextStep}</div>
+    </div>`;
+
+  // Also update round progress bar
+  if (currentRound) {
+    const pct2 = Math.min(100, (avgS / currentRound.target) * 100);
+    const fill = document.getElementById('rb-progress-fill');
+    const best = document.getElementById('rb-best-val');
+    const wrap = document.getElementById('rb-progress-wrap');
+    const tgt  = document.getElementById('rb-target-label');
+    if (fill) { fill.style.width = pct2 + '%'; fill.style.background = pct2>=100?'var(--green)':pct2>=70?'var(--yellow)':'var(--red)'; }
+    if (best) best.textContent = avgS.toFixed(2) + ' (MC avg)';
+    if (wrap) wrap.style.display = '';
+    if (tgt)  tgt.textContent = `/ ${currentRound.target} target`;
+  }
+
+  showResultTab('result');
 }
 
 const _consoleLogs = [];
 function consoleLog(msg) {
   _consoleLogs.push(msg);
-  if (_consoleLogs.length > 8) _consoleLogs.shift();
+  if (_consoleLogs.length > 40) _consoleLogs.shift();
+  // Always show console when a log comes in (if result tab is visible, switch)
+  if (_currentResultTab === 'result') showResultTab('console');
   const el = document.getElementById('console-out');
-  el.textContent = _consoleLogs.join('\n');
-  el.scrollTop = el.scrollHeight;
+  if (el) {
+    el.innerHTML = _consoleLogs.map(l =>
+      l.startsWith('❌') ? `<span style="color:var(--red)">${escHtml(l)}</span>` :
+      l.startsWith('✅') || l.startsWith('🏆') ? `<span style="color:var(--green)">${escHtml(l)}</span>` :
+      l.startsWith('⚠') ? `<span style="color:var(--yellow)">${escHtml(l)}</span>` :
+      l.startsWith('💡') ? `<span style="color:var(--blue)">${escHtml(l)}</span>` :
+      l.startsWith('📊') || l.startsWith('🏁') ? `<span style="color:var(--bright)">${escHtml(l)}</span>` :
+      escHtml(l)
+    ).join('\n');
+    el.scrollTop = el.scrollHeight;
+  }
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 function clearConsole() {
   _consoleLogs.length = 0;
-  document.getElementById('console-out').textContent = '▶ Console cleared.';
+  const el = document.getElementById('console-out');
+  if (el) el.innerHTML = '<span style="color:var(--dim)">▶ Console cleared.</span>';
 }
 window.clearConsole = clearConsole;
 
@@ -2190,12 +2382,45 @@ async function runWalkForward() {
     consoleLog(`   IS  Sharpe: ${isSharpe}  | PnL: ${(isFinal*100).toFixed(2)}bps`);
     consoleLog(`   OOS Sharpe: ${oosSharpe} | PnL: ${(oosFinal*100).toFixed(2)}bps`);
     if (oosSharpe > 0 && Math.abs(decay) < 80) {
-      consoleLog(`   ✅ Generalises well (${decay}% decay)`);
+      consoleLog(`✅ Generalises well — only ${decay}% decay IS→OOS`);
     } else if (oosSharpe > 0) {
-      consoleLog(`   ⚠️ Large decay (${decay}%) — possible overfit`);
+      consoleLog(`⚠️ Large decay (${decay}%) — possible overfit. Simplify signal.`);
     } else {
-      consoleLog(`   ❌ Negative OOS — likely overfit, rethink signal`);
+      consoleLog(`❌ Negative OOS Sharpe — likely overfit. Rethink signal.`);
     }
+    // Show rich result
+    const rtab = document.getElementById('rtab-result');
+    if (rtab) rtab.style.display = '';
+    const cards = document.getElementById('result-cards');
+    const decayColor = Math.abs(decay) < 40 ? 'var(--green)' : Math.abs(decay) < 80 ? 'var(--yellow)' : 'var(--red)';
+    const verdict = oosSharpe > 0 && Math.abs(decay) < 80
+      ? {t:'Passes OOS', c:'good', interp:'Your signal retains most of its edge on data it never saw during development. This is the gold standard for a real strategy.', next:'✅ Run ⏱ Backtest for final robustness check, then enter a Competition Round.'}
+      : oosSharpe > 0
+      ? {t:'Borderline', c:'ok', interp:`The signal is profitable out-of-sample but performance dropped ${decay}% from IS. Some overfitting likely. Consider reducing the number of parameters or shortening lookback windows.`, next:'💡 Try simplifying: fewer parameters, shorter lookbacks, or load a simpler snippet.'}
+      : {t:'Fails OOS', c:'bad', interp:'The signal had negative returns on the 40% of data it never saw. This is a clear sign of overfitting — the signal learned noise patterns specific to the in-sample period.', next:'💡 Start fresh with a simpler signal (Momentum or Z-score) and avoid tuning parameters to fit the chart.'};
+    cards.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-value" style="color:${isSharpe>0?'var(--blue)':'var(--red)'};">${isSharpe}</div>
+        <div class="stat-name">IS Sharpe</div>
+        <div class="stat-grade ${isSharpe>0.5?'good':isSharpe>0?'ok':'bad'}">${isSharpe>0.5?'Good':isSharpe>0?'Decent':'Negative'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:${oosSharpe>0?'var(--green)':'var(--red)'};">${oosSharpe}</div>
+        <div class="stat-name">OOS Sharpe</div>
+        <div class="stat-grade ${oosSharpe>0.5?'good':oosSharpe>0?'ok':'bad'}">${oosSharpe>0.5?'Good':oosSharpe>0?'Decent':'Negative'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:${decayColor};font-size:18px;">${decay}%</div>
+        <div class="stat-name">IS→OOS Decay</div>
+        <div class="stat-grade ${verdict.c}">${verdict.t}</div>
+      </div>
+      <div class="interpretation-card">
+        <div class="interp-title">Walk-Forward Validation</div>
+        <div class="interp-body">${verdict.interp}</div>
+        <div class="interp-next">${verdict.next}</div>
+      </div>`;
+    showResultTab('result');
+    setPipelineStep(oosSharpe > 0 ? 5 : 3);
 
     // Show IS vs OOS on equity chart
     const isLen = isEq.length;
@@ -2936,6 +3161,8 @@ window.launchRound = launchRound;
 window.showChartInfo = showChartInfo;
 window.showResultTab = showResultTab;
 window.setPipelineStep = setPipelineStep;
+window.showBacktestDistribution = showBacktestDistribution;
+window.showBacktestResult = showBacktestResult;
 window.setEditorTab = setEditorTab;
 window.runStrategy = runStrategy;
 window.runBacktest = runBacktest;
