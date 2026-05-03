@@ -389,7 +389,6 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:8px 18p
   <a href="options-outcry.html">Outcry</a>
   <a href="cmi-challenge.html">Asset Mgr</a>
 <a href="https://lexie-marketmakerbaos.onrender.com" target="_blank">Market Maker</a>
-<button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
 
     <a href="terminal.html">⌨ Terminal</a>
 </nav>
@@ -1099,12 +1098,5 @@ function finalizeR5() {
 </script>
 <script src="lexie-core.js"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  var b=document.getElementById("lx-theme-btn-2");
-  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
-  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
-});
-</script>
 </body>
 </html>
