@@ -91,7 +91,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     <h1>&#x1F3AF; Market Making Desk</h1>
     <p>Spread design &bull; Inventory risk &bull; Adverse selection</p>
   </div>
-  <span class="status-badge" id="status-badge">Select Instrument</span>
+  <div style="display:flex;align-items:center;gap:10px"><button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button><span class="status-badge" id="status-badge">Select Instrument</span></div>
 </header>
 <div class="pipeline">
   <div class="pipe-step active" id="step-1">1 Instrument</div>
@@ -424,6 +424,14 @@ function mean(arr){return arr.length?arr.reduce(function(s,v){return s+v;},0)/ar
 function stdDev(arr){if(arr.length<2)return 0;var m=mean(arr);return Math.sqrt(arr.reduce(function(s,v){return s+(v-m)*(v-m);},0)/(arr.length-1));}
 
 document.addEventListener('DOMContentLoaded',function(){buildPicker();if(window.LX)LX.visitDesk('price-war');});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var b=document.getElementById("lx-theme-btn-2");
+  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
+  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
+});
 </script>
 </body>
 </html>
