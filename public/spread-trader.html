@@ -148,7 +148,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     <p>Co-integration &bull; Z-Score &bull; Statistical Arbitrage</p>
   </div>
   <div class="header-right">
-    <button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
+    
     <span class="status-badge" id="status-badge">Ready</span>
   </div>
 </header>
@@ -846,12 +846,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  var b=document.getElementById("lx-theme-btn-2");
-  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
-  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
-});
-</script>
 </body>
 </html>
