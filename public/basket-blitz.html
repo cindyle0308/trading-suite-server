@@ -880,6 +880,12 @@ function endGame() {
   const all=[{name:G.playerName,pnl:G.playerPnl,isYou:true},...G.bots.map(b=>({name:b.name,pnl:b.pnl,isYou:false}))];
   all.sort((a,b)=>b.pnl-a.pnl);
   const rank=all.findIndex(p=>p.isYou)+1;
+  if(window.LX){
+    LX.visitDesk('basket-blitz');
+    var bkXP = Math.max(20, Math.min(200, 100 - (rank-1)*25 + Math.round(G.playerPnl/50)));
+    LX.addXP(bkXP, 'Basket Blitz');
+    LX.recordRun({sharpe: +((G.playerPnl)/(Math.max(1,G.caught+G.missed)*20)).toFixed(2), isBacktest:false, desk:'basket-blitz'});
+  }
 
   const medals=['🥇','🥈','🥉'];
   document.getElementById('res-pnl').textContent=fmtPnl(G.playerPnl);
