@@ -1,21 +1,23 @@
 /*
  * LeXie Capital — Shared Design System
- * lx-design.css v1.0
+ * lx-design.css v1.1
  * Fonts: Sora (UI) · Lora (body) · DM Mono (data/code)
  * Palette: warm espresso-charcoal + emerald + dusty-rose accents
+ * Themes: [data-theme="dark"] (default) · [data-theme="light"]
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
 
-/* ── COLOR TOKENS ─────────────────────────────────── */
+/* ── COLOR TOKENS — DARK (default) ───────────────── */
 :root {
   /* Backgrounds — warm espresso-charcoal */
-  --bg-base:      #0e0c0b;
-  --bg-surface:   #141210;
-  --bg-panel:     #1a1714;
-  --bg-raised:    #211e1a;
-  --bg-elevated:  #282420;
-  --bg-overlay:   #302b26;
+  --bg-base:          #0e0c0b;
+  --bg-surface:       #141210;
+  --bg-panel:         #1a1714;
+  --bg-raised:        #211e1a;
+  --bg-elevated:      #282420;
+  --bg-overlay:       #302b26;
+  --bg-header-glass:  rgba(20,18,16,0.92);
 
   /* Borders — warm-tinted */
   --border-dim:    #332e28;
@@ -290,3 +292,96 @@ p  { font-size:var(--text-base);line-height:1.65;color:var(--fg-primary); }
 /* ── GLOW EFFECTS ─────────────────────────────────────── */
 .lx-glow-green { box-shadow:var(--glow-green); }
 .lx-glow-coral { box-shadow:var(--glow-coral); }
+
+/* ── LIGHT MODE ───────────────────────────────────────── */
+/* Applied via data-theme="light" on <html>               */
+[data-theme="light"] {
+  /* ── Backgrounds — warm cream/parchment ── */
+  --bg-base:          #faf7f3;
+  --bg-surface:       #f4efe8;
+  --bg-panel:         #ede7de;
+  --bg-raised:        #e6dfd5;
+  --bg-elevated:      #ddd6cb;
+  --bg-overlay:       #d4ccc0;
+  --bg-header-glass:  rgba(244,239,232,0.92);
+
+  /* ── Borders ── */
+  --border-dim:    #cdc5b8;
+  --border-mid:    #b8afa0;
+  --border-bright: #a09080;
+
+  /* ── Text ── */
+  --fg-muted:     #c0b8ae;
+  --fg-subtle:    #8a7e72;
+  --fg-secondary: #5c5048;
+  --fg-primary:   #38302a;
+  --fg-bright:    #1e1814;
+  --fg-white:     #0e0c0b;
+
+  /* ── Accents — slightly deepened for light-bg contrast ── */
+  --green:        #2a9466;
+  --green-dim:    #1c7650;
+  --green-glow:   rgba(42,148,102,0.18);
+  --green-bg:     rgba(42,148,102,0.09);
+
+  --coral:        #b85570;
+  --coral-dim:    #964460;
+  --coral-glow:   rgba(184,85,112,0.18);
+  --coral-bg:     rgba(184,85,112,0.09);
+
+  --amber:        #a87828;
+  --amber-dim:    #885e1a;
+  --amber-bg:     rgba(168,120,40,0.10);
+
+  --blue:         #4878b0;
+  --blue-dim:     #3860a0;
+  --blue-bg:      rgba(72,120,176,0.10);
+
+  --red:          #a83848;
+  --red-dim:      #883040;
+  --red-bg:       rgba(168,56,72,0.10);
+
+  --purple:       #7858c0;
+  --purple-bg:    rgba(120,88,192,0.10);
+
+  /* ── Semantic ── */
+  --color-positive: var(--green);
+  --color-negative: var(--red);
+  --color-warning:  var(--amber);
+  --color-info:     var(--blue);
+  --color-brand:    var(--coral);
+
+  /* ── Shadows ── */
+  --shadow-card:       0 0 0 1.5px var(--border-dim), 0 4px 24px rgba(0,0,0,0.07);
+  --shadow-card-hover: 0 0 0 1.5px var(--border-mid), 0 8px 32px rgba(0,0,0,0.11);
+  --shadow-modal:      0 0 0 1.5px var(--border-mid), 0 16px 56px rgba(0,0,0,0.15);
+  --glow-green:        0 0 16px rgba(42,148,102,0.20), 0 0 0 1.5px var(--green);
+  --glow-coral:        0 0 16px rgba(184,85,112,0.20), 0 0 0 1.5px var(--coral);
+
+  /* ── Old-page variable compat (arbitrage-sprint, basket-blitz, etc.) ── */
+  --bg:#faf7f3; --bg2:#f4efe8; --bg3:#ede7de; --bg4:#e6dfd5;
+  --panel:#f4efe8; --panel2:#ede7de;
+  --surface:#f4efe8; --card:#e6dfd5; --card2:#ddd6cb;
+  --border:#cdc5b8; --border2:#b8afa0;
+  --text:#38302a; --dim:#8a7e72; --dim2:#5c5048; --bright:#1e1814;
+  --accent:#2a9466; --accent2:#1c7650;
+  --green:#2a9466; --green-dim:#1c7650;
+  --red:#a83848; --gold:#a87828; --yellow:#a87828;
+  --blue:#4878b0; --blue-l:#5a90c8;
+  --purple:#7858c0; --cyan:#4878b0;
+  --teal:#2a9466; --orange:#a87828; --pink:#b85570;
+  --green-bg:rgba(42,148,102,0.10); --red-bg:rgba(168,56,72,0.10);
+  --blue-bg:rgba(72,120,176,0.10);  --yellow-bg:rgba(168,120,40,0.10);
+  --purple-bg:rgba(120,88,192,0.10); --teal-bg:rgba(42,148,102,0.10);
+  --orange-bg:rgba(168,120,40,0.10);
+  --shadow:rgba(0,0,0,0.10);
+  --mono:'DM Mono','JetBrains Mono',monospace;
+}
+
+/* ── SMOOTH THEME TRANSITION ──────────────────────────── */
+*, *::before, *::after {
+  transition: background-color 180ms ease, border-color 180ms ease, color 60ms ease;
+}
+/* Disable transition on interactive elements to avoid laggy hover feels */
+button, a, input, select, textarea { transition: none; }
+button { transition: transform var(--t-fast), box-shadow var(--t-fast), opacity var(--t-fast); }
