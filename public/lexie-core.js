@@ -1,10 +1,32 @@
 /**
  * LeXie Capital — Core Career & Progression System
- * lexie-core.js  v1.0
+ * lexie-core.js  v1.1
  *
  * Include AFTER instruments.js on every page.
- * Exposes: LX, lxXP, lxLevel, lxUnlock, lxEvent, lxDailyState
+ * Exposes: LX, lxXP, lxLevel, lxUnlock, lxEvent, lxDailyState, lxTheme
  */
+
+/* ─── THEME SYSTEM — runs immediately so there's no flash ────────── */
+(function applyTheme() {
+  var saved = localStorage.getItem('lx_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  // Expose globally
+  window.lxTheme = {
+    get: function() { return localStorage.getItem('lx_theme') || 'dark'; },
+    set: function(t) {
+      localStorage.setItem('lx_theme', t);
+      document.documentElement.setAttribute('data-theme', t);
+      var btn = document.getElementById('lx-theme-btn');
+      if (btn) btn.textContent = t === 'light' ? '☾' : '☀';
+      var btn2 = document.getElementById('lx-theme-btn-2');
+      if (btn2) btn2.textContent = t === 'light' ? '☾' : '☀';
+    },
+    toggle: function() {
+      window.lxTheme.set(window.lxTheme.get() === 'dark' ? 'light' : 'dark');
+    },
+    isDark: function() { return window.lxTheme.get() === 'dark'; }
+  };
+})();
 
 /* ─── Constants ───────────────────────────────────────────────────── */
 const LX_STORAGE_KEY = 'lexie_career_v1';
@@ -306,30 +328,39 @@ function lxDailyState() {
 
     const hud = document.createElement('div');
     hud.id = 'lx-hud';
+    // Use CSS vars from lx-design.css so it respects dark/light theme
     hud.style.cssText = `
       position:fixed; bottom:16px; right:16px; z-index:9999;
-      background:rgba(15,15,20,0.92); border:1px solid rgba(255,255,255,0.08);
-      border-radius:12px; padding:10px 14px; min-width:200px;
-      font-family:'Inter',sans-serif; font-size:12px; color:#c0cfe0;
-      backdrop-filter:blur(8px); box-shadow:0 4px 24px rgba(0,0,0,0.5);
-      cursor:pointer; transition:all .2s;
+      background:var(--bg-elevated,#282420); border:1.5px solid var(--border-dim,#332e28);
+      border-radius:14px; padding:10px 14px; min-width:210px;
+      font-family:'Sora','Inter',sans-serif; font-size:12px; color:var(--fg-secondary,#b8b0a8);
+      box-shadow:var(--shadow-card,0 4px 24px rgba(0,0,0,0.4));
+      user-select:none;
     `;
-    hud.title = 'LeXie Career Progress';
+    hud.title = 'LeXie Career Progress — click to go to Lobby';
+    const themeIcon = window.lxTheme.isDark() ? '☀' : '☾';
     hud.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span id="lx-hud-badge" style="font-size:18px">${info.badge}</span>
-        <div>
-          <div style="font-weight:700;color:#e8f0fe;font-size:11px" id="lx-hud-title">${info.title}</div>
-          <div style="color:#667eea;font-size:10px" id="lx-hud-xp">${info.xp.toLocaleString()} XP</div>
+        <span id="lx-hud-badge" style="font-size:18px;line-height:1">${info.badge}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;color:var(--fg-bright,#f0ebe4);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="lx-hud-title">${info.title}</div>
+          <div style="color:var(--green,#4dba88);font-size:10px;font-family:'DM Mono',monospace" id="lx-hud-xp">${info.xp.toLocaleString()} XP</div>
         </div>
-        <a href="index.html" style="margin-left:auto;font-size:11px;color:#667eea;text-decoration:none" title="Lobby">🏦</a>
+        <button id="lx-theme-btn" title="Toggle light/dark mode" style="background:none;border:1px solid var(--border-mid,#484038);border-radius:6px;color:var(--fg-subtle,#6a6058);font-size:12px;cursor:pointer;padding:2px 6px;line-height:1.4;flex-shrink:0">${themeIcon}</button>
+        <a href="index.html" style="flex-shrink:0;font-size:14px;color:var(--fg-subtle,#6a6058);text-decoration:none;line-height:1" title="Lobby">⌂</a>
       </div>
-      <div style="background:rgba(255,255,255,0.08);border-radius:4px;height:4px;overflow:hidden">
-        <div id="lx-hud-bar" style="background:linear-gradient(90deg,#667eea,#764ba2);height:100%;width:${info.pct}%;transition:width .4s"></div>
+      <div style="background:var(--bg-overlay,#302b26);border-radius:var(--r-pill,999px);height:4px;overflow:hidden">
+        <div id="lx-hud-bar" style="background:linear-gradient(90deg,var(--green,#4dba88),var(--coral,#d4728a));height:100%;width:${info.pct}%;transition:width .4s ease"></div>
       </div>
-      <div style="margin-top:4px;color:#667eea;font-size:10px" id="lx-hud-next">${info.next ? `${info.xpInLevel}/${info.xpToNext} to ${info.next.title}` : 'MAX LEVEL'}</div>
+      <div style="margin-top:4px;color:var(--fg-subtle,#6a6058);font-size:10px;font-family:'DM Mono',monospace" id="lx-hud-next">${info.next ? `${info.xpInLevel}/${info.xpToNext} → ${info.next.title}` : '✦ MAX LEVEL'}</div>
     `;
 
+    // Theme toggle — stop propagation so it doesn't navigate to lobby
+    hud.querySelector('#lx-theme-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      window.lxTheme.toggle();
+    });
+    // Click elsewhere on HUD navigates to lobby
     hud.addEventListener('click', () => { window.location.href = 'index.html'; });
 
     document.body.appendChild(hud);
@@ -371,12 +402,13 @@ function lxDailyState() {
   function _showToast(msg, type) {
     const area = document.getElementById('lx-toasts');
     if (!area) return;
-    const color = type === 'xp' ? '#667eea' : type === 'level' ? '#ffd700' : '#28a745';
+    const color = type === 'xp' ? 'var(--green,#4dba88)' : type === 'level' ? 'var(--amber,#cc9438)' : 'var(--green,#4dba88)';
     const t = document.createElement('div');
     t.style.cssText = `
-      background:rgba(15,15,20,0.95); border-left:3px solid ${color};
-      color:#e8f0fe; padding:8px 14px; border-radius:8px; font-size:12px;
-      font-family:'Inter',sans-serif; box-shadow:0 2px 12px rgba(0,0,0,0.4);
+      background:var(--bg-elevated,#282420); border-left:3px solid ${color};
+      border:1.5px solid var(--border-mid,#484038); border-left:3px solid ${color};
+      color:var(--fg-primary,#d4cdc6); padding:8px 14px; border-radius:8px; font-size:12px;
+      font-family:'Sora','Inter',sans-serif; box-shadow:var(--shadow-card,0 2px 12px rgba(0,0,0,0.4));
       opacity:0; transform:translateX(20px); transition:all .3s;
       pointer-events:none; white-space:nowrap;
     `;
@@ -391,10 +423,10 @@ function lxDailyState() {
     if (!area) return;
     const t = document.createElement('div');
     t.style.cssText = `
-      background:linear-gradient(135deg,rgba(40,60,30,0.97),rgba(20,40,15,0.97));
-      border:1px solid #28a745; border-radius:10px; padding:12px 16px;
-      font-family:'Inter',sans-serif; color:#e8f0fe;
-      box-shadow:0 4px 20px rgba(40,167,69,0.3);
+      background:var(--bg-elevated,#282420);
+      border:1.5px solid var(--green,#4dba88); border-radius:10px; padding:12px 16px;
+      font-family:'Sora','Inter',sans-serif; color:var(--fg-primary,#d4cdc6);
+      box-shadow:0 4px 20px rgba(77,186,136,0.2);
       opacity:0; transform:translateX(20px); transition:all .3s;
       pointer-events:none; max-width:260px;
     `;
