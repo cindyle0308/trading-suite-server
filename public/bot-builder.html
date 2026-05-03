@@ -778,6 +778,12 @@ function endTournament() {
   document.getElementById('rs-pnl').textContent=(yourFinalPnL>=0?'+':'')+'€'+yourFinalPnL.toFixed(0);
   document.getElementById('rs-pnl').style.color=yourFinalPnL>=0?'var(--green)':'var(--red)';
   document.getElementById('rs-trades').textContent=T.yourTrades;
+  if(window.LX){
+    LX.visitDesk('bot-builder');
+    var bbXP = rank===1?150 : rank===2?100 : rank===3?70 : 30;
+    LX.addXP(bbXP, 'Bot Builder');
+    LX.recordRun({sharpe: +((6-rank)/2.5).toFixed(2), isBacktest:false, desk:'bot-builder'});
+  }
   // Analysis
   const marketNames={alpha:'ALPHA (Trending)',beta:'BETA (Mean-Reverting)',gamma:'GAMMA (Volatile)'};
   const stratNames={mm:'Market Maker',momentum:'Momentum',meanrev:'Mean Reversion'};
