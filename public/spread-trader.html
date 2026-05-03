@@ -2,849 +2,422 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<script>!function(){var t=localStorage.getItem("lx_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}();</script>
+<script>!function(){var t=localStorage.getItem('lx_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pairs Research Desk — LeXie Capital</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="instruments.js"></script>
-<script src="lexie-core.js"></script>
+<title>Spread Trader — LeXie Capital</title>
 <link rel="stylesheet" href="lx-design.css">
 <style>
-:root {
-  --bg:#0e0c0b; --surface:#141210; --card:#1a1714; --card2:#211e1a;
-  --border:#332e28; --border2:#484038;
-  --text:#d4cdc6; --dim:#6a6058;
-  --accent:#4dba88; --accent2:#37966c;
-  --green:#4dba88; --green-dim:#37966c; --red:#c45868; --gold:#cc9438;
-  --mono:'DM Mono','JetBrains Mono',monospace;
-}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(102,126,234,0.025)1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,0.025)1px,transparent 1px);background-size:40px 40px;}
-
-/* ── Header ── */
-.header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:1px solid var(--border);background:rgba(8,12,20,0.85);backdrop-filter:blur(12px);}
-.back-btn{font-size:12px;color:var(--dim);text-decoration:none;display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:8px;transition:all .2s;}
-.back-btn:hover{color:var(--accent);border-color:var(--accent);}
-.header-title{display:flex;flex-direction:column;align-items:center;}
-.header-title h1{font-size:16px;font-weight:800;color:#e8f0fe;}
-.header-title p{font-size:11px;color:var(--dim);}
-.header-right{display:flex;align-items:center;gap:10px;}
-
-/* ── Pipeline strip ── */
-.pipeline{display:flex;align-items:center;justify-content:center;gap:0;padding:12px 32px;background:rgba(10,15,25,0.7);border-bottom:1px solid var(--border);position:relative;z-index:5;}
-.pipe-step{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;font-size:11px;font-weight:600;color:var(--dim);border:1px solid transparent;transition:all .3s;white-space:nowrap;}
-.pipe-step.active{background:rgba(102,126,234,0.15);border-color:rgba(102,126,234,0.3);color:var(--accent);}
-.pipe-step.done{color:var(--green);}
-.pipe-arrow{color:var(--border2);font-size:14px;margin:0 2px;}
-
-/* ── Layout ── */
-.layout{display:grid;grid-template-columns:320px 1fr;gap:0;height:calc(100vh - 116px);position:relative;z-index:1;}
-.sidebar{border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);display:flex;flex-direction:column;}
-.main-area{overflow-y:auto;padding:24px;}
-
-/* ── Pair selector ── */
-.pair-selector-header{padding:16px;border-bottom:1px solid var(--border);}
-.pair-selector-header h2{font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:4px;}
-.pair-selector-header p{font-size:11px;color:var(--dim);}
-.pair-list{padding:8px;}
-.pair-item{padding:12px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:all .2s;background:transparent;}
-.pair-item:hover{background:var(--card2);border-color:rgba(102,126,234,0.25);}
-.pair-item.active{background:rgba(102,126,234,0.1);border-color:rgba(102,126,234,0.4);}
-.pair-item-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
-.pair-emojis{font-size:18px;}
-.pair-names{font-size:13px;font-weight:700;color:#e8f0fe;}
-.pair-type{font-size:10px;padding:1px 7px;border-radius:8px;background:rgba(102,126,234,0.12);color:var(--accent);}
-.pair-thesis{font-size:11px;color:var(--dim);line-height:1.4;}
-.pair-stats-row{display:flex;gap:8px;margin-top:6px;}
-.pair-stat{font-size:10px;color:var(--dim);}
-.pair-stat span{color:#e8f0fe;font-weight:600;}
-
-/* ── Research panel ── */
-.research-panel{display:grid;grid-template-rows:auto 1fr auto;gap:16px;}
-
-/* ── Step cards ── */
-.step-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;}
-.step-card-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-.step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
-.step-title{font-size:14px;font-weight:700;color:#e8f0fe;}
-.step-desc{font-size:12px;color:var(--dim);}
-
-/* ── Charts ── */
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.chart-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;}
-.chart-box h3{font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:4px;}
-.chart-box p{font-size:11px;color:var(--dim);margin-bottom:12px;}
-.chart-wrap{position:relative;height:180px;}
-
-/* ── Metrics strip ── */
-.metrics-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
-.metric{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;}
-.metric-value{font-size:20px;font-weight:800;color:#e8f0fe;font-variant-numeric:tabular-nums;}
-.metric-label{font-size:10px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:0.4px;}
-.metric-sub{font-size:10px;color:var(--dim);margin-top:1px;}
-.metric.good .metric-value{color:var(--green);}
-.metric.bad  .metric-value{color:var(--red);}
-
-/* ── Signal config ── */
-.signal-config{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
-.param-group label{display:block;font-size:11px;color:var(--dim);margin-bottom:4px;}
-.param-group input,
-.param-group select{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);color:#e8f0fe;border-radius:8px;padding:7px 10px;font-size:13px;font-family:var(--mono);}
-.param-group input:focus,
-.param-group select:focus{outline:none;border-color:var(--accent);}
-
-/* ── Results panel ── */
-.results-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;}
-.results-tabs{display:flex;gap:4px;margin-bottom:16px;}
-.rtab{font-size:12px;padding:5px 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--dim);cursor:pointer;transition:all .2s;}
-.rtab.active{background:rgba(102,126,234,0.15);border-color:rgba(102,126,234,0.3);color:var(--accent);}
-.rtab-content{display:none;}
-.rtab-content.visible{display:block;}
-
-/* ── Interpretation box ── */
-.interp-box{background:rgba(102,126,234,0.06);border:1px solid rgba(102,126,234,0.15);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--dim);line-height:1.6;margin-top:12px;}
-.interp-box strong{color:#e8f0fe;}
-
-/* ── Action buttons ── */
-.action-row{display:flex;gap:10px;align-items:center;}
-.btn{padding:9px 20px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
-.btn-primary:hover{opacity:0.9;transform:translateY(-1px);}
-.btn-secondary{background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text);}
-.btn-secondary:hover{background:var(--card2);border-color:var(--accent);}
-.btn-success{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:var(--green);}
-.btn-success:hover{background:rgba(34,197,94,0.25);}
-.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-
-/* ── Status badge ── */
-.status-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600;}
-.status-badge.running{background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);}
-.status-badge.done{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
-
-/* ── Regression table ── */
-.reg-table{width:100%;border-collapse:collapse;font-size:12px;}
-.reg-table th{text-align:left;color:var(--dim);font-weight:600;padding:4px 8px;border-bottom:1px solid var(--border);}
-.reg-table td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.03);font-variant-numeric:tabular-nums;}
-.reg-table tr:last-child td{border:none;}
-
-/* ── Score gauge ── */
-.score-gauge{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid var(--border);}
-.score-num{font-size:36px;font-weight:900;color:#e8f0fe;}
-.score-label{font-size:11px;color:var(--dim);}
-.score-bar-wrap{flex:1;background:rgba(255,255,255,0.06);border-radius:4px;height:8px;overflow:hidden;}
-.score-bar{height:100%;border-radius:4px;transition:width .6s;}
-
-::-webkit-scrollbar{width:5px;}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px;}
+body{font-family:'Inter',system-ui,sans-serif;font-size:14px;background:var(--bg-base);color:var(--fg-primary);min-height:100vh;display:flex;flex-direction:column;}
+.lx-nav{height:48px;background:var(--bg-surface);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:8px;padding:0 16px;flex-shrink:0;font-size:12px;}
+.lx-nav a{color:var(--fg-subtle);text-decoration:none;padding:4px 6px;border-radius:4px;}
+.lx-nav a:hover{color:var(--fg-primary);background:var(--bg-raised);}
+.lx-nav .sep{color:var(--border-mid);}
+.nav-logo{color:var(--gold)!important;font-weight:700;font-size:13px;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-pill{background:var(--bg-raised);border:1px solid var(--border-dim);border-radius:16px;padding:2px 10px;font-size:11px;color:var(--fg-subtle);}
+.mode-bar{background:var(--bg-panel);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;padding:0 20px;flex-shrink:0;}
+.mode-tab{padding:12px 20px;font-size:13px;font-weight:600;border-bottom:2px solid transparent;color:var(--fg-subtle);cursor:pointer;transition:all .15s;}
+.mode-tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+.mode-tab:hover:not(.active){color:var(--fg-primary);}
+.api-link{margin-left:auto;font-size:12px;color:var(--fg-subtle);text-decoration:none;padding:4px 10px;border:1px solid var(--border-dim);border-radius:6px;}
+.api-link:hover{color:var(--teal);border-color:var(--teal);}
+.workspace{flex:1;display:flex;overflow:hidden;}
+#manual-mode{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.manual-top{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg-panel);border-bottom:1px solid var(--border-dim);flex-shrink:0;flex-wrap:wrap;}
+.pair-select,.pair-sel-code{background:var(--bg-raised);border:1px solid var(--border-dim);color:var(--fg-primary);padding:6px 10px;border-radius:6px;font-size:12px;}
+.stat-pill{background:var(--bg-raised);border:1px solid var(--border-dim);border-radius:8px;padding:4px 10px;font-size:12px;display:flex;gap:6px;align-items:center;}
+.stat-pill .sv{font-weight:700;font-family:monospace;}
+.stat-pill.pos{border-color:var(--green);background:var(--green-bg);}
+.stat-pill.neg{border-color:var(--red);background:var(--red-bg);}
+.btn-sm{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:opacity .15s;}
+.btn-buy{background:var(--green);color:#fff;}
+.btn-sell{background:var(--red);color:#fff;}
+.btn-flat{background:var(--bg-overlay);border:1px solid var(--border-mid);color:var(--fg-primary);}
+.btn-sm:disabled{opacity:.35;cursor:not-allowed;}
+.manual-body{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;overflow:hidden;}
+.chart-panel{background:var(--bg-surface);border-right:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);display:flex;flex-direction:column;overflow:hidden;}
+.chart-panel:nth-child(2n){border-right:none;}
+.chart-panel:nth-child(n+3){border-bottom:none;}
+.chart-label{padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-subtle);border-bottom:1px solid var(--border-dim);flex-shrink:0;}
+.chart-canvas-wrap{flex:1;position:relative;overflow:hidden;}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;}
+#code-mode{flex:1;display:flex;overflow:hidden;}
+.editor-pane{width:46%;min-width:320px;border-right:1px solid var(--border-dim);display:flex;flex-direction:column;background:var(--bg-panel);overflow:hidden;}
+.results-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.pane-header{padding:9px 14px;background:var(--bg-surface);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.pane-title{font-size:11px;font-weight:700;color:var(--fg-subtle);text-transform:uppercase;letter-spacing:.07em;}
+.run-btn{margin-left:auto;background:var(--teal);color:#fff;border:none;padding:6px 18px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
+.run-btn:hover{opacity:.88;}
+.template-bar{padding:5px 14px;background:var(--bg-raised);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+.tmpl-btn{font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--border-dim);background:var(--bg-surface);color:var(--fg-subtle);cursor:pointer;}
+.tmpl-btn:hover{border-color:var(--teal);color:var(--teal);}
+.tmpl-label{font-size:11px;color:var(--fg-subtle);}
+.code-editor{flex:1;font-family:'JetBrains Mono','Fira Code',monospace;font-size:12px;line-height:1.7;padding:14px;background:var(--bg-base);color:var(--fg-primary);border:none;resize:none;outline:none;tab-size:2;}
+.code-error{padding:8px 14px;background:var(--red-bg);border-top:1px solid var(--red);color:var(--red);font-size:12px;font-family:monospace;flex-shrink:0;display:none;}
+.results-charts{flex:1;display:grid;grid-template-rows:1fr 1fr;overflow:hidden;}
+.rc-panel{border-bottom:1px solid var(--border-dim);display:flex;flex-direction:column;overflow:hidden;}
+.rc-panel:last-child{border-bottom:none;}
+.stats-bar{padding:10px 16px;background:var(--bg-surface);border-top:1px solid var(--border-dim);display:flex;gap:20px;flex-shrink:0;flex-wrap:wrap;}
+.stat-item{display:flex;flex-direction:column;gap:2px;}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle);}
+.stat-value{font-size:15px;font-weight:700;font-family:monospace;}
+.stat-value.pos{color:var(--green);}
+.stat-value.neg{color:var(--red);}
+.stat-value.neu{color:var(--fg-primary);}
 </style>
 </head>
-<body data-desk="spread-trader">
+<body>
+<nav class="lx-nav">
+  <a href="index.html" class="nav-logo">LeXie</a>
+  <span class="sep">|</span>
+  <a href="spread-trader.html" style="color:var(--fg-primary);font-weight:600">⚖️ Spread Trader</a>
+  <span class="sep">·</span>
+  <a href="momentum-trainer.html">Momentum</a>
+  <a href="price-war.html">Price War</a>
+  <a href="regime-rider.html">Regime</a>
+  <a href="terminal.html">Terminal</a>
+  <div class="nav-right"><a href="api-reference.html" class="nav-pill">📖 API Ref</a></div>
+</nav>
+<div class="mode-bar">
+  <div class="mode-tab active" id="tab-manual" onclick="switchMode('manual')">🖱 Manual</div>
+  <div class="mode-tab" id="tab-code" onclick="switchMode('code')">💻 Code Lab</div>
+  <a href="api-reference.html#spread" class="api-link">📖 API Reference</a>
+</div>
+<div class="workspace">
 
-<header class="header">
-  <a href="index.html" class="back-btn">&#x2190; Lobby</a>
-  <div class="header-title">
-    <h1>&#x2696;&#xFE0F; Pairs Research Desk</h1>
-    <p>Co-integration &bull; Z-Score &bull; Statistical Arbitrage</p>
+<!-- MANUAL MODE -->
+<div id="manual-mode">
+  <div class="manual-top">
+    <select class="pair-select" id="pair-select" onchange="resetManual()">
+      <option value="ko-pep">KO / PEP</option>
+      <option value="xom-cvx">XOM / CVX</option>
+      <option value="jpm-bac">JPM / BAC</option>
+      <option value="aapl-msft">AAPL / MSFT</option>
+      <option value="gld-slv">GLD / SLV</option>
+    </select>
+    <div class="stat-pill" id="sp-z">Z <span class="sv" id="z-val">—</span></div>
+    <div class="stat-pill" id="sp-pos">Pos <span class="sv" id="pos-val">FLAT</span></div>
+    <div class="stat-pill" id="sp-pnl">PnL <span class="sv" id="pnl-val">$0</span></div>
+    <button class="btn-sm btn-buy"  id="btn-long"  onclick="manualTrade('LONG')"  disabled>▲ Long Spread</button>
+    <button class="btn-sm btn-sell" id="btn-short" onclick="manualTrade('SHORT')" disabled>▼ Short Spread</button>
+    <button class="btn-sm btn-flat" id="btn-flat"  onclick="manualTrade('FLAT')"  disabled>✕ Flatten</button>
+    <button class="btn-sm" style="margin-left:auto;background:var(--bg-raised);border:1px solid var(--border-dim);color:var(--fg-primary)" onclick="resetManual()">↺ Reset</button>
   </div>
-  <div class="header-right">
-    
-    <span class="status-badge" id="status-badge">Ready</span>
+  <div class="manual-body">
+    <div class="chart-panel"><div class="chart-label">Asset Prices (indexed)</div><div class="chart-canvas-wrap"><canvas id="c-prices"></canvas></div></div>
+    <div class="chart-panel"><div class="chart-label">Raw Spread</div><div class="chart-canvas-wrap"><canvas id="c-spread"></canvas></div></div>
+    <div class="chart-panel"><div class="chart-label">Z-Score  <span style="font-size:9px;color:var(--fg-subtle);margin-left:6px">Enter ±2σ · Exit ±0.5σ</span></div><div class="chart-canvas-wrap"><canvas id="c-zscore"></canvas></div></div>
+    <div class="chart-panel"><div class="chart-label">Equity Curve</div><div class="chart-canvas-wrap"><canvas id="c-equity-m"></canvas></div></div>
   </div>
-</header>
-
-<div class="pipeline">
-  <div class="pipe-step active" id="step-1">1 Select Pair</div>
-  <div class="pipe-arrow">&#x203A;</div>
-  <div class="pipe-step" id="step-2">2 Correlation</div>
-  <div class="pipe-arrow">&#x203A;</div>
-  <div class="pipe-step" id="step-3">3 Z-Score Signal</div>
-  <div class="pipe-arrow">&#x203A;</div>
-  <div class="pipe-step" id="step-4">4 Backtest</div>
-  <div class="pipe-arrow">&#x203A;</div>
-  <div class="pipe-step" id="step-5">5 Results</div>
 </div>
 
-<div class="layout">
-  <!-- Sidebar: pair selector -->
-  <div class="sidebar">
-    <div class="pair-selector-header">
-      <h2>Curated Pairs</h2>
-      <p>Select a pair to research. Each has documented economic relationships.</p>
+<!-- CODE MODE -->
+<div id="code-mode" style="display:none">
+  <div class="editor-pane">
+    <div class="pane-header">
+      <span class="pane-title">Strategy Code</span>
+      <select class="pair-sel-code" id="code-pair">
+        <option value="ko-pep">KO/PEP</option>
+        <option value="xom-cvx">XOM/CVX</option>
+        <option value="jpm-bac">JPM/BAC</option>
+        <option value="aapl-msft">AAPL/MSFT</option>
+        <option value="gld-slv">GLD/SLV</option>
+      </select>
+      <button class="run-btn" onclick="runCodeStrategy()">▶ Run</button>
     </div>
-    <div class="pair-list" id="pair-list"></div>
+    <div class="template-bar">
+      <span class="tmpl-label">Load:</span>
+      <button class="tmpl-btn" onclick="loadTemplate('basic')">Basic Z-Score</button>
+      <button class="tmpl-btn" onclick="loadTemplate('dynamic')">Dynamic Entry</button>
+      <button class="tmpl-btn" onclick="loadTemplate('kalman')">Kalman Hedge</button>
+    </div>
+    <textarea class="code-editor" id="strategy-code" spellcheck="false"></textarea>
+    <div class="code-error" id="code-error"></div>
   </div>
-
-  <!-- Main research area -->
-  <div class="main-area" id="main-area">
-    <div id="no-pair-msg" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--dim);">
-      <div style="font-size:48px">&#x2696;&#xFE0F;</div>
-      <div style="font-size:16px;font-weight:700;color:#e8f0fe;">Select a Pair to Begin Research</div>
-      <div style="font-size:13px;max-width:360px;text-align:center;line-height:1.6;">
-        Choose a pair from the sidebar. You will work through a research pipeline:
-        correlation analysis, spread construction, Z-score signal design, and backtesting.
-      </div>
+  <div class="results-pane">
+    <div class="pane-header">
+      <span class="pane-title">Simulation</span>
+      <span id="run-status" style="font-size:11px;color:var(--fg-subtle);margin-left:4px">Press ▶ Run</span>
     </div>
+    <div class="results-charts">
+      <div class="rc-panel"><div class="chart-label">Z-Score + Entry/Exit Signals</div><div class="chart-canvas-wrap"><canvas id="c-code-z"></canvas></div></div>
+      <div class="rc-panel"><div class="chart-label">Equity Curve</div><div class="chart-canvas-wrap"><canvas id="c-code-eq"></canvas></div></div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-label">Sharpe</div><div class="stat-value neu" id="cs-sharpe">—</div></div>
+      <div class="stat-item"><div class="stat-label">Total PnL</div><div class="stat-value neu" id="cs-pnl">—</div></div>
+      <div class="stat-item"><div class="stat-label">Max DD</div><div class="stat-value neu" id="cs-dd">—</div></div>
+      <div class="stat-item"><div class="stat-label">Trades</div><div class="stat-value neu" id="cs-trades">—</div></div>
+      <div class="stat-item"><div class="stat-label">Win Rate</div><div class="stat-value neu" id="cs-wr">—</div></div>
+      <div class="stat-item"><div class="stat-label">Avg Hold</div><div class="stat-value neu" id="cs-hold">—</div></div>
+    </div>
+  </div>
+</div>
 
-    <div id="research-content" style="display:none">
-
-      <!-- Step 1: Pair overview -->
-      <div class="step-card" id="card-overview" style="margin-bottom:16px">
-        <div class="step-card-header">
-          <div class="step-num">1</div>
-          <div>
-            <div class="step-title" id="overview-title">Pair Overview</div>
-            <div class="step-desc" id="overview-sub">Economic relationship and research context</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div style="font-size:12px;color:var(--dim);line-height:1.6" id="overview-thesis"></div>
-          <div>
-            <table class="reg-table" id="overview-table">
-              <tr><th>Parameter</th><th>Leg A</th><th>Leg B</th></tr>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Correlation & spread charts -->
-      <div class="step-card" id="card-corr" style="margin-bottom:16px">
-        <div class="step-card-header">
-          <div class="step-num">2</div>
-          <div>
-            <div class="step-title">Correlation &amp; Spread Analysis</div>
-            <div class="step-desc">Simulate 300-bar price paths and study the relationship</div>
-          </div>
-          <button class="btn btn-secondary" onclick="simulate()" style="margin-left:auto">&#x1F504; Resimulate</button>
-        </div>
-        <div class="charts-grid">
-          <div class="chart-box">
-            <h3>Price Series</h3>
-            <p>Normalised price paths of both legs</p>
-            <div class="chart-wrap"><canvas id="chart-prices"></canvas></div>
-          </div>
-          <div class="chart-box">
-            <h3>Spread (Leg A &minus; hedge &times; Leg B)</h3>
-            <p>Raw spread over time &mdash; should be stationary</p>
-            <div class="chart-wrap"><canvas id="chart-spread"></canvas></div>
-          </div>
-        </div>
-        <div class="metrics-strip" style="margin-top:12px">
-          <div class="metric" id="m-corr"><div class="metric-value" id="mv-corr">-</div><div class="metric-label">Correlation</div></div>
-          <div class="metric" id="m-hurst"><div class="metric-value" id="mv-hurst">-</div><div class="metric-label">Spread Hurst</div><div class="metric-sub">0.5=random, &lt;0.5=MR</div></div>
-          <div class="metric" id="m-halflife"><div class="metric-value" id="mv-halflife">-</div><div class="metric-label">Half-Life (bars)</div></div>
-          <div class="metric" id="m-hedge"><div class="metric-value" id="mv-hedge">-</div><div class="metric-label">Hedge Ratio</div></div>
-          <div class="metric" id="m-vol"><div class="metric-value" id="mv-vol">-</div><div class="metric-label">Spread Vol</div></div>
-        </div>
-      </div>
-
-      <!-- Step 3: Signal design -->
-      <div class="step-card" id="card-signal" style="margin-bottom:16px">
-        <div class="step-card-header">
-          <div class="step-num">3</div>
-          <div>
-            <div class="step-title">Z-Score Signal Design</div>
-            <div class="step-desc">Configure entry/exit rules for the mean-reversion strategy</div>
-          </div>
-        </div>
-        <div class="signal-config">
-          <div class="param-group">
-            <label>Lookback window (bars)</label>
-            <input type="number" id="p-lookback" value="20" min="5" max="100">
-          </div>
-          <div class="param-group">
-            <label>Entry threshold (z-score)</label>
-            <input type="number" id="p-entry" value="2.0" min="0.5" max="4.0" step="0.1">
-          </div>
-          <div class="param-group">
-            <label>Exit threshold (z-score)</label>
-            <input type="number" id="p-exit" value="0.5" min="0.0" max="2.0" step="0.1">
-          </div>
-          <div class="param-group">
-            <label>Stop-loss (z-score)</label>
-            <input type="number" id="p-stop" value="3.5" min="1.0" max="6.0" step="0.1">
-          </div>
-          <div class="param-group">
-            <label>Position sizing</label>
-            <select id="p-sizing">
-              <option value="fixed">Fixed (equal notional)</option>
-              <option value="vol">Vol-adjusted</option>
-              <option value="conv">Conviction-scaled</option>
-            </select>
-          </div>
-          <div class="param-group">
-            <label>Max concurrent positions</label>
-            <input type="number" id="p-maxpos" value="1" min="1" max="3">
-          </div>
-        </div>
-        <div class="chart-box" style="margin-bottom:0">
-          <h3>Z-Score Signal</h3>
-          <p>Rolling z-score of spread with entry/exit thresholds</p>
-          <div class="chart-wrap"><canvas id="chart-zscore"></canvas></div>
-        </div>
-        <button class="btn btn-secondary" onclick="recomputeZScore()" style="margin-top:12px">&#x1F4CA; Update Signal</button>
-      </div>
-
-      <!-- Step 4 + 5: Backtest & Results -->
-      <div class="step-card">
-        <div class="step-card-header">
-          <div class="step-num">4</div>
-          <div>
-            <div class="step-title">Backtest &amp; Results</div>
-            <div class="step-desc">Run 20 simulations to evaluate strategy robustness</div>
-          </div>
-          <div class="action-row" style="margin-left:auto">
-            <button class="btn btn-primary" id="run-btn" onclick="runBacktest()">&#x25B6; Run Backtest (20 paths)</button>
-          </div>
-        </div>
-
-        <!-- Results tabs -->
-        <div class="results-tabs">
-          <button class="rtab active" onclick="showRTab('summary')">Summary</button>
-          <button class="rtab" onclick="showRTab('equity')">Equity Curves</button>
-          <button class="rtab" onclick="showRTab('signals')">Signal Stats</button>
-          <button class="rtab" onclick="showRTab('risk')">Risk</button>
-        </div>
-
-        <div class="rtab-content visible" id="rtab-summary">
-          <div id="summary-placeholder" style="color:var(--dim);font-size:13px;padding:16px 0">
-            Configure parameters above and click Run Backtest.
-          </div>
-          <div id="summary-content" style="display:none">
-            <div class="score-gauge" style="margin-bottom:16px">
-              <div>
-                <div class="score-num" id="res-score">-</div>
-                <div class="score-label">Research Score</div>
-              </div>
-              <div style="flex:1">
-                <div class="score-bar-wrap"><div class="score-bar" id="res-score-bar" style="width:0%"></div></div>
-                <div style="font-size:11px;color:var(--dim);margin-top:4px" id="res-verdict"></div>
-              </div>
-            </div>
-            <div class="metrics-strip" style="margin-bottom:12px">
-              <div class="metric" id="r-sharpe"><div class="metric-value" id="rv-sharpe">-</div><div class="metric-label">Sharpe</div></div>
-              <div class="metric" id="r-maxdd"><div class="metric-value" id="rv-maxdd">-</div><div class="metric-label">Max DD</div></div>
-              <div class="metric" id="r-winrate"><div class="metric-value" id="rv-winrate">-</div><div class="metric-label">Win Rate</div></div>
-              <div class="metric" id="r-trades"><div class="metric-value" id="rv-trades">-</div><div class="metric-label">Avg Trades</div></div>
-              <div class="metric" id="r-pnl"><div class="metric-value" id="rv-pnl">-</div><div class="metric-label">Avg PnL%</div></div>
-            </div>
-            <div class="interp-box" id="res-interp"></div>
-          </div>
-        </div>
-
-        <div class="rtab-content" id="rtab-equity">
-          <div class="chart-wrap" style="height:260px"><canvas id="chart-equity"></canvas></div>
-        </div>
-        <div class="rtab-content" id="rtab-signals">
-          <div id="signals-content" style="color:var(--dim);font-size:13px;padding:8px 0">Run backtest to see signal statistics.</div>
-        </div>
-        <div class="rtab-content" id="rtab-risk">
-          <div class="chart-wrap" style="height:220px"><canvas id="chart-dd"></canvas></div>
-          <div id="risk-content" style="color:var(--dim);font-size:13px;padding:8px 0"></div>
-        </div>
-      </div>
-
-    </div><!-- /research-content -->
-  </div><!-- /main-area -->
-</div><!-- /layout -->
-
+</div>
+<script src="lexie-core.js"></script>
 <script>
-/* ── State ── */
-var currentPair = null;
-var pricesA = [], pricesB = [];
-var spreadArr = [], zscoreArr = [];
-var charts = {};
-var btResults = null;
+const PAIRS={'ko-pep':{a:'KO',b:'PEP',aP:60,bP:175,beta:0.35,sigma:0.012,halfLife:18,color:'#4dba88'},'xom-cvx':{a:'XOM',b:'CVX',aP:105,bP:155,beta:0.68,sigma:0.016,halfLife:12,color:'#f59e0b'},'jpm-bac':{a:'JPM',b:'BAC',aP:195,bP:37,beta:5.25,sigma:0.014,halfLife:15,color:'#60a5fa'},'aapl-msft':{a:'AAPL',b:'MSFT',aP:190,bP:410,beta:0.46,sigma:0.018,halfLife:10,color:'#c084fc'},'gld-slv':{a:'GLD',b:'SLV',aP:220,bP:25,beta:8.8,sigma:0.015,halfLife:20,color:'#fb923c'}};
+const LB=30,NB=300;
 
-/* ── Chart defaults ── */
-Chart.defaults.color = '#667890';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
-
-function mkChart(id, cfg) {
-  if (charts[id]) { charts[id].destroy(); }
-  var ctx = document.getElementById(id);
-  if (!ctx) return null;
-  charts[id] = new Chart(ctx, cfg);
-  return charts[id];
-}
-
-/* ── Pipeline steps ── */
-function setStep(n) {
-  for (var i = 1; i <= 5; i++) {
-    var el = document.getElementById('step-'+i);
-    if (!el) continue;
-    el.className = 'pipe-step' + (i < n ? ' done' : i === n ? ' active' : '');
+function genData(cfg){
+  const kappa=Math.log(2)/cfg.halfLife;
+  let sA=cfg.aP,sB=cfg.bP;
+  const As=[sA],Bs=[sB],sp=[sA-cfg.beta*sB];
+  const rng=()=>(Math.random()+Math.random()+Math.random()-1.5)*cfg.sigma;
+  for(let i=1;i<NB;i++){
+    const dA=rng()*sA,dB=rng()*sB;
+    const rev=-kappa*(sA-cfg.beta*sB);
+    sA+=dA+rev*0.5; sB+=dB-rev*0.5/cfg.beta;
+    As.push(sA);Bs.push(sB);sp.push(sA-cfg.beta*sB);
   }
-}
-
-/* ── Pair list ── */
-function buildPairList() {
-  var el = document.getElementById('pair-list');
-  if (!el || !window.LX_PAIRS) return;
-  el.innerHTML = LX_PAIRS.map(function(p, idx) {
-    var instA = LX_INSTRUMENTS[p.keyA];
-    var instB = LX_INSTRUMENTS[p.keyB];
-    if (!instA || !instB) return '';
-    return '<div class="pair-item" id="pair-item-'+idx+'" onclick="selectPair('+idx+')">' +
-      '<div class="pair-item-header">' +
-        '<span class="pair-emojis">'+instA.emoji+instB.emoji+'</span>' +
-        '<span class="pair-names">'+p.nameA+' / '+p.nameB+'</span>' +
-        '<span class="pair-type">'+p.pairType+'</span>' +
-      '</div>' +
-      '<div class="pair-thesis">'+p.thesis.slice(0,80)+'...</div>' +
-      '<div class="pair-stats-row">' +
-        '<div class="pair-stat">Correlation: <span>'+(p.historicCorr>=0?'+':'')+p.historicCorr+'</span></div>' +
-        '<div class="pair-stat"> &bull; HL: <span>~'+p.typicalHalfLife+' bars</span></div>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-function selectPair(idx) {
-  currentPair = LX_PAIRS[idx];
-  // Highlight
-  document.querySelectorAll('.pair-item').forEach(function(el,i){
-    el.className = 'pair-item' + (i===idx?' active':'');
+  const zs=sp.map((_,i)=>{
+    if(i<LB)return 0;
+    const w=sp.slice(i-LB,i);
+    const mu=w.reduce((a,b)=>a+b,0)/LB;
+    const std=Math.sqrt(w.reduce((a,b)=>a+(b-mu)**2,0)/LB);
+    return std<1e-8?0:(sp[i]-mu)/std;
   });
-  // Show research content
-  document.getElementById('no-pair-msg').style.display = 'none';
-  document.getElementById('research-content').style.display = 'block';
-  // Populate overview
-  populateOverview();
-  // Simulate
-  simulate();
-  setStep(2);
+  return{As,Bs,spreads:sp,zscores:zs};
 }
 
-function populateOverview() {
-  var p = currentPair;
-  if (!p) return;
-  var instA = LX_INSTRUMENTS[p.keyA];
-  var instB = LX_INSTRUMENTS[p.keyB];
-  document.getElementById('overview-title').textContent = p.nameA + ' / ' + p.nameB + ' Spread';
-  document.getElementById('overview-sub').textContent = p.pairType + ' — ' + (p.category || '');
-  document.getElementById('overview-thesis').innerHTML = '<strong>Economic rationale:</strong> ' + p.thesis +
-    (p.riskNote ? '<br><br><strong>Risk note:</strong> ' + p.riskNote : '');
-  var tbl = document.getElementById('overview-table');
-  tbl.innerHTML = '<tr><th>Parameter</th><th>'+p.nameA+'</th><th>'+p.nameB+'</th></tr>' +
-    '<tr><td>Ann. Vol</td><td>'+(instA.vol*100).toFixed(0)+'%</td><td>'+(instB.vol*100).toFixed(0)+'%</td></tr>' +
-    '<tr><td>Hurst</td><td>'+instA.hurst.toFixed(2)+'</td><td>'+instB.hurst.toFixed(2)+'</td></tr>' +
-    '<tr><td>Beta</td><td>'+instA.beta.toFixed(2)+'</td><td>'+instB.beta.toFixed(2)+'</td></tr>' +
-    '<tr><td>Sector</td><td>'+instA.sector+'</td><td>'+instB.sector+'</td></tr>';
+function getTC(){const d=document.documentElement.getAttribute('data-theme')!=='light';return{grid:d?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.06)',text:d?'#6a6058':'#8a8070',bg:d?'#0f0e0c':'#faf8f5',axis:d?'#3a3530':'#d0c8bc'};}
+
+function drawLine(canvas,series,opts={}){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  if(!W||!H)return;
+  canvas.width=W;canvas.height=H;
+  const tc=getTC();
+  const p={t:6,b:22,l:44,r:6};
+  const w=W-p.l-p.r,h=H-p.t-p.b;
+  ctx.fillStyle=tc.bg;ctx.fillRect(0,0,W,H);
+  const all=Array.isArray(series[0])?series:[series];
+  const colors=opts.colors||['#4dba88','#60a5fa','#f59e0b'];
+  let yMin=Infinity,yMax=-Infinity;
+  all.forEach(s=>s.forEach(v=>{if(isFinite(v)){if(v<yMin)yMin=v;if(v>yMax)yMax=v;}}));
+  if(opts.yMin!==undefined)yMin=opts.yMin;
+  if(opts.yMax!==undefined)yMax=opts.yMax;
+  const yr=yMax-yMin||1;
+  const n=all[0].length;
+  const toX=i=>p.l+i*(w/Math.max(n-1,1));
+  const toY=v=>p.t+h-((v-yMin)/yr)*h;
+  ctx.strokeStyle=tc.grid;ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){const y=p.t+(g/4)*h;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+w,y);ctx.stroke();const val=yMax-(g/4)*yr;ctx.fillStyle=tc.text;ctx.font='9px Inter,sans-serif';ctx.textAlign='right';ctx.fillText(opts.fmt?opts.fmt(val):val.toFixed(2),p.l-3,y+3);}
+  if(opts.zeroLine&&yMin<0&&yMax>0){const y0=toY(0);ctx.strokeStyle=tc.axis;ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(p.l,y0);ctx.lineTo(p.l+w,y0);ctx.stroke();ctx.setLineDash([]);}
+  (opts.thresholds||[]).forEach(({v,color,dash})=>{const y=toY(v);ctx.strokeStyle=color+'99';ctx.lineWidth=1;if(dash)ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+w,y);ctx.stroke();ctx.setLineDash([]);});
+  all.forEach((s,si)=>{ctx.strokeStyle=colors[si%colors.length];ctx.lineWidth=1.5;ctx.beginPath();s.forEach((v,i)=>{if(!isFinite(v))return;i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v));});ctx.stroke();});
+  (opts.signals||[]).forEach(({i,type,z})=>{const x=toX(i),y=toY(isFinite(z)?z:0);ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=type==='LONG'?'#22c55e':type==='SHORT'?'#ef4444':'#f59e0b';ctx.fill();});
 }
 
-/* ── Simulate price paths ── */
-function simulate() {
-  var p = currentPair;
-  if (!p) return;
-  var instA = LX_INSTRUMENTS[p.keyA];
-  var instB = LX_INSTRUMENTS[p.keyB];
-  var seed  = Math.floor(Date.now()/1000) & 0xFFFFFF;
-  pricesA = lxSimulate(p.keyA, 300, seed);
-  pricesB = lxSimulate(p.keyB, 300, seed ^ 0x5A3F2);
+// Manual state
+let M={data:null,pos:0,entry:0,pnl:0,equity:[0],cfg:null};
+let mTick=null,mBar=0;
 
-  // Compute hedge ratio (OLS beta)
-  var hedgeRatio = computeHedgeRatio(pricesA, pricesB);
-  // Spread
-  spreadArr = pricesA.map(function(a,i){ return a - hedgeRatio * pricesB[i]; });
-  // Metrics
-  var corr     = pearsonCorr(pricesA, pricesB);
-  var hurstVal = estimateHurst(spreadArr);
-  var halfLife = estimateHalfLife(spreadArr);
-  var spreadVol= stdDev(spreadArr) / mean(pricesA) * 100;
-
-  document.getElementById('mv-corr').textContent     = corr.toFixed(3);
-  document.getElementById('mv-hurst').textContent    = hurstVal.toFixed(3);
-  document.getElementById('mv-halflife').textContent = halfLife.toFixed(1);
-  document.getElementById('mv-hedge').textContent    = hedgeRatio.toFixed(4);
-  document.getElementById('mv-vol').textContent      = spreadVol.toFixed(2)+'%';
-
-  colorMetric('m-corr',  corr > 0.6, corr > 0.8);
-  colorMetric('m-hurst', hurstVal < 0.45, hurstVal < 0.35);
-  colorMetric('m-halflife', halfLife < 30, halfLife < 15);
-
-  drawPricesChart();
-  drawSpreadChart();
-  computeZScore();
+function resetManual(){
+  clearInterval(mTick);
+  const cfg=PAIRS[document.getElementById('pair-select').value];
+  M={data:genData(cfg),pos:0,entry:0,pnl:0,equity:[0],cfg};
+  mBar=LB;
+  updateUI();
+  mTick=setInterval(()=>{if(mBar>=NB-1){clearInterval(mTick);return;}mBar++;const uP=M.pos!==0?(M.data.spreads[mBar]-M.entry)*M.pos*100:0;M.equity.push(M.pnl+uP);updateUI();renderCharts();},500);
 }
 
-function colorMetric(id, ok, great) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  el.className = 'metric' + (great?' good':ok?'':' bad');
+function manualTrade(a){
+  if(!M.data)return;
+  const sp=M.data.spreads[mBar];
+  if(a==='LONG'&&M.pos===0){M.pos=1;M.entry=sp;}
+  else if(a==='SHORT'&&M.pos===0){M.pos=-1;M.entry=sp;}
+  else if(a==='FLAT'&&M.pos!==0){M.pnl+=(sp-M.entry)*M.pos*100;M.pos=0;M.entry=0;}
+  updateUI();
 }
 
-/* ── Charts ── */
-function drawPricesChart() {
-  var labels = pricesA.map(function(_,i){return i;});
-  var normA  = pricesA.map(function(v){return v/pricesA[0];});
-  var normB  = pricesB.map(function(v){return v/pricesB[0];});
-  var p = currentPair;
-  mkChart('chart-prices', {
-    type:'line',
-    data:{
-      labels:labels,
-      datasets:[
-        {label:p.nameA, data:normA, borderColor:'#667eea', borderWidth:1.5, pointRadius:0, tension:0.3},
-        {label:p.nameB, data:normB, borderColor:'#f59e0b', borderWidth:1.5, pointRadius:0, tension:0.3}
-      ]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:10,font:{size:10}}}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
-  });
+function updateUI(){
+  if(!M.data)return;
+  const z=M.data.zscores[mBar];
+  const sp=M.data.spreads[mBar];
+  const uP=M.pos!==0?(sp-M.entry)*M.pos*100:0;
+  const tot=M.pnl+uP;
+  document.getElementById('z-val').textContent=z.toFixed(2);
+  document.getElementById('sp-z').className='stat-pill'+(z>1.8?' neg':z<-1.8?' pos':'');
+  document.getElementById('pos-val').textContent=M.pos===1?'LONG':M.pos===-1?'SHORT':'FLAT';
+  document.getElementById('pnl-val').textContent=(tot>=0?'+':'')+'$'+tot.toFixed(0);
+  document.getElementById('sp-pnl').className='stat-pill'+(tot>0?' pos':tot<0?' neg':'');
+  document.getElementById('btn-long').disabled=M.pos!==0;
+  document.getElementById('btn-short').disabled=M.pos!==0;
+  document.getElementById('btn-flat').disabled=M.pos===0;
 }
 
-function drawSpreadChart() {
-  var labels = spreadArr.map(function(_,i){return i;});
-  var mu     = mean(spreadArr);
-  var sig    = stdDev(spreadArr);
-  mkChart('chart-spread', {
-    type:'line',
-    data:{
-      labels:labels,
-      datasets:[
-        {label:'Spread', data:spreadArr, borderColor:'#22c55e', borderWidth:1.5, pointRadius:0, tension:0.2},
-        {label:'Mean',   data:labels.map(function(){return mu;}), borderColor:'rgba(255,255,255,0.3)', borderWidth:1, borderDash:[4,4], pointRadius:0},
-        {label:'+2SD',   data:labels.map(function(){return mu+2*sig;}), borderColor:'rgba(239,68,68,0.4)', borderWidth:1, borderDash:[2,4], pointRadius:0},
-        {label:'-2SD',   data:labels.map(function(){return mu-2*sig;}), borderColor:'rgba(239,68,68,0.4)', borderWidth:1, borderDash:[2,4], pointRadius:0}
-      ]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:10}}}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
-  });
+function renderCharts(){
+  if(!M.data)return;
+  const d=M.data,n=mBar+1,cfg=M.cfg;
+  const normA=d.As.slice(0,n).map(v=>v/d.As[0]*100);
+  const normB=d.Bs.slice(0,n).map(v=>v/d.Bs[0]*100);
+  drawLine(document.getElementById('c-prices'),[normA,normB],{colors:[cfg.color,'#60a5fa'],fmt:v=>v.toFixed(0)});
+  drawLine(document.getElementById('c-spread'),d.spreads.slice(0,n),{colors:[cfg.color],zeroLine:true});
+  drawLine(document.getElementById('c-zscore'),d.zscores.slice(0,n),{colors:['#60a5fa'],zeroLine:true,thresholds:[{v:2,color:'#ef4444',dash:true},{v:-2,color:'#22c55e',dash:true},{v:.5,color:'#888',dash:true},{v:-.5,color:'#888',dash:true}]});
+  drawLine(document.getElementById('c-equity-m'),M.equity,{colors:[M.pnl>=0?'#22c55e':'#ef4444'],zeroLine:true,fmt:v=>'$'+v.toFixed(0)});
 }
 
-function computeZScore() {
-  var lookback = parseInt(document.getElementById('p-lookback').value) || 20;
-  zscoreArr = rollingZScore(spreadArr, lookback);
-  drawZScoreChart();
-  setStep(3);
-}
+// Templates
+const T={
+basic:`// Spread Trader — Basic Z-Score Strategy
+// ctx object available each bar:
+//   ctx.zscore   — current z-score of spread (e.g. 2.1)
+//   ctx.spread   — raw spread: priceA - β × priceB
+//   ctx.pos      — your position: +1 long, -1 short, 0 flat
+//   ctx.bar      — current bar index
+//   ctx.pairA, ctx.pairB — ticker strings
+//   ctx.beta     — hedge ratio β
+//   ctx.priceA, ctx.priceB — raw prices
+//
+// Return: 'LONG_SPREAD' | 'SHORT_SPREAD' | 'FLAT' | 'HOLD'
 
-function recomputeZScore() { computeZScore(); }
+const ENTRY_Z = 2.0;   // enter when |z| > this
+const EXIT_Z  = 0.5;   // flatten when |z| < this
+const STOP_Z  = 3.5;   // stop-loss if z keeps going
 
-function drawZScoreChart() {
-  var entry = parseFloat(document.getElementById('p-entry').value) || 2.0;
-  var exit  = parseFloat(document.getElementById('p-exit').value)  || 0.5;
-  var stop  = parseFloat(document.getElementById('p-stop').value)  || 3.5;
-  var labels = zscoreArr.map(function(_,i){return i;});
-  var n = zscoreArr.length;
-  mkChart('chart-zscore', {
-    type:'line',
-    data:{
-      labels:labels,
-      datasets:[
-        {label:'Z-Score',   data:zscoreArr, borderColor:'#667eea', borderWidth:1.5, pointRadius:0, tension:0.2, fill:false},
-        {label:'+Entry',    data:Array(n).fill(entry),  borderColor:'rgba(239,68,68,0.6)', borderWidth:1, borderDash:[4,3], pointRadius:0},
-        {label:'-Entry',    data:Array(n).fill(-entry), borderColor:'rgba(34,197,94,0.6)', borderWidth:1, borderDash:[4,3], pointRadius:0},
-        {label:'Exit band', data:Array(n).fill(exit),   borderColor:'rgba(255,255,255,0.2)', borderWidth:1, borderDash:[2,4], pointRadius:0},
-        {label:'Stop',      data:Array(n).fill(stop),   borderColor:'rgba(239,68,68,0.3)', borderWidth:1, borderDash:[1,5], pointRadius:0}
-      ]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:10}}}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
-  });
-}
+function signal(ctx) {
+  const { zscore, pos } = ctx;
 
-/* ── Backtest ── */
-function runBacktest() {
-  if (!currentPair) return;
-  var btn = document.getElementById('run-btn');
-  btn.disabled = true;
-  btn.textContent = 'Running 20 paths...';
-  var sb = document.getElementById('status-badge');
-  sb.className = 'status-badge running';
-  sb.textContent = 'Running';
-  setStep(4);
-
-  setTimeout(function() {
-    var results = [];
-    for (var sim = 0; sim < 20; sim++) {
-      var seed = (Date.now() & 0xFFFFFF) ^ (sim * 31337);
-      var pA = lxSimulate(currentPair.keyA, 300, seed);
-      var pB = lxSimulate(currentPair.keyB, 300, seed ^ 0x5A3F2);
-      var hr  = computeHedgeRatio(pA, pB);
-      var sp  = pA.map(function(a,i){ return a - hr * pB[i]; });
-      var lb  = parseInt(document.getElementById('p-lookback').value) || 20;
-      var zs  = rollingZScore(sp, lb);
-      var res = runSimBacktest(pA, pB, sp, zs);
-      results.push(res);
-    }
-    btResults = results;
-    displayResults(results);
-    btn.disabled = false;
-    btn.textContent = 'Re-run Backtest (20 paths)';
-    sb.className = 'status-badge done';
-    sb.textContent = 'Done';
-    setStep(5);
-
-    // XP
-    if (window.LX) {
-      var avgSharpe = results.reduce(function(s,r){return s+r.sharpe;},0)/results.length;
-      LX.recordRun({sharpe: avgSharpe, isBacktest: true, desk: 'spread-trader'});
-    }
-  }, 400);
-}
-
-function runSimBacktest(pA, pB, sp, zs) {
-  var entryZ  = parseFloat(document.getElementById('p-entry').value)  || 2.0;
-  var exitZ   = parseFloat(document.getElementById('p-exit').value)   || 0.5;
-  var stopZ   = parseFloat(document.getElementById('p-stop').value)   || 3.5;
-  var sizing  = document.getElementById('p-sizing').value;
-
-  var pos = 0;  // +1 = long spread, -1 = short spread
-  var equity = [100];
-  var trades = 0, wins = 0;
-  var entryPrice = 0;
-  var maxDD = 0, peak = 100;
-  var returns = [];
-
-  for (var i = 1; i < zs.length; i++) {
-    var z = zs[i];
-    var prevZ = zs[i-1];
-    var spChange = sp[i] - sp[i-1];
-
-    // Entry
-    if (pos === 0) {
-      if (z > entryZ && prevZ <= entryZ) { pos = -1; entryPrice = sp[i]; trades++; }
-      if (z < -entryZ && prevZ >= -entryZ) { pos = +1; entryPrice = sp[i]; trades++; }
-    }
-
-    // Exit
-    if (pos !== 0) {
-      var convFactor = sizing === 'vol' ? 1 / (stdDev(zs.slice(Math.max(0,i-20),i)) + 0.1) :
-                       sizing === 'conv' ? Math.min(2, Math.abs(z) / entryZ) : 1.0;
-      var pnl = pos * spChange * convFactor / (Math.abs(entryPrice) + 0.001) * 100;
-      var last = equity[equity.length-1];
-      equity.push(last + pnl * 0.1);
-      returns.push(pnl * 0.1);
-
-      var hitExit = pos === 1 ? z > -exitZ : z < exitZ;
-      var hitStop = pos === 1 ? z < -stopZ : z > stopZ;
-      if (hitExit || hitStop) {
-        if (pnl > 0) wins++;
-        pos = 0;
-      }
-    } else {
-      equity.push(equity[equity.length-1]);
-      returns.push(0);
-    }
-
-    if (equity[equity.length-1] > peak) peak = equity[equity.length-1];
-    var dd = (peak - equity[equity.length-1]) / peak;
-    if (dd > maxDD) maxDD = dd;
+  if (pos === 0) {
+    if (zscore >  ENTRY_Z) return 'SHORT_SPREAD';
+    if (zscore < -ENTRY_Z) return 'LONG_SPREAD';
+  } else if (pos === 1) {            // long spread
+    if (zscore > -EXIT_Z) return 'FLAT';
+    if (zscore < -STOP_Z) return 'FLAT';
+  } else if (pos === -1) {           // short spread
+    if (zscore <  EXIT_Z) return 'FLAT';
+    if (zscore >  STOP_Z) return 'FLAT';
   }
 
-  // Sharpe
-  var meanR = mean(returns);
-  var sdR   = stdDev(returns) + 1e-9;
-  var sharpe = meanR / sdR * Math.sqrt(252);
-  var totalPnl = (equity[equity.length-1] - 100);
+  return 'HOLD';
+}`,
+dynamic:`// Dynamic Entry — tighten threshold as z accelerates back
 
-  return {equity: equity, sharpe: sharpe, maxDD: maxDD,
-    trades: trades, winRate: trades > 0 ? wins/trades : 0, totalPnl: totalPnl, returns: returns};
-}
+const BASE_ENTRY = 1.8;
+const EXIT_Z = 0.3;
+const STOP_Z = 4.0;
+var zPrev = 0;
 
-function displayResults(results) {
-  // Aggregate
-  var sharpes  = results.map(function(r){return r.sharpe;});
-  var maxDDs   = results.map(function(r){return r.maxDD;});
-  var winRates = results.map(function(r){return r.winRate;});
-  var trades   = results.map(function(r){return r.trades;});
-  var pnls     = results.map(function(r){return r.totalPnl;});
+function signal(ctx) {
+  const { zscore, pos } = ctx;
+  const mom = zscore - zPrev;
+  zPrev = zscore;
 
-  var avgSharpe  = mean(sharpes);
-  var avgMaxDD   = mean(maxDDs);
-  var avgWinRate = mean(winRates);
-  var avgTrades  = mean(trades);
-  var avgPnl     = mean(pnls);
-
-  // Colour
-  document.getElementById('rv-sharpe').textContent  = avgSharpe.toFixed(2);
-  document.getElementById('rv-maxdd').textContent   = (avgMaxDD*100).toFixed(1)+'%';
-  document.getElementById('rv-winrate').textContent = (avgWinRate*100).toFixed(0)+'%';
-  document.getElementById('rv-trades').textContent  = Math.round(avgTrades);
-  document.getElementById('rv-pnl').textContent     = (avgPnl > 0 ? '+' : '')+avgPnl.toFixed(1)+'%';
-
-  document.getElementById('r-sharpe').className  = 'metric'+(avgSharpe>1.5?' good':avgSharpe>0.8?'':' bad');
-  document.getElementById('r-maxdd').className   = 'metric'+(avgMaxDD<0.1?' good':avgMaxDD<0.2?'':' bad');
-  document.getElementById('r-winrate').className = 'metric'+(avgWinRate>0.6?' good':avgWinRate>0.45?'':' bad');
-  document.getElementById('r-pnl').className     = 'metric'+(avgPnl>5?' good':avgPnl>0?'':' bad');
-
-  // Score
-  var score = Math.min(100, Math.max(0, Math.round(
-    (Math.min(avgSharpe/2, 1)*40) +
-    (Math.max(0, 1 - avgMaxDD/0.3)*30) +
-    (avgWinRate > 0.5 ? 20 : 0) +
-    (avgPnl > 0 ? 10 : 0)
-  )));
-  document.getElementById('res-score').textContent = score;
-  var barEl = document.getElementById('res-score-bar');
-  barEl.style.width = score + '%';
-  barEl.style.background = score >= 70 ? 'linear-gradient(90deg,#22c55e,#16a34a)'
-                         : score >= 40 ? 'linear-gradient(90deg,#f59e0b,#d97706)'
-                         : 'linear-gradient(90deg,#ef4444,#dc2626)';
-  document.getElementById('res-verdict').textContent =
-    score >= 70 ? 'Compelling edge — strategy shows consistent mean-reversion profit.' :
-    score >= 40 ? 'Marginal edge — consider tighter signal parameters.' :
-                  'Weak edge — check spread stationarity and re-calibrate entry thresholds.';
-
-  // Interpretation
-  var interp = '<strong>What this means:</strong> Across 20 simulated paths, your z-score strategy achieved a mean Sharpe of <strong>'+avgSharpe.toFixed(2)+'</strong> (target: >1.0). ';
-  interp += 'Average max drawdown was <strong>'+(avgMaxDD*100).toFixed(1)+'%</strong>. ';
-  if (avgSharpe > 1) interp += 'The positive Sharpe indicates the spread reliably reverts, and your entry/exit thresholds capture this. ';
-  else interp += 'The Sharpe is below 1.0 — try narrowing your entry threshold or adjusting the lookback window. ';
-  if (avgMaxDD > 0.2) interp += 'Max drawdown is elevated; consider adding the stop-loss to limit tail risk. ';
-  interp += 'Win rate of '+(avgWinRate*100).toFixed(0)+'% across '+Math.round(avgTrades)+' avg trades.';
-  document.getElementById('res-interp').innerHTML = interp;
-
-  // Show
-  document.getElementById('summary-placeholder').style.display = 'none';
-  document.getElementById('summary-content').style.display     = 'block';
-
-  // Equity chart
-  drawEquityChart(results);
-  // DD chart
-  drawDDChart(results);
-  // Signal stats
-  buildSignalStats(results);
-}
-
-function drawEquityChart(results) {
-  var n = results[0].equity.length;
-  var labels = Array.from({length:n}, function(_,i){return i;});
-  var datasets = [];
-  // p10 / mean / p90
-  var meanEq = [], p10Eq = [], p90Eq = [];
-  for (var i = 0; i < n; i++) {
-    var vals = results.map(function(r){return r.equity[i];}).sort(function(a,b){return a-b;});
-    meanEq.push(mean(vals));
-    p10Eq.push(vals[Math.floor(vals.length*0.1)]);
-    p90Eq.push(vals[Math.floor(vals.length*0.9)]);
+  if (pos === 0) {
+    // Only enter if z is ALREADY moving back toward zero
+    if (zscore >  BASE_ENTRY && mom < 0) return 'SHORT_SPREAD';
+    if (zscore < -BASE_ENTRY && mom > 0) return 'LONG_SPREAD';
+  } else if (pos === 1) {
+    if (zscore > -EXIT_Z || zscore < -STOP_Z) return 'FLAT';
+  } else if (pos === -1) {
+    if (zscore <  EXIT_Z || zscore >  STOP_Z) return 'FLAT';
   }
-  mkChart('chart-equity', {
-    type:'line',
-    data:{labels:labels, datasets:[
-      {label:'p90', data:p90Eq, borderColor:'rgba(34,197,94,0.3)', borderWidth:1, pointRadius:0, fill:false},
-      {label:'Mean equity', data:meanEq, borderColor:'#667eea', borderWidth:2, pointRadius:0, fill:false},
-      {label:'p10', data:p10Eq, borderColor:'rgba(239,68,68,0.3)', borderWidth:1, pointRadius:0, fill:false}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:10,font:{size:10}}}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
-  });
+  return 'HOLD';
+}`,
+kalman:`// Kalman Filter — adaptive hedge ratio, 20-bar z-score window
+
+const Q = 0.0001, R = 0.001;
+const ENTRY_Z = 2.0, EXIT_Z = 0.5;
+var kBeta = null, kP = 1, hist = [];
+
+function signal(ctx) {
+  if (kBeta === null) kBeta = ctx.beta;
+
+  // Kalman update on beta
+  const predP = kP + Q;
+  const K = predP / (predP + R);
+  kBeta = kBeta + K * (ctx.spread - kBeta);
+  kP = (1 - K) * predP;
+
+  // Z-score on filtered spread
+  const fs = ctx.priceA - kBeta * ctx.priceB;
+  hist.push(fs);
+  if (hist.length > 20) hist.shift();
+  if (hist.length < 10) return 'HOLD';
+
+  const mu = hist.reduce((a,b)=>a+b,0) / hist.length;
+  const sd = Math.sqrt(hist.reduce((a,b)=>a+(b-mu)**2,0) / hist.length) || 1;
+  const z  = (fs - mu) / sd;
+
+  if (ctx.pos === 0) {
+    if (z >  ENTRY_Z) return 'SHORT_SPREAD';
+    if (z < -ENTRY_Z) return 'LONG_SPREAD';
+  } else if (ctx.pos === 1) {
+    if (z > -EXIT_Z) return 'FLAT';
+  } else if (ctx.pos === -1) {
+    if (z <  EXIT_Z) return 'FLAT';
+  }
+  return 'HOLD';
+}`};
+
+function loadTemplate(n){document.getElementById('strategy-code').value=T[n];document.getElementById('code-error').style.display='none';}
+
+function runCodeStrategy(){
+  const errEl=document.getElementById('code-error');
+  errEl.style.display='none';
+  const code=document.getElementById('strategy-code').value;
+  const cfg=PAIRS[document.getElementById('code-pair').value];
+  const data=genData(cfg);
+  let fn;
+  try{fn=(new Function(code+'\nreturn signal;'))();if(typeof fn!=='function')throw new Error('signal() not found');}
+  catch(e){errEl.textContent='⚠ '+e.message;errEl.style.display='block';return;}
+
+  let pos=0,entry=0,pnl=0;
+  const equity=[0],sigs=[],trades=[];
+  let wins=0,hold=0,eBar=0;
+
+  for(let i=LB;i<NB;i++){
+    const ctx={zscore:data.zscores[i],spread:data.spreads[i],priceA:data.As[i],priceB:data.Bs[i],pos,bar:i,pairA:cfg.a,pairB:cfg.b,beta:cfg.beta};
+    let act;
+    try{act=fn(ctx);}catch(e){errEl.textContent='⚠ bar '+i+': '+e.message;errEl.style.display='block';return;}
+    if(act==='LONG_SPREAD'&&pos===0){pos=1;entry=data.spreads[i];eBar=i;sigs.push({i,type:'LONG',z:data.zscores[i]});}
+    else if(act==='SHORT_SPREAD'&&pos===0){pos=-1;entry=data.spreads[i];eBar=i;sigs.push({i,type:'SHORT',z:data.zscores[i]});}
+    else if(act==='FLAT'&&pos!==0){const p=(data.spreads[i]-entry)*pos*100;pnl+=p;if(p>0)wins++;hold+=i-eBar;trades.push(p);sigs.push({i,type:'FLAT',z:data.zscores[i]});pos=0;}
+    const uP=pos!==0?(data.spreads[i]-entry)*pos*100:0;
+    equity.push(pnl+uP);
+  }
+  if(pos!==0){const p=(data.spreads[NB-1]-entry)*pos*100;pnl+=p;if(p>0)wins++;trades.push(p);}
+
+  const rets=equity.slice(1).map((v,i)=>v-equity[i]);
+  const mu=rets.reduce((a,b)=>a+b,0)/rets.length;
+  const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-mu)**2,0)/rets.length)||1;
+  const sharpe=+(mu/sd*Math.sqrt(252)).toFixed(2);
+  const dd=(()=>{let pk=equity[0],d=0;equity.forEach(v=>{pk=Math.max(pk,v);d=Math.min(d,v-pk);});return d;})();
+  const wr=trades.length?Math.round(wins/trades.length*100):0;
+  const ah=trades.length?Math.round(hold/trades.length):0;
+
+  const sv=(id,v,cls)=>{const e=document.getElementById(id);e.textContent=v;e.className='stat-value '+cls;};
+  sv('cs-sharpe',sharpe.toFixed(2),sharpe>0?'pos':'neg');
+  sv('cs-pnl',(pnl>=0?'+':'')+'$'+pnl.toFixed(0),pnl>=0?'pos':'neg');
+  sv('cs-dd','$'+dd.toFixed(0),'neg');
+  sv('cs-trades',trades.length,'neu');
+  sv('cs-wr',wr+'%',wr>=50?'pos':'neg');
+  sv('cs-hold',ah+' bars','neu');
+  document.getElementById('run-status').textContent=NB+' bars · '+trades.length+' trades · Sharpe '+sharpe.toFixed(2);
+
+  drawLine(document.getElementById('c-code-z'),data.zscores,{colors:['#60a5fa'],zeroLine:true,thresholds:[{v:2,color:'#ef4444',dash:true},{v:-2,color:'#22c55e',dash:true},{v:.5,color:'#888',dash:true},{v:-.5,color:'#888',dash:true}],signals:sigs});
+  drawLine(document.getElementById('c-code-eq'),equity,{colors:[pnl>=0?'#22c55e':'#ef4444'],zeroLine:true,fmt:v=>'$'+v.toFixed(0)});
+
+  if(window.LX){LX.visitDesk('spread-trader');LX.addXP(Math.max(20,Math.min(150,50+Math.round(sharpe*40))),'Spread Trader');LX.recordRun({sharpe,isBacktest:false,desk:'spread-trader'});}
 }
 
-function drawDDChart(results) {
-  // Mean drawdown curve
-  var n = results[0].equity.length;
-  var dds = results.map(function(r) {
-    var peak = 100; var ddArr = [];
-    r.equity.forEach(function(v){ if(v>peak)peak=v; ddArr.push((peak-v)/peak*100); });
-    return ddArr;
-  });
-  var meanDD = Array.from({length:n}, function(_,i){
-    return mean(dds.map(function(d){return d[i];}));
-  });
-  mkChart('chart-dd', {
-    type:'line',
-    data:{labels:meanDD.map(function(_,i){return i;}), datasets:[{
-      label:'Mean Drawdown %', data:meanDD, borderColor:'#ef4444', borderWidth:1.5,
-      fill:true, backgroundColor:'rgba(239,68,68,0.08)', pointRadius:0, tension:0.2
-    }]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
-  });
+function switchMode(m){
+  document.getElementById('manual-mode').style.display=m==='manual'?'flex':'none';
+  document.getElementById('code-mode').style.display=m==='code'?'flex':'none';
+  document.getElementById('tab-manual').className='mode-tab'+(m==='manual'?' active':'');
+  document.getElementById('tab-code').className='mode-tab'+(m==='code'?' active':'');
+  if(m==='code'&&!document.getElementById('strategy-code').value)loadTemplate('basic');
+  if(m==='manual')renderCharts();
 }
 
-function buildSignalStats(results) {
-  var avgTrades  = mean(results.map(function(r){return r.trades;}));
-  var avgWR      = mean(results.map(function(r){return r.winRate;}));
-  var avgSharpe  = mean(results.map(function(r){return r.sharpe;}));
-  var sdSharpe   = stdDev(results.map(function(r){return r.sharpe;}));
-  var el = document.getElementById('signals-content');
-  el.innerHTML = '<table class="reg-table" style="margin-top:8px">'+
-    '<tr><th>Metric</th><th>Mean</th><th>Std Dev</th><th>Interpretation</th></tr>'+
-    '<tr><td>Sharpe Ratio</td><td>'+avgSharpe.toFixed(2)+'</td><td>'+sdSharpe.toFixed(2)+'</td><td>'+(sdSharpe<0.5?'Consistent':'Variable — parameter sensitivity')+'</td></tr>'+
-    '<tr><td>Trades / path</td><td>'+avgTrades.toFixed(1)+'</td><td>'+stdDev(results.map(function(r){return r.trades;})).toFixed(1)+'</td><td>'+(avgTrades<10?'Too few — loosen entry Z':'Reasonable frequency')+'</td></tr>'+
-    '<tr><td>Win Rate</td><td>'+(avgWR*100).toFixed(1)+'%</td><td>'+( stdDev(results.map(function(r){return r.winRate;}))*100).toFixed(1)+'%</td><td>'+(avgWR>0.55?'Positive edge':'Near coin-flip')+'</td></tr>'+
-    '</table>'+
-    '<div class="interp-box" style="margin-top:12px">'+
-      '<strong>Signal quality:</strong> The z-score lookback of '+document.getElementById('p-lookback').value+' bars captures the spread mean-reversion. '+
-      'High Sharpe consistency (std dev &lt; 0.4) indicates the signal is robust to path variation. '+
-      (avgTrades < 8 ? 'Entry threshold may be too tight — few trades limit statistical significance. Try reducing to 1.5-1.8.' :
-      avgTrades > 50 ? 'Very high trade frequency — check for over-fitting to noise.' : 'Trade frequency is healthy for statistical significance.') +
-    '</div>';
-}
-
-/* ── Result tabs ── */
-function showRTab(name) {
-  document.querySelectorAll('.rtab-content').forEach(function(el){ el.className = 'rtab-content'; });
-  document.querySelectorAll('.rtab').forEach(function(el){ el.className = 'rtab'; });
-  document.getElementById('rtab-'+name).className = 'rtab-content visible';
-  event.target.className = 'rtab active';
-}
-
-/* ── Math utils ── */
-function mean(arr) { return arr.length ? arr.reduce(function(s,v){return s+v;},0)/arr.length : 0; }
-function stdDev(arr) {
-  if (arr.length < 2) return 0;
-  var m = mean(arr);
-  return Math.sqrt(arr.reduce(function(s,v){return s+(v-m)*(v-m);},0)/(arr.length-1));
-}
-function pearsonCorr(a,b) {
-  var ma = mean(a), mb = mean(b);
-  var num = a.reduce(function(s,v,i){return s+(v-ma)*(b[i]-mb);},0);
-  var da  = Math.sqrt(a.reduce(function(s,v){return s+(v-ma)*(v-ma);},0));
-  var db  = Math.sqrt(b.reduce(function(s,v){return s+(v-mb)*(v-mb);},0));
-  return da*db < 1e-9 ? 0 : num/(da*db);
-}
-function computeHedgeRatio(a,b) {
-  var ma = mean(a), mb = mean(b);
-  var num = a.reduce(function(s,v,i){return s+(v-ma)*(b[i]-mb);},0);
-  var den = b.reduce(function(s,v){return s+(v-mb)*(v-mb);},0);
-  return den < 1e-9 ? 1 : num/den;
-}
-function estimateHurst(arr) {
-  if (arr.length < 20) return 0.5;
-  var lags = [2,4,8,16];
-  var logLags = [], logRS = [];
-  lags.forEach(function(lag) {
-    if (arr.length < lag*2) return;
-    var subseries = [];
-    for (var i = 0; i + lag <= arr.length; i += lag) {
-      var sub = arr.slice(i, i+lag);
-      var mu  = mean(sub);
-      var cs  = sub.map(function(v,j){return sub.slice(0,j+1).reduce(function(s,x){return s+x-mu;},0);});
-      var R   = Math.max.apply(null,cs) - Math.min.apply(null,cs);
-      var S   = stdDev(sub) + 1e-9;
-      subseries.push(R/S);
-    }
-    if (subseries.length > 0) {
-      logLags.push(Math.log(lag));
-      logRS.push(Math.log(mean(subseries)));
-    }
-  });
-  if (logLags.length < 2) return 0.5;
-  var slope = computeHedgeRatio(logRS, logLags);
-  return Math.max(0.1, Math.min(0.9, slope));
-}
-function estimateHalfLife(arr) {
-  if (arr.length < 4) return 20;
-  var lagged = arr.slice(0,-1);
-  var delta  = arr.slice(1).map(function(v,i){return v-arr[i];});
-  var hr  = computeHedgeRatio(delta, lagged);
-  return hr < 0 ? Math.max(1, -1/hr) : 30;
-}
-function rollingZScore(arr, window) {
-  return arr.map(function(_,i) {
-    if (i < window) return 0;
-    var sub = arr.slice(i-window, i);
-    var m = mean(sub), s = stdDev(sub);
-    return s < 1e-9 ? 0 : (arr[i]-m)/s;
-  });
-}
-
-/* ── Init ── */
-document.addEventListener('DOMContentLoaded', function() {
-  buildPairList();
-  if (window.LX) LX.visitDesk('spread-trader');
+window.addEventListener('load',()=>{
+  if(window.LX)LX.visitDesk('spread-trader');
+  resetManual();
+  new ResizeObserver(renderCharts).observe(document.querySelector('.manual-body'));
 });
 </script>
-
 </body>
 </html>
