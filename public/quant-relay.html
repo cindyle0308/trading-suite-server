@@ -365,7 +365,6 @@ canvas{width:100%;border-radius:6px;}
   <a href="basket-blitz.html">Basket</a>
   <a href="options-outcry.html">Outcry</a>
 <a href="https://lexie-marketmakerbaos.onrender.com" target="_blank">Market Maker</a>
-<button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
 
     <a href="terminal.html">⌨ Terminal</a>
 </nav>
@@ -1129,12 +1128,5 @@ function escHtml(s) {
 </script>
 <script src="lexie-core.js"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  var b=document.getElementById("lx-theme-btn-2");
-  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
-  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
-});
-</script>
 </body>
 </html>
