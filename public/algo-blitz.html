@@ -111,6 +111,7 @@ body { min-height:100vh; background:var(--bg-base); display:flex; flex-direction
 <header class="lx-header">
   <div class="lx-logo">LeXie <span>Capital</span></div>
   <div class="lx-header-title">Quant Tech Interview</div>
+  <button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
   <a class="lx-back" href="index.html">← Lobby</a>
 </header>
 
@@ -508,5 +509,13 @@ function showScore() {
 }
 </script>
 <script src="lexie-core.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var b=document.getElementById("lx-theme-btn-2");
+  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
+  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
+});
+</script>
 </body>
 </html>
