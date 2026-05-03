@@ -4,239 +4,205 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LeXie Capital — Trading Floor</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>&#x1F3E6;</text></svg>">
+<link rel="stylesheet" href="lx-design.css">
+<script src="instruments.js"></script>
+<script src="lexie-core.js"></script>
 <style>
-  :root {
-    --bg:       #080c14;
-    --surface:  #0f1520;
-    --card:     #131c2e;
-    --card2:    #1a2540;
-    --border:   rgba(255,255,255,0.07);
-    --border2:  rgba(255,255,255,0.12);
-    --text:     #c8d8f0;
-    --dim:      #667890;
-    --accent:   #667eea;
-    --accent2:  #764ba2;
-    --green:    #22c55e;
-    --red:      #ef4444;
-    --gold:     #f59e0b;
-  }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body {
-    font-family:'Inter','Segoe UI',sans-serif;
-    background:var(--bg); color:var(--text);
-    min-height:100vh; overflow-x:hidden;
-  }
-  body::before {
-    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-    background-image:
-      linear-gradient(rgba(102,126,234,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(102,126,234,0.03) 1px, transparent 1px);
-    background-size:40px 40px;
-  }
-  .header {
-    position:relative; z-index:10;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:20px 40px; border-bottom:1px solid var(--border);
-    background:rgba(8,12,20,0.8); backdrop-filter:blur(12px);
-  }
-  .logo { display:flex; align-items:center; gap:12px; }
-  .logo-icon { font-size:32px; line-height:1; }
-  .logo-text h1 {
-    font-size:22px; font-weight:800;
-    background:linear-gradient(135deg,#e8f0fe,#667eea);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    letter-spacing:-0.5px;
-  }
-  .logo-text p { font-size:11px; color:var(--dim); letter-spacing:0.5px; }
-  .header-right { display:flex; align-items:center; gap:16px; }
-  .time-chip {
-    font-size:12px; color:var(--dim);
-    background:var(--surface); border:1px solid var(--border);
-    padding:4px 12px; border-radius:20px; font-variant-numeric:tabular-nums;
-  }
-  .nav-links { display:flex; gap:8px; }
-  .nav-link {
-    font-size:12px; padding:6px 14px; border-radius:8px;
-    border:1px solid var(--border); background:transparent;
-    color:var(--text); cursor:pointer; text-decoration:none; transition:all .2s;
-  }
-  .nav-link:hover { background:var(--card2); border-color:var(--accent); color:var(--accent); }
-  .career-bar {
-    position:relative; z-index:5; padding:16px 40px;
-    background:linear-gradient(135deg,rgba(15,21,32,0.9),rgba(19,28,46,0.9));
-    border-bottom:1px solid var(--border);
-  }
-  .career-inner {
-    max-width:1400px; margin:0 auto;
-    display:flex; align-items:center; gap:20px;
-  }
-  .career-badge { font-size:28px; flex-shrink:0; }
-  .career-info { flex:1; }
-  .career-title-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-  .career-title { font-size:15px; font-weight:700; color:#e8f0fe; }
-  .career-xp {
-    font-size:12px; color:var(--accent);
-    background:rgba(102,126,234,0.15); padding:2px 10px; border-radius:12px;
-  }
-  .career-bar-track { background:rgba(255,255,255,0.06); border-radius:4px; height:6px; overflow:hidden; }
-  .career-bar-fill {
-    height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2));
-    border-radius:4px; transition:width .5s cubic-bezier(0.4,0,0.2,1);
-  }
-  .career-bar-label { margin-top:4px; font-size:11px; color:var(--dim); }
-  .career-right { display:flex; gap:8px; flex-shrink:0; }
-  .career-stat {
-    text-align:center; background:var(--card); border:1px solid var(--border);
-    border-radius:8px; padding:8px 16px; min-width:80px;
-  }
-  .career-stat-value { font-size:18px; font-weight:700; color:#e8f0fe; }
-  .career-stat-label { font-size:10px; color:var(--dim); margin-top:1px; }
-  .ticker-bar {
-    position:relative; z-index:5; background:rgba(10,15,25,0.8);
-    border-bottom:1px solid var(--border); padding:8px 0; overflow:hidden;
-  }
-  .ticker-scroll { display:flex; gap:0; animation:ticker 45s linear infinite; width:max-content; }
-  @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-  .ticker-item {
-    display:flex; align-items:center; gap:6px;
-    padding:0 24px; border-right:1px solid var(--border);
-    white-space:nowrap; font-size:12px;
-  }
-  .ticker-name { color:var(--dim); }
-  .ticker-price { font-weight:600; color:#e8f0fe; font-variant-numeric:tabular-nums; }
-  .ticker-change { font-size:11px; }
-  .up { color:var(--green); } .dn { color:var(--red); }
-  .main {
-    position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:32px 40px;
-  }
-  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
-  .section-title {
-    font-size:13px; font-weight:700; text-transform:uppercase;
-    letter-spacing:1.5px; color:var(--dim); display:flex; align-items:center; gap:8px;
-  }
-  .section-title::before {
-    content:''; display:block; width:3px; height:14px; border-radius:2px;
-    background:linear-gradient(var(--accent),var(--accent2));
-  }
-  .daily-brief {
-    background:linear-gradient(135deg,rgba(19,28,46,0.9),rgba(26,37,64,0.9));
-    border:1px solid rgba(102,126,234,0.2); border-radius:16px; padding:24px;
-    margin-bottom:32px; display:grid; grid-template-columns:1fr auto;
-    gap:24px; align-items:center; position:relative; overflow:hidden;
-  }
-  .daily-brief::before {
-    content:''; position:absolute; top:-40px; right:-40px;
-    width:200px; height:200px;
-    background:radial-gradient(circle,rgba(102,126,234,0.08),transparent 70%);
-    pointer-events:none;
-  }
-  .brief-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-  .brief-badge {
-    font-size:11px; font-weight:700; letter-spacing:0.5px;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    color:#fff; padding:3px 10px; border-radius:12px;
-  }
-  .brief-date { font-size:12px; color:var(--dim); }
-  .brief-headline { font-size:20px; font-weight:800; color:#e8f0fe; margin-bottom:8px; line-height:1.3; }
-  .brief-desc { font-size:13px; color:var(--dim); line-height:1.5; }
-  .brief-instruments { display:flex; flex-direction:column; gap:10px; min-width:240px; }
-  .brief-inst-card {
-    background:rgba(255,255,255,0.04); border:1px solid var(--border);
-    border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:10px;
-  }
-  .brief-inst-emoji { font-size:22px; }
-  .brief-inst-info { flex:1; }
-  .brief-inst-name { font-size:13px; font-weight:700; color:#e8f0fe; }
-  .brief-inst-desc { font-size:11px; color:var(--dim); margin-top:2px; }
-  .brief-inst-stat { text-align:right; }
-  .brief-inst-vol { font-size:11px; color:var(--accent); }
-  .brief-inst-risk { font-size:10px; color:var(--dim); }
-  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:36px; }
-  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 20px; }
-  .stat-label { font-size:11px; color:var(--dim); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
-  .stat-value { font-size:24px; font-weight:800; color:#e8f0fe; }
-  .stat-sub { font-size:11px; color:var(--dim); margin-top:2px; }
-  .desk-grid {
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-    gap:16px; margin-bottom:36px;
-  }
-  .desk-card {
-    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px;
-    cursor:pointer; text-decoration:none; display:block;
-    transition:all .2s cubic-bezier(0.4,0,0.2,1);
-    position:relative; overflow:hidden;
-  }
-  .desk-card::before {
-    content:''; position:absolute; inset:0;
-    background:linear-gradient(135deg,transparent,rgba(102,126,234,0.03));
-    opacity:0; transition:opacity .2s;
-  }
-  .desk-card:hover {
-    border-color:rgba(102,126,234,0.35); background:var(--card2);
-    transform:translateY(-2px);
-    box-shadow:0 8px 32px rgba(0,0,0,0.3),0 0 0 1px rgba(102,126,234,0.1);
-  }
-  .desk-card:hover::before { opacity:1; }
-  .desk-card.locked { opacity:0.42; cursor:not-allowed; pointer-events:none; }
-  .desk-card.locked::after { content:'locked'; position:absolute; top:12px; right:12px; font-size:11px; color:var(--dim); background:rgba(0,0,0,0.5); padding:2px 7px; border-radius:8px; }
-  .desk-card.featured { border-color:rgba(245,158,11,0.25); }
-  .desk-card.featured:hover { border-color:rgba(245,158,11,0.45); box-shadow:0 8px 32px rgba(0,0,0,0.3),0 0 0 1px rgba(245,158,11,0.15); }
-  .desk-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:12px; }
-  .desk-icon {
-    font-size:26px; width:48px; height:48px;
-    background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:12px;
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  }
-  .desk-meta { flex:1; }
-  .desk-name { font-size:14px; font-weight:700; color:#e8f0fe; margin-bottom:4px; }
-  .desk-tags { display:flex; gap:5px; flex-wrap:wrap; }
-  .desk-tag {
-    font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px;
-    background:rgba(102,126,234,0.12); color:var(--accent); border:1px solid rgba(102,126,234,0.2);
-  }
-  .desk-tag.green { background:rgba(34,197,94,0.1); color:#4ade80; border-color:rgba(34,197,94,0.2); }
-  .desk-tag.gold  { background:rgba(245,158,11,0.1); color:#fbbf24; border-color:rgba(245,158,11,0.2); }
-  .desk-desc { font-size:12px; color:var(--dim); line-height:1.5; margin-bottom:14px; }
-  .desk-footer { display:flex; align-items:center; justify-content:space-between; }
-  .desk-level-req { font-size:11px; color:var(--dim); }
-  .desk-level-req.met { color:var(--green); }
-  .desk-cta { font-size:11px; font-weight:700; color:var(--accent); opacity:0.7; transition:opacity .2s; }
-  .desk-card:hover .desk-cta { opacity:1; }
-  .desk-instrument { font-size:11px; color:var(--dim); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
-  .desk-instrument span { color:#e8f0fe; font-weight:600; }
-  .missions-panel { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:32px; }
-  .mission-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; margin-top:16px; }
-  .mission-item {
-    background:rgba(255,255,255,0.03); border:1px solid var(--border);
-    border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;
-  }
-  .mission-item.done { background:rgba(34,197,94,0.05); border-color:rgba(34,197,94,0.2); opacity:0.6; }
-  .mission-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
-  .mission-body { flex:1; }
-  .mission-title { font-size:12px; font-weight:700; color:#e8f0fe; margin-bottom:2px; }
-  .mission-desc  { font-size:11px; color:var(--dim); }
-  .mission-xp { font-size:11px; font-weight:700; color:var(--accent); white-space:nowrap; }
-  .mission-progress { margin-top:6px; background:rgba(255,255,255,0.06); border-radius:3px; height:3px; overflow:hidden; }
-  .mission-progress-fill { height:100%; background:var(--accent); border-radius:3px; transition:width .4s; }
-  .footer {
-    border-top:1px solid var(--border); padding:20px 40px;
-    display:flex; align-items:center; justify-content:space-between;
-    font-size:11px; color:var(--dim);
-  }
-  .footer a { color:var(--dim); text-decoration:none; }
-  .footer a:hover { color:var(--accent); }
-  ::-webkit-scrollbar { width:6px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
-  @media (max-width:900px) {
-    .header,.career-bar,.footer { padding:16px 20px; }
-    .main { padding:20px; }
-    .stats-row { grid-template-columns:repeat(2,1fr); }
-    .desk-grid { grid-template-columns:1fr; }
-    .daily-brief { grid-template-columns:1fr; }
-    .brief-instruments { flex-direction:row; min-width:unset; }
-  }
+body { overflow-x:hidden; }
+body::before { content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(77,186,136,0.06),transparent); }
+
+/* ── Header ── */
+.header {
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--sp-8);height:56px;
+  background:rgba(20,18,16,0.92);backdrop-filter:blur(14px);
+  border-bottom:1.5px solid var(--border-dim);
+}
+.logo { display:flex;align-items:center;gap:var(--sp-3); }
+.logo-mark { font-size:22px; }
+.logo-text  { font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--fg-bright);letter-spacing:-0.03em; }
+.logo-sub   { font-size:var(--text-xs);color:var(--fg-subtle);font-family:var(--font-sans);letter-spacing:0.08em;text-transform:uppercase; }
+.header-nav { display:flex;align-items:center;gap:var(--sp-2); }
+.header-clock { font-family:var(--font-mono);font-size:var(--text-xs);color:var(--fg-subtle);padding:3px 10px;background:var(--bg-raised);border:1.5px solid var(--border-dim);border-radius:var(--r-pill);margin-right:var(--sp-2); }
+
+/* Free play toggle */
+.fp-toggle {
+  display:flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:var(--r-pill);
+  border:1.5px solid var(--border-mid);background:transparent;
+  font-family:var(--font-sans);font-size:var(--text-xs);font-weight:600;
+  color:var(--fg-secondary);cursor:pointer;transition:all var(--t-fast);
+}
+.fp-toggle.on { background:var(--amber-bg);border-color:rgba(204,148,56,0.35);color:var(--amber); }
+.fp-dot { width:7px;height:7px;border-radius:50%;background:var(--fg-muted);transition:background var(--t-fast); }
+.fp-toggle.on .fp-dot { background:var(--amber); }
+
+/* ── Career bar ── */
+.career-bar {
+  background:var(--bg-panel);border-bottom:1.5px solid var(--border-dim);
+  padding:var(--sp-3) var(--sp-8);
+  display:flex;align-items:center;gap:var(--sp-5);
+}
+.career-badge { font-size:24px;flex-shrink:0; }
+.career-info  { flex:1; }
+.career-name-row { display:flex;align-items:center;gap:var(--sp-3);margin-bottom:5px; }
+.career-title { font-family:var(--font-sans);font-size:var(--text-md);font-weight:700;color:var(--fg-bright); }
+.career-xp-badge {
+  font-family:var(--font-mono);font-size:var(--text-xs);color:var(--green);
+  background:var(--green-bg);border:1.5px solid rgba(77,186,136,0.25);
+  padding:2px 8px;border-radius:var(--r-pill);
+}
+.career-bar-sub { font-size:var(--text-xs);font-family:var(--font-sans);color:var(--fg-subtle);margin-top:4px; }
+.career-stats { display:flex;gap:var(--sp-3);flex-shrink:0; }
+.career-stat {
+  text-align:center;background:var(--bg-raised);border:1.5px solid var(--border-dim);
+  border-radius:var(--r-lg);padding:8px 16px;min-width:72px;
+}
+.career-stat-val { font-family:var(--font-mono);font-size:17px;font-weight:700;color:var(--fg-bright); }
+.career-stat-lbl { font-family:var(--font-sans);font-size:var(--text-xs);color:var(--fg-subtle);margin-top:2px; }
+
+/* ── Ticker ── */
+.ticker-bar { background:var(--bg-base);border-bottom:1.5px solid var(--border-dim);padding:7px 0;overflow:hidden; }
+.ticker-scroll { display:flex;animation:lx-ticker 50s linear infinite;width:max-content; }
+@keyframes lx-ticker { from{transform:translateX(0)}to{transform:translateX(-50%)} }
+.ticker-item { display:flex;align-items:center;gap:6px;padding:0 24px;border-right:1.5px solid var(--border-dim);white-space:nowrap;font-size:var(--text-xs);font-family:var(--font-sans); }
+.ticker-sym   { color:var(--fg-secondary);font-weight:600; }
+.ticker-price { font-family:var(--font-mono);color:var(--fg-bright); }
+.ticker-up    { color:var(--green); }
+.ticker-dn    { color:var(--red); }
+
+/* ── Main ── */
+.main { max-width:1320px;margin:0 auto;padding:var(--sp-8) var(--sp-8);position:relative;z-index:1; }
+
+/* ── Section header ── */
+.section-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-5); }
+.section-title {
+  font-family:var(--font-sans);font-size:var(--text-xs);font-weight:700;
+  text-transform:uppercase;letter-spacing:0.1em;color:var(--fg-subtle);
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::before { content:'';display:block;width:3px;height:13px;border-radius:2px;background:linear-gradient(var(--green),var(--coral)); }
+
+/* ── Daily brief ── */
+.daily-brief {
+  background:linear-gradient(135deg,var(--bg-raised),var(--bg-elevated));
+  border:1.5px solid var(--border-mid);border-radius:var(--r-xl);
+  padding:var(--sp-6);margin-bottom:var(--sp-8);
+  display:grid;grid-template-columns:1fr auto;gap:var(--sp-6);align-items:start;
+  position:relative;overflow:hidden;
+}
+.daily-brief::after { content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;background:radial-gradient(circle,var(--green-glow),transparent 70%);pointer-events:none; }
+.brief-eyebrow { display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3); }
+.brief-pill { background:var(--green-bg);color:var(--green);border:1.5px solid rgba(77,186,136,0.3);padding:2px 10px;border-radius:var(--r-pill);font-family:var(--font-sans);font-size:var(--text-xs);font-weight:700; }
+.brief-date { font-size:var(--text-xs);color:var(--fg-subtle);font-family:var(--font-sans); }
+.brief-headline { font-family:var(--font-display);font-size:var(--text-2xl);font-weight:800;color:var(--fg-bright);margin-bottom:var(--sp-2);line-height:1.25; }
+.brief-desc     { font-size:var(--text-sm);color:var(--fg-secondary);line-height:1.6; }
+.brief-actions  { display:flex;gap:var(--sp-2);margin-top:var(--sp-4); }
+.brief-insts    { display:flex;flex-direction:column;gap:var(--sp-3);min-width:220px; }
+.brief-inst-card {
+  background:rgba(255,255,255,0.03);border:1.5px solid var(--border-dim);
+  border-radius:var(--r-lg);padding:12px;display:flex;align-items:center;gap:10px;
+}
+.brief-inst-emoji { font-size:20px; }
+.brief-inst-name  { font-family:var(--font-sans);font-size:var(--text-sm);font-weight:700;color:var(--fg-bright); }
+.brief-inst-sub   { font-size:var(--text-xs);color:var(--fg-subtle);margin-top:2px; }
+.brief-inst-vol   { font-family:var(--font-mono);font-size:var(--text-xs);color:var(--green);text-align:right; }
+
+/* ── Stats row ── */
+.stats-row { display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4);margin-bottom:var(--sp-8); }
+.stat-card { background:var(--bg-raised);border:1.5px solid var(--border-dim);border-radius:var(--r-xl);padding:var(--sp-4) var(--sp-5); }
+.stat-card-val { font-family:var(--font-mono);font-size:var(--text-3xl);font-weight:700;color:var(--fg-bright);margin-bottom:3px; }
+.stat-card-lbl { font-family:var(--font-sans);font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--fg-subtle); }
+.stat-card-sub { font-size:var(--text-xs);color:var(--fg-muted);margin-top:3px;font-family:var(--font-sans); }
+
+/* ── Free play banner ── */
+.fp-banner {
+  background:linear-gradient(135deg,var(--amber-bg),rgba(204,148,56,0.04));
+  border:1.5px solid rgba(204,148,56,0.3);border-radius:var(--r-xl);
+  padding:var(--sp-4) var(--sp-5);margin-bottom:var(--sp-5);
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);
+}
+.fp-banner-text { font-size:var(--text-sm);color:var(--amber);font-family:var(--font-sans); }
+.fp-banner-text strong { color:var(--fg-bright); }
+
+/* ── Desk grid ── */
+.desk-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--sp-4);margin-bottom:var(--sp-8); }
+.desk-card {
+  background:var(--bg-raised);border:1.5px solid var(--border-dim);border-radius:var(--r-xl);
+  padding:var(--sp-5);cursor:pointer;text-decoration:none;display:block;
+  transition:border-color var(--t-normal),box-shadow var(--t-normal),transform var(--t-normal);
+  position:relative;overflow:hidden;
+}
+.desk-card:hover {
+  border-color:var(--border-mid);transform:translateY(-2px);
+  box-shadow:var(--shadow-card-hover);
+}
+.desk-card.featured { border-color:rgba(204,148,56,0.3); }
+.desk-card.featured:hover { border-color:rgba(204,148,56,0.5);box-shadow:0 0 0 1.5px var(--border-mid),0 8px 32px rgba(204,148,56,0.1); }
+.desk-card.locked { opacity:0.42;cursor:not-allowed;pointer-events:none; }
+.desk-lock-chip {
+  position:absolute;top:12px;right:12px;
+  font-family:var(--font-sans);font-size:var(--text-xs);color:var(--fg-subtle);
+  background:var(--bg-elevated);border:1.5px solid var(--border-dim);
+  padding:2px 8px;border-radius:var(--r-sm);
+}
+.desk-icon {
+  width:44px;height:44px;border-radius:var(--r-lg);
+  background:var(--bg-elevated);border:1.5px solid var(--border-dim);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:var(--sp-3);flex-shrink:0;
+}
+.desk-name { font-family:var(--font-sans);font-size:var(--text-md);font-weight:700;color:var(--fg-bright);margin-bottom:var(--sp-2); }
+.desk-tags { display:flex;gap:5px;flex-wrap:wrap;margin-bottom:var(--sp-3); }
+.desk-tag {
+  font-family:var(--font-sans);font-size:var(--text-xs);font-weight:600;
+  padding:2px 8px;border-radius:var(--r-pill);
+  background:var(--blue-bg);color:var(--blue);border:1.5px solid rgba(106,159,212,0.2);
+}
+.desk-tag:nth-child(2){background:var(--green-bg);color:var(--green);border-color:rgba(77,186,136,0.2);}
+.desk-tag:nth-child(3){background:var(--amber-bg);color:var(--amber);border-color:rgba(204,148,56,0.2);}
+.desk-desc { font-size:var(--text-sm);color:var(--fg-subtle);line-height:1.55;margin-bottom:var(--sp-4); }
+.desk-footer { display:flex;align-items:center;justify-content:space-between; }
+.desk-req { font-size:var(--text-xs);font-family:var(--font-sans);color:var(--fg-muted); }
+.desk-req.met { color:var(--green); }
+.desk-cta { font-family:var(--font-sans);font-size:var(--text-xs);font-weight:700;color:var(--fg-secondary);transition:color var(--t-fast); }
+.desk-card:hover .desk-cta { color:var(--green); }
+.desk-today { font-size:var(--text-xs);color:var(--fg-subtle);font-family:var(--font-sans);margin-top:var(--sp-2);padding-top:var(--sp-2);border-top:1.5px solid var(--border-dim); }
+.desk-today span { color:var(--fg-bright);font-weight:600; }
+
+/* ── Missions ── */
+.mission-list { display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:var(--sp-3);margin-bottom:var(--sp-8); }
+.mission-card {
+  background:var(--bg-raised);border:1.5px solid var(--border-dim);
+  border-radius:var(--r-lg);padding:var(--sp-4);
+  display:flex;align-items:flex-start;gap:var(--sp-3);
+}
+.mission-card.done { background:rgba(77,186,136,0.04);border-color:rgba(77,186,136,0.2);opacity:0.7; }
+.mission-icon { font-size:18px;flex-shrink:0;margin-top:1px; }
+.mission-body { flex:1; }
+.mission-title { font-family:var(--font-sans);font-size:var(--text-sm);font-weight:700;color:var(--fg-bright);margin-bottom:3px; }
+.mission-desc  { font-size:var(--text-xs);color:var(--fg-subtle);line-height:1.5; }
+.mission-prog  { margin-top:6px;background:var(--bg-elevated);border-radius:var(--r-pill);height:3px;overflow:hidden; }
+.mission-prog-fill { height:100%;background:var(--green);border-radius:var(--r-pill);transition:width .4s; }
+.mission-prog-lbl  { font-family:var(--font-mono);font-size:var(--text-xs);color:var(--fg-subtle);margin-top:3px; }
+.mission-xp { font-family:var(--font-mono);font-size:var(--text-xs);font-weight:700;color:var(--green);white-space:nowrap;flex-shrink:0; }
+
+/* ── Footer ── */
+.footer {
+  border-top:1.5px solid var(--border-dim);padding:var(--sp-5) var(--sp-8);
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:var(--text-xs);color:var(--fg-subtle);font-family:var(--font-sans);
+}
+.footer a { color:var(--fg-subtle);text-decoration:none;transition:color var(--t-fast); }
+.footer a:hover { color:var(--green); }
+
+@media(max-width:900px){
+  .header,.career-bar,.main,.footer{padding-left:var(--sp-4);padding-right:var(--sp-4);}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .daily-brief{grid-template-columns:1fr;}
+  .brief-insts{flex-direction:row;}
+}
 </style>
 </head>
 <body data-desk="index">
@@ -244,302 +210,314 @@
 <script src="instruments.js"></script>
 <script src="lexie-core.js"></script>
 
+<!-- ── Header ── -->
 <header class="header">
   <div class="logo">
-    <div class="logo-icon">&#x1F3E6;</div>
-    <div class="logo-text">
-      <h1>LeXie Capital</h1>
-      <p>QUANTITATIVE TRADING TRAINING FLOOR</p>
+    <div class="logo-mark">&#x1F3E6;</div>
+    <div>
+      <div class="logo-text">LeXie Capital</div>
+      <div class="logo-sub">Quantitative Trading Training Floor</div>
     </div>
   </div>
-  <div class="header-right">
-    <div class="time-chip" id="clock">--:--:-- UTC</div>
-    <nav class="nav-links">
-      <a class="nav-link" href="#desks">Desks</a>
-      <a class="nav-link" href="#missions">Missions</a>
-      <a class="nav-link" href="terminal.html">&#x1F5A5; Terminal</a>
-    </nav>
-  </div>
+  <nav class="header-nav">
+    <div class="header-clock" id="clock">--:--:-- UTC</div>
+    <button class="fp-toggle" id="fp-toggle" onclick="toggleFreePlay()" title="Free Play — unlock all desks">
+      <div class="fp-dot"></div>
+      <span id="fp-label">Free Play</span>
+    </button>
+    <a href="#desks" class="lx-btn lx-btn-ghost lx-btn-sm">Desks</a>
+    <a href="#missions" class="lx-btn lx-btn-ghost lx-btn-sm">Missions</a>
+    <a href="terminal.html" class="lx-btn lx-btn-primary lx-btn-sm">&#x25B6; Terminal</a>
+  </nav>
 </header>
 
+<!-- ── Career Bar ── -->
 <div class="career-bar">
-  <div class="career-inner">
-    <div class="career-badge" id="career-badge">&#x1F393;</div>
-    <div class="career-info">
-      <div class="career-title-row">
-        <span class="career-title" id="career-title">Intern</span>
-        <span class="career-xp" id="career-xp">0 XP</span>
-      </div>
-      <div class="career-bar-track">
-        <div class="career-bar-fill" id="career-bar-fill" style="width:0%"></div>
-      </div>
-      <div class="career-bar-label" id="career-bar-label">0 / 500 XP to Junior Analyst</div>
+  <div class="career-badge" id="career-badge">&#x1F393;</div>
+  <div class="career-info">
+    <div class="career-name-row">
+      <span class="career-title" id="career-title">Intern</span>
+      <span class="career-xp-badge" id="career-xp">0 XP</span>
     </div>
-    <div class="career-right">
-      <div class="career-stat">
-        <div class="career-stat-value" id="stat-runs">0</div>
-        <div class="career-stat-label">Runs</div>
-      </div>
-      <div class="career-stat">
-        <div class="career-stat-value" id="stat-sharpe">-</div>
-        <div class="career-stat-label">Best Sharpe</div>
-      </div>
-      <div class="career-stat">
-        <div class="career-stat-value" id="stat-missions">0</div>
-        <div class="career-stat-label">Missions</div>
-      </div>
+    <div class="lx-xp-track" style="max-width:400px">
+      <div class="lx-xp-fill" id="career-fill" style="width:0%"></div>
     </div>
+    <div class="career-bar-sub" id="career-sub">0 / 500 XP to Junior Analyst</div>
+  </div>
+  <div class="career-stats">
+    <div class="career-stat"><div class="career-stat-val" id="s-runs">0</div><div class="career-stat-lbl">Runs</div></div>
+    <div class="career-stat"><div class="career-stat-val" id="s-sharpe">—</div><div class="career-stat-lbl">Best Sharpe</div></div>
+    <div class="career-stat"><div class="career-stat-val" id="s-missions">0</div><div class="career-stat-lbl">Missions</div></div>
+    <div class="career-stat"><div class="career-stat-val" id="s-streak">0 &#x1F525;</div><div class="career-stat-lbl">Streak</div></div>
   </div>
 </div>
 
+<!-- ── Market Ticker ── -->
 <div class="ticker-bar">
   <div class="ticker-scroll" id="ticker"></div>
 </div>
 
+<!-- ── Main ── -->
 <main class="main">
 
-  <div style="margin-bottom:32px">
-    <div class="section-header" style="margin-bottom:16px">
+  <!-- Daily Brief -->
+  <div style="margin-bottom:var(--sp-8)">
+    <div class="section-hdr">
       <div class="section-title">Today's Market Brief</div>
-      <a href="terminal.html" style="font-size:12px;color:var(--accent);text-decoration:none">Open Terminal &rarr;</a>
+      <a href="terminal.html" class="lx-btn lx-btn-ghost lx-btn-sm">Open Terminal &#x2192;</a>
     </div>
     <div class="daily-brief">
       <div>
-        <div class="brief-top">
-          <span class="brief-badge">TODAY'S FOCUS</span>
+        <div class="brief-eyebrow">
+          <span class="brief-pill">TODAY'S FOCUS</span>
           <span class="brief-date" id="brief-date"></span>
         </div>
-        <div class="brief-headline" id="brief-headline">Loading today's research brief...</div>
+        <div class="brief-headline" id="brief-headline">Loading...</div>
         <div class="brief-desc" id="brief-desc"></div>
+        <div class="brief-actions">
+          <a href="terminal.html" class="lx-btn lx-btn-primary lx-btn-sm">&#x25B6; Research in Terminal</a>
+          <a href="spread-trader.html" class="lx-btn lx-btn-secondary lx-btn-sm">&#x2696; Pairs Desk</a>
+        </div>
       </div>
-      <div class="brief-instruments" id="brief-instruments"></div>
+      <div class="brief-insts" id="brief-insts"></div>
     </div>
   </div>
 
-  <div class="stats-row">
+  <!-- Stats -->
+  <div class="stats-row" style="margin-bottom:var(--sp-8)">
     <div class="stat-card">
-      <div class="stat-label">Total XP</div>
-      <div class="stat-value" id="total-xp">0</div>
-      <div class="stat-sub">Run strategies to earn</div>
+      <div class="stat-card-val" id="st-xp">0</div>
+      <div class="stat-card-lbl">Total XP</div>
+      <div class="stat-card-sub">Run strategies to earn</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Desks Visited</div>
-      <div class="stat-value" id="desks-visited">0 / 13</div>
-      <div class="stat-sub">Explore the floor</div>
+      <div class="stat-card-val" id="st-desks">0/13</div>
+      <div class="stat-card-lbl">Desks Visited</div>
+      <div class="stat-card-sub">Explore the floor</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Best Sharpe</div>
-      <div class="stat-value" id="best-sharpe">-</div>
-      <div class="stat-sub">From all backtests</div>
+      <div class="stat-card-val" id="st-sharpe">—</div>
+      <div class="stat-card-lbl">Best Sharpe</div>
+      <div class="stat-card-sub">From all backtests</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Daily Streak</div>
-      <div class="stat-value" id="daily-streak">0</div>
-      <div class="stat-sub">Complete daily challenges</div>
+      <div class="stat-card-val" id="st-streak">0</div>
+      <div class="stat-card-lbl">Daily Streak</div>
+      <div class="stat-card-sub">Complete daily challenges</div>
     </div>
   </div>
 
-  <div id="desks" style="margin-bottom:12px">
-    <div class="section-header">
+  <!-- Desks -->
+  <div id="desks" style="margin-bottom:var(--sp-8)">
+    <div class="section-hdr">
       <div class="section-title">Trading Desks</div>
-      <div style="font-size:12px;color:var(--dim)">13 desks &bull; level up to unlock all</div>
+      <div id="desk-info" style="font-size:var(--text-xs);font-family:var(--font-sans);color:var(--fg-subtle)"></div>
+    </div>
+    <div id="fp-banner" style="display:none" class="fp-banner">
+      <div class="fp-banner-text">&#x1F511; <strong>Free Play mode on</strong> — all desks unlocked. XP and career progress still tracked normally.</div>
+      <button class="lx-btn lx-btn-secondary lx-btn-sm" onclick="toggleFreePlay()">Exit Free Play</button>
     </div>
     <div class="desk-grid" id="desk-grid"></div>
   </div>
 
-  <div id="missions" style="margin-bottom:32px">
-    <div class="section-header">
+  <!-- Missions -->
+  <div id="missions">
+    <div class="section-hdr">
       <div class="section-title">Missions</div>
-      <div id="missions-summary" style="font-size:12px;color:var(--dim)">Loading...</div>
+      <div id="missions-hdr" style="font-size:var(--text-xs);font-family:var(--font-sans);color:var(--fg-subtle)"></div>
     </div>
-    <div class="missions-panel">
-      <div class="mission-list" id="mission-list"></div>
-    </div>
+    <div class="mission-list" id="mission-list"></div>
   </div>
 
 </main>
 
 <footer class="footer">
-  <div>&copy; 2025 LeXie Capital &mdash; Training Simulation &bull; No real money involved</div>
-  <div style="display:flex;gap:16px">
+  <div>&copy; 2025 LeXie Capital &mdash; Training simulation &middot; No real money involved</div>
+  <div style="display:flex;gap:var(--sp-4)">
     <a href="terminal.html">Terminal</a>
+    <a href="spread-trader.html">Pairs Desk</a>
+    <a href="momentum-trainer.html">Trend Desk</a>
     <a href="#" onclick="if(confirm('Reset all career progress?'))LX._reset()">Reset Progress</a>
   </div>
 </footer>
 
 <script>
-/* ── Clock ── */
-function updateClock() {
-  var now = new Date();
-  var h = String(now.getUTCHours()).padStart(2,'0');
-  var m = String(now.getUTCMinutes()).padStart(2,'0');
-  var s = String(now.getUTCSeconds()).padStart(2,'0');
-  var el = document.getElementById('clock');
-  if (el) el.textContent = h+':'+m+':'+s+' UTC';
+/* ── Free Play ── */
+var FP_KEY = 'lx_free_play';
+function isFP() { return localStorage.getItem(FP_KEY) === '1'; }
+function toggleFreePlay() {
+  localStorage.setItem(FP_KEY, isFP() ? '0' : '1');
+  updateFPUI();
+  buildDeskGrid();
 }
-setInterval(updateClock, 1000);
-updateClock();
+function updateFPUI() {
+  var on = isFP();
+  var btn = document.getElementById('fp-toggle');
+  var banner = document.getElementById('fp-banner');
+  if (btn) btn.className = 'fp-toggle' + (on ? ' on' : '');
+  if (banner) banner.style.display = on ? 'flex' : 'none';
+}
+
+/* ── Clock ── */
+function tick() {
+  var n=new Date();
+  var t=String(n.getUTCHours()).padStart(2,'0')+':'+String(n.getUTCMinutes()).padStart(2,'0')+':'+String(n.getUTCSeconds()).padStart(2,'0');
+  var el=document.getElementById('clock');
+  if(el)el.textContent=t+' UTC';
+}
+setInterval(tick,1000); tick();
 
 /* ── Ticker ── */
-var TICKER_SNAP = [
-  {ticker:'AAPL',emoji:'&#x1F34E;',price:182.4,chg:+0.8},
-  {ticker:'NVDA',emoji:'&#x1F7E2;',price:875.2,chg:+2.3},
-  {ticker:'TSLA',emoji:'&#x26A1;',price:241.6,chg:-1.4},
-  {ticker:'BTC',emoji:'&#x20BF;',price:67420,chg:+1.9},
-  {ticker:'ETH',emoji:'&#x1F537;',price:3540,chg:+0.7},
-  {ticker:'GOLD',emoji:'&#x1F947;',price:2340,chg:+0.3},
-  {ticker:'OIL',emoji:'&#x1F6E2;',price:82.4,chg:-0.6},
-  {ticker:'EURUSD',emoji:'&#x1F4B1;',price:1.082,chg:+0.04},
-  {ticker:'SPX',emoji:'&#x1F4C8;',price:5240,chg:+0.5},
-  {ticker:'VIX',emoji:'&#x1F631;',price:16.2,chg:-3.1},
-  {ticker:'TLT',emoji:'&#x1F3DB;',price:94.8,chg:-0.2},
-  {ticker:'SOL',emoji:'&#x2600;',price:158,chg:+3.4},
-  {ticker:'GLD',emoji:'&#x2728;',price:218.4,chg:+0.3},
-  {ticker:'WHEAT',emoji:'&#x1F33E;',price:590,chg:-0.4},
-  {ticker:'MSFT',emoji:'&#x1FA9F;',price:412.5,chg:+0.6}
+var TICKS=[
+  {s:'AAPL',e:'&#x1F34E;',p:182.4,c:+0.8},{s:'NVDA',e:'&#x1F7E2;',p:875.2,c:+2.3},{s:'TSLA',e:'&#x26A1;',p:241.6,c:-1.4},
+  {s:'BTC', e:'&#x20BF;', p:67420,c:+1.9},{s:'ETH', e:'&#x1F537;',p:3540, c:+0.7},{s:'GOLD',e:'&#x1F947;',p:2340, c:+0.3},
+  {s:'OIL', e:'&#x1F6E2;',p:82.4, c:-0.6},{s:'SPX', e:'&#x1F4C8;',p:5240, c:+0.5},{s:'VIX', e:'&#x1F631;',p:16.2, c:-3.1},
+  {s:'TLT', e:'&#x1F3DB;',p:94.8, c:-0.2},{s:'SOL', e:'&#x2600;', p:158,  c:+3.4},{s:'EURUSD',e:'&#x1F4B1;',p:1.082,c:+0.04},
 ];
-
-function buildTicker() {
-  var t = document.getElementById('ticker');
-  if (!t) return;
-  var all = TICKER_SNAP.concat(TICKER_SNAP);
-  t.innerHTML = all.map(function(d) {
-    var sign = d.chg >= 0 ? '+' : '';
-    var cls  = d.chg >= 0 ? 'up' : 'dn';
-    var pfmt = d.price >= 1000 ? d.price.toLocaleString('en',{maximumFractionDigits:0})
-             : d.price >= 10   ? d.price.toFixed(1)
-             : d.price.toFixed(3);
-    return '<div class="ticker-item"><span>'+d.emoji+'</span><span class="ticker-name">'+d.ticker+'</span><span class="ticker-price">'+pfmt+'</span><span class="ticker-change '+cls+'">'+sign+d.chg+'%</span></div>';
+function buildTicker(){
+  var el=document.getElementById('ticker');if(!el)return;
+  var all=TICKS.concat(TICKS);
+  el.innerHTML=all.map(function(d){
+    var fmt=d.p>=1000?d.p.toLocaleString('en',{maximumFractionDigits:0}):d.p>=10?d.p.toFixed(1):d.p.toFixed(3);
+    var cls=d.c>=0?'ticker-up':'ticker-dn';
+    var sign=d.c>=0?'+':'';
+    return '<div class="ticker-item"><span>'+d.e+'</span><span class="ticker-sym">'+d.s+'</span><span class="ticker-price">'+fmt+'</span><span class="'+cls+'">'+sign+d.c+'%</span></div>';
   }).join('');
 }
-buildTicker();
 
 /* ── Career UI ── */
-function updateCareerUI() {
-  if (!window.LX) return;
-  var info  = LX.getLevelInfo();
-  var state = LX.getState();
-  document.getElementById('career-badge').textContent = info.badge;
-  document.getElementById('career-title').textContent = info.title;
-  document.getElementById('career-xp').textContent = info.xp.toLocaleString()+' XP';
-  document.getElementById('career-bar-fill').style.width = info.pct+'%';
-  document.getElementById('career-bar-label').textContent = info.next
-    ? info.xpInLevel.toLocaleString()+' / '+info.xpToNext.toLocaleString()+' XP to '+info.next.title
-    : 'MAX LEVEL REACHED';
-  document.getElementById('stat-runs').textContent    = state.terminalRuns;
-  document.getElementById('stat-sharpe').textContent  = state.bestSharpe > 0 ? state.bestSharpe.toFixed(2) : '-';
-  document.getElementById('stat-missions').textContent = state.missionsCompleted.length;
-  document.getElementById('total-xp').textContent     = info.xp.toLocaleString();
-  document.getElementById('desks-visited').textContent= (state.desksVisited ? [...state.desksVisited].length : 0)+' / 13';
-  document.getElementById('best-sharpe').textContent  = state.bestSharpe > 0 ? state.bestSharpe.toFixed(2) : '-';
-  document.getElementById('daily-streak').textContent = (state.dailyStreak || 0)+' 🔥';
+function updateCareerUI(){
+  if(!window.LX)return;
+  var info=LX.getLevelInfo(),st=LX.getState();
+  document.getElementById('career-badge').textContent=info.badge;
+  document.getElementById('career-title').textContent=info.title;
+  document.getElementById('career-xp').textContent=info.xp.toLocaleString()+' XP';
+  document.getElementById('career-fill').style.width=info.pct+'%';
+  document.getElementById('career-sub').textContent=info.next
+    ?info.xpInLevel.toLocaleString()+' / '+info.xpToNext.toLocaleString()+' XP to '+info.next.title
+    :'MAX LEVEL';
+  document.getElementById('s-runs').textContent=st.terminalRuns;
+  document.getElementById('s-sharpe').textContent=st.bestSharpe>0?st.bestSharpe.toFixed(2):'—';
+  document.getElementById('s-missions').textContent=st.missionsCompleted.length;
+  document.getElementById('s-streak').textContent=(st.dailyStreak||0)+' 🔥';
+  document.getElementById('st-xp').textContent=info.xp.toLocaleString();
+  document.getElementById('st-desks').textContent=(st.desksVisited?[...st.desksVisited].length:0)+'/13';
+  document.getElementById('st-sharpe').textContent=st.bestSharpe>0?st.bestSharpe.toFixed(2):'—';
+  document.getElementById('st-streak').textContent=(st.dailyStreak||0);
 }
 
 /* ── Desk grid ── */
-var DESK_EXTRA = {
-  'terminal':         {tags:['Alpha Factors','Backtesting','Walk-Forward'],featured:true},
-  'spread-trader':    {tags:['Pairs Research','Mean Reversion','Z-Score']},
-  'momentum-trainer': {tags:['Momentum','Multi-TF','Regime']},
-  'regime-rider':     {tags:['Macro','Rates','Risk-Off']},
-  'price-war':        {tags:['Market Making','Inventory','Bid-Ask']},
-  'algo-blitz':       {tags:['Coding','Signals','Interview']},
-  'arbitrage-sprint': {tags:['Arb','Relative Value','Mispricing']},
-  'bot-builder':      {tags:['Execution','Logic','Automation']},
-  'cmi-challenge':    {tags:['Portfolio','Risk Limits','Drawdown']},
-  'quant-relay':      {tags:['Factor Research','Sprints','IC']},
-  'alpha-factory':    {tags:['Alt Data','IC Decay','Signals']},
-  'basket-blitz':     {tags:['ETF','Factor Exposure','Hedging']},
-  'options-outcry':   {tags:['Options','Greeks','Volatility']}
+var DESK_META={
+  'terminal':          {tags:['Alpha Factors','Backtesting','Walk-Fwd'],featured:true},
+  'spread-trader':     {tags:['Pairs Research','Mean Reversion','Z-Score']},
+  'momentum-trainer':  {tags:['Momentum','Multi-TF','Regime']},
+  'regime-rider':      {tags:['Macro','Rates','Risk-Off']},
+  'price-war':         {tags:['Market Making','Inventory','Bid-Ask']},
+  'algo-blitz':        {tags:['Coding','Signals','Interview']},
+  'arbitrage-sprint':  {tags:['Arb','Relative Value','Mispricing']},
+  'bot-builder':       {tags:['Execution','Logic','Automation']},
+  'cmi-challenge':     {tags:['Portfolio','Risk Limits','Drawdown']},
+  'quant-relay':       {tags:['Factor Research','Sprints','IC']},
+  'alpha-factory':     {tags:['Alt Data','IC Decay','Signals']},
+  'basket-blitz':      {tags:['ETF','Factor Exposure','Hedging']},
+  'options-outcry':    {tags:['Options','Greeks','Volatility']},
 };
 
-function buildDeskGrid() {
-  var grid = document.getElementById('desk-grid');
-  if (!grid || !window.LX || !window.LX_DESKS) return;
-  var daily      = window.lxDailyState ? lxDailyState() : null;
-  var levelIndex = LX.getLevelInfo().index;
-  var html = LX_DESKS.map(function(desk) {
-    var extra    = DESK_EXTRA[desk.id] || {};
-    var locked   = levelIndex < desk.minLevel;
-    var reqLevel = LX_LEVELS[desk.minLevel];
-    var tags     = (extra.tags || []).map(function(t,i){
-      return '<span class="desk-tag '+(i===0?'green':i===1?'gold':'')+'">'+t+'</span>';
-    }).join('');
-    var isDaily  = daily && daily.instrument && desk.id === 'terminal';
-    var instNote = (isDaily && daily.instrument)
-      ? '<div class="desk-instrument">Today: <span>'+daily.instrument.emoji+' '+daily.instrument.name+'</span></div>'
-      : '';
-    var lockNote = locked
-      ? '<span class="desk-level-req">'+reqLevel.badge+' '+reqLevel.title+' required</span>'
-      : '<span class="desk-level-req met">&#x2713; Accessible</span>';
-    return '<a href="'+(locked?'#':desk.file)+'" class="desk-card'+(locked?' locked':'')+(extra.featured?' featured':'')+'">'+
-      '<div class="desk-header"><div class="desk-icon">'+desk.icon+'</div>'+
-      '<div class="desk-meta"><div class="desk-name">'+desk.name+'</div><div class="desk-tags">'+tags+'</div></div></div>'+
-      '<div class="desk-desc">'+desk.desc+'</div>'+instNote+
-      '<div class="desk-footer">'+lockNote+'<span class="desk-cta">'+(locked?'Locked':'Enter &rarr;')+'</span></div>'+
-      '</a>';
+function buildDeskGrid(){
+  var grid=document.getElementById('desk-grid');
+  if(!grid||!window.LX||!window.LX_DESKS)return;
+  var fp=isFP();
+  var lvl=LX.getLevelInfo().index;
+  var daily=window.lxDailyState?lxDailyState():null;
+  var accessible=LX_DESKS.filter(function(d){return fp||lvl>=d.minLevel;}).length;
+  document.getElementById('desk-info').textContent=accessible+' / '+LX_DESKS.length+' accessible'+(fp?' (free play)':'');
+
+  grid.innerHTML=LX_DESKS.map(function(desk){
+    var meta=DESK_META[desk.id]||{};
+    var locked=(!fp)&&(lvl<desk.minLevel);
+    var req=LX_LEVELS[desk.minLevel];
+    var isDaily=daily&&daily.instrument&&desk.id==='terminal';
+    var tags=(meta.tags||[]).map(function(t){return '<span class="desk-tag">'+t+'</span>';}).join('');
+    var todayNote=isDaily&&daily.instrument
+      ?'<div class="desk-today">Today: <span>'+daily.instrument.emoji+' '+daily.instrument.name+'</span></div>'
+      :'';
+    var reqNote=locked
+      ?'<span class="desk-req">'+req.badge+' '+req.title+' required</span>'
+      :'<span class="desk-req met">&#x2713; Accessible</span>';
+    return '<a href="'+(locked?'javascript:void(0)':desk.file)+'" class="desk-card'+(locked?' locked':'')+(meta.featured?' featured':'')+'">'+
+      (locked?'<div class="desk-lock-chip">LOCKED</div>':'')+
+      '<div class="desk-icon">'+desk.icon+'</div>'+
+      '<div class="desk-name">'+desk.name+'</div>'+
+      '<div class="desk-tags">'+tags+'</div>'+
+      '<div class="desk-desc">'+desk.desc+'</div>'+
+      todayNote+
+      '<div class="desk-footer">'+reqNote+'<span class="desk-cta">'+(locked?'':'Enter &#x2192;')+'</span></div>'+
+    '</a>';
   }).join('');
-  grid.innerHTML = html;
 }
 
 /* ── Daily brief ── */
-var BRIEF_THEMES = [
-  {headline:'Equity Momentum vs Mean Reversion',desc:'Technology stocks showing strong price continuation. Cross-sectional momentum diverges from short-term mean-reversion. Research signal decay at different horizons in the Terminal.'},
-  {headline:'Macro Regime Shift: Risk-Off Signals',desc:'VIX elevated, credit spreads widening. Bond-equity correlation flipping. Test how strategies perform across regimes using attribution tools.'},
-  {headline:'Pairs Opportunity: Gold vs Long Bonds',desc:'Historical correlation between gold and long-duration bonds elevated. Spread has diverged over 2 standard deviations. Research entry timing on the Pairs Desk.'},
-  {headline:'Crypto Momentum: BTC Leading ETH',desc:'Bitcoin dominance at 52%. ETH underperforming on 5-day basis. Research cross-asset lead-lag relationships and IC at multiple horizons.'},
-  {headline:'Factor Rotation: Quality Over Momentum',desc:'Rate-sensitive factor rotation underway. Quality and low-volatility factors outperforming. Explore regime-specific alpha construction in the Lab.'},
-  {headline:'Commodity Supply Premium Building',desc:'WTI-Brent spread widening. Energy sector volatility elevated. Research commodity correlation structures and carry signals.'},
-  {headline:'FX Carry Under Pressure',desc:'USD strength compressing carry trade returns. AUDUSD and EURUSD mean-reversion signals triggering. Test currency signal construction in the Terminal.'}
+var BRIEFS=[
+  {h:'Equity Momentum vs Mean Reversion',d:'Technology stocks showing strong price continuation. Cross-sectional momentum diverges from short-term mean-reversion. Research signal decay at multiple horizons in the Terminal.'},
+  {h:'Macro Regime Shift: Risk-Off Signals',d:'VIX elevated, credit spreads widening. Bond-equity correlation flipping. Test how strategies perform across regimes using attribution tools.'},
+  {h:'Pairs Opportunity: Gold vs Long Bonds',d:'Spread has diverged over 2 standard deviations from its mean. Research entry timing and hedge ratio on the Pairs Research Desk.'},
+  {h:'Crypto Momentum: BTC Leading ETH',d:'Bitcoin dominance at 52%. ETH underperforming on 5-day basis. Research cross-asset lead-lag and IC at multiple horizons.'},
+  {h:'Factor Rotation: Quality Over Momentum',d:'Rate-sensitive factor rotation underway. Quality outperforms. Explore regime-specific alpha construction in the Quant Lab.'},
+  {h:'Commodity Supply Premium Building',d:'WTI-Brent spread widening. Energy sector volatility elevated. Research commodity correlation and carry signals.'},
+  {h:'FX Carry Under Pressure',d:'USD strength compressing carry trade P&L. AUDUSD and EURUSD mean-reversion signals triggering in the Terminal.'},
 ];
-
-function buildDailyBrief() {
-  var dateNum = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''));
-  var theme   = BRIEF_THEMES[dateNum % BRIEF_THEMES.length];
-  var dateStr = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  document.getElementById('brief-date').textContent     = dateStr;
-  document.getElementById('brief-headline').textContent = theme.headline;
-  document.getElementById('brief-desc').textContent     = theme.desc;
-
-  var daily  = window.lxDailyState ? lxDailyState() : null;
-  var instEl = document.getElementById('brief-instruments');
-  if (!daily || !instEl) return;
-  var cards = [];
-  if (daily.instrument) {
-    var inst = daily.instrument;
-    cards.push('<div class="brief-inst-card"><div class="brief-inst-emoji">'+inst.emoji+'</div><div class="brief-inst-info"><div class="brief-inst-name">'+inst.name+'</div><div class="brief-inst-desc">'+(inst.microDesc||inst.desc||'').slice(0,70)+'</div></div><div class="brief-inst-stat"><div class="brief-inst-vol">&sigma; '+(inst.vol*100).toFixed(0)+'%</div><div class="brief-inst-risk">'+(inst.risk||'')+'</div></div></div>');
+function buildBrief(){
+  var dn=parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''));
+  var b=BRIEFS[dn%BRIEFS.length];
+  var ds=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('brief-date').textContent=ds;
+  document.getElementById('brief-headline').textContent=b.h;
+  document.getElementById('brief-desc').textContent=b.d;
+  var daily=window.lxDailyState?lxDailyState():null;
+  var el=document.getElementById('brief-insts');
+  if(!daily||!el)return;
+  var cards=[];
+  if(daily.instrument){
+    var ins=daily.instrument;
+    cards.push('<div class="brief-inst-card"><div class="brief-inst-emoji">'+ins.emoji+'</div><div style="flex:1"><div class="brief-inst-name">'+ins.name+'</div><div class="brief-inst-sub">'+(ins.microDesc||ins.desc||'').slice(0,55)+'</div></div><div class="brief-inst-vol">&#x3C3; '+(ins.vol*100).toFixed(0)+'%</div></div>');
   }
-  if (daily.pair) {
-    var p = daily.pair;
-    cards.push('<div class="brief-inst-card"><div class="brief-inst-emoji">&#x2696;</div><div class="brief-inst-info"><div class="brief-inst-name">'+p.nameA+' / '+p.nameB+'</div><div class="brief-inst-desc">'+(p.thesis||'Pairs spread opportunity').slice(0,70)+'</div></div><div class="brief-inst-stat"><div class="brief-inst-vol">Spread</div><div class="brief-inst-risk">Arb</div></div></div>');
+  if(daily.pair){
+    var p=daily.pair;
+    cards.push('<div class="brief-inst-card"><div class="brief-inst-emoji">&#x2696;</div><div style="flex:1"><div class="brief-inst-name">'+p.nameA+' / '+p.nameB+'</div><div class="brief-inst-sub">'+(p.thesis||'').slice(0,55)+'</div></div><div class="brief-inst-vol">Spread</div></div>');
   }
-  instEl.innerHTML = cards.join('');
+  el.innerHTML=cards.join('');
 }
 
 /* ── Missions ── */
-function buildMissions() {
-  var list    = document.getElementById('mission-list');
-  var summary = document.getElementById('missions-summary');
-  if (!list || !window.LX) return;
-  var missions = LX.getMissions();
-  var done  = missions.filter(function(m){return m.completed;}).length;
-  var total = missions.length;
-  if (summary) summary.textContent = done+' / '+total+' completed';
-  var show = missions.filter(function(m){return !m.completed;}).slice(0,9)
-    .concat(missions.filter(function(m){return m.completed;}).slice(0,3));
-  list.innerHTML = show.map(function(m) {
-    var prog    = m.progress;
-    var progBar = prog ? '<div class="mission-progress"><div class="mission-progress-fill" style="width:'+Math.min(100,Math.floor(prog[0]/prog[1]*100))+'%"></div></div>' : '';
-    var progNote= (prog && !m.completed) ? '<div style="font-size:10px;color:var(--dim);margin-top:2px">'+prog[0]+' / '+prog[1]+'</div>' : '';
-    return '<div class="mission-item'+(m.completed?' done':'')+'"><div class="mission-icon">'+(m.completed?'&#x2705;':m.icon)+'</div><div class="mission-body"><div class="mission-title">'+m.title+'</div><div class="mission-desc">'+m.desc+'</div>'+progBar+progNote+'</div><div class="mission-xp">+'+m.xp+'</div></div>';
+function buildMissions(){
+  var list=document.getElementById('mission-list');
+  var hdr=document.getElementById('missions-hdr');
+  if(!list||!window.LX)return;
+  var ms=LX.getMissions();
+  var done=ms.filter(function(m){return m.completed;}).length;
+  if(hdr)hdr.textContent=done+' / '+ms.length+' completed';
+  var show=ms.filter(function(m){return !m.completed;}).slice(0,9)
+    .concat(ms.filter(function(m){return m.completed;}).slice(0,3));
+  list.innerHTML=show.map(function(m){
+    var pg=m.progress;
+    var pbar=pg?'<div class="mission-prog"><div class="mission-prog-fill" style="width:'+Math.min(100,Math.floor(pg[0]/pg[1]*100))+'%"></div></div><div class="mission-prog-lbl">'+pg[0]+' / '+pg[1]+'</div>':'';
+    return '<div class="mission-card'+(m.completed?' done':'')+'">'+
+      '<div class="mission-icon">'+(m.completed?'&#x2705;':m.icon)+'</div>'+
+      '<div class="mission-body"><div class="mission-title">'+m.title+'</div><div class="mission-desc">'+m.desc+'</div>'+pbar+'</div>'+
+      '<div class="mission-xp">+'+m.xp+' XP</div>'+
+    '</div>';
   }).join('');
 }
 
-window.addEventListener('lx:update', function() {
-  updateCareerUI(); buildDeskGrid(); buildMissions();
-});
+window.addEventListener('lx:update',function(){updateCareerUI();buildDeskGrid();buildMissions();});
 
-document.addEventListener('DOMContentLoaded', function() {
-  updateCareerUI(); buildDeskGrid(); buildDailyBrief(); buildMissions();
+document.addEventListener('DOMContentLoaded',function(){
+  buildTicker();
+  updateCareerUI();
+  updateFPUI();
+  buildDeskGrid();
+  buildBrief();
+  buildMissions();
 });
 </script>
 </body>
