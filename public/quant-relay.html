@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<link rel="stylesheet" href="lx-design.css">
 <style>
   /* ══════════════════════════════════════════════
      CROSS-PLATFORM TYPOGRAPHY + VISUAL POLISH
@@ -159,16 +160,16 @@
   .section-label,.spec-section-title,.section-title{font-size:0.68rem!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:0.14em!important;color:var(--dim)!important;margin-bottom:12px!important;}
 
 :root{
-  --bg:#060d1a;--panel:#0d1829;--panel2:#101e30;
-  --border:#1e3a5f;--border2:#1e2d4a;
-  --text:#e2e8f0;--dim:#64748b;--dim2:#94a3b8;
-  --blue:#3b82f6;--blue-l:#60a5fa;
-  --green:#22c55e;--red:#ef4444;
-  --yellow:#eab308;--purple:#a855f7;--cyan:#06b6d4;
-  --teal:#14b8a6;--orange:#f97316;
-  --green-bg:rgba(34,197,94,0.12);--red-bg:rgba(239,68,68,0.12);
-  --blue-bg:rgba(59,130,246,0.12);--yellow-bg:rgba(234,179,8,0.12);
-  --purple-bg:rgba(168,85,247,0.12);--teal-bg:rgba(20,184,166,0.12);
+  --bg:#0e0c0b;--panel:#141210;--panel2:#1a1714;
+  --border:#332e28;--border2:#484038;
+  --text:#d4cdc6;--dim:#6a6058;--dim2:#b8b0a8;
+  --blue:#6a9fd4;--blue-l:#89b8e0;
+  --green:#4dba88;--red:#c45868;
+  --yellow:#cc9438;--purple:#9878d0;--cyan:#6a9fd4;
+  --teal:#4dba88;--orange:#cc9438;
+  --green-bg:rgba(77,186,136,0.12);--red-bg:rgba(196,88,104,0.12);
+  --blue-bg:rgba(106,159,212,0.12);--yellow-bg:rgba(204,148,56,0.12);
+  --purple-bg:rgba(152,120,208,0.12);--teal-bg:rgba(77,186,136,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;min-height:100vh;}
@@ -1125,5 +1126,6 @@ function escHtml(s) {
   setTheme(localStorage.getItem('imc-theme')||'system', false);
 })();
 </script>
+<script src="lexie-core.js"></script>
 </body>
 </html>
