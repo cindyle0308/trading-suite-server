@@ -384,7 +384,7 @@ summary.rules-sum::marker{display:none}
     <a href="momentum-trainer.html">Momentum</a>
     <a href="spread-trader.html">Spread</a>
     <a href="regime-rider.html">Regime</a>
-  <button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
+  
   
     <a href="terminal.html">⌨ Terminal</a>
 </nav>
@@ -564,7 +564,7 @@ summary.rules-sum::marker{display:none}
     <a href="momentum-trainer.html">Momentum</a>
     <a href="spread-trader.html">Spread</a>
     <a href="regime-rider.html">Regime</a>
-    <button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
+    
   </nav>
   <div class="results-card">
     <div class="setup-icon">⚡</div>
@@ -957,12 +957,5 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 <script src="lexie-core.js"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  var b=document.getElementById("lx-theme-btn-2");
-  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
-  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
-});
-</script>
 </body>
 </html>
