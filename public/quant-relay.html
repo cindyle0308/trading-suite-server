@@ -1044,6 +1044,11 @@ function showResults(result, fid) {
   document.getElementById('res-fidelity-pts').textContent = fidScore + ' / 25 pts';
   document.getElementById('res-dd').textContent = (result.maxDD * 100).toFixed(1) + '%';
   document.getElementById('res-dd-pts').textContent = ddScore + ' / 25 pts';
+  if(window.LX){
+    LX.visitDesk('quant-relay');
+    LX.addXP(total, 'Quant Relay');
+    LX.recordRun({sharpe: result.sharpe, isBacktest:false, desk:'quant-relay'});
+  }
 
   // Equity curve
   drawEquity('equity-canvas', result.equity);
