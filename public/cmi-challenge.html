@@ -1010,6 +1010,12 @@ function endSession() {
   document.getElementById('rr-bench').textContent=(alpha>=0?'+':'')+alpha.toFixed(1)+'% vs bench';
   document.getElementById('rr-bench').style.color=alpha>=0?'var(--green)':'var(--red)';
   document.getElementById('rr-trades').textContent=G.trades;
+  if(window.LX){
+    LX.visitDesk('cmi-challenge');
+    var cmiXP = Math.max(20, Math.min(200, Math.round(pnl/40)));
+    LX.addXP(cmiXP, 'CMI Challenge');
+    LX.recordRun({sharpe: +(alpha/10).toFixed(2), isBacktest:false, desk:'cmi-challenge'});
+  }
   document.getElementById('rr-income').textContent='€'+G.spreadIncome.toFixed(0);
   let rows='';
   G.stocks.forEach(s=>{
