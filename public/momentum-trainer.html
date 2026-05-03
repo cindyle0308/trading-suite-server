@@ -2,786 +2,487 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<script>!function(){var t=localStorage.getItem("lx_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}();</script>
+<script>!function(){var t=localStorage.getItem('lx_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Trend &amp; Momentum Desk — LeXie Capital</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="instruments.js"></script>
-<script src="lexie-core.js"></script>
+<title>Momentum Trainer — LeXie Capital</title>
 <link rel="stylesheet" href="lx-design.css">
 <style>
-:root {
-  --bg:#0e0c0b; --surface:#141210; --card:#1a1714; --card2:#211e1a;
-  --border:#332e28; --border2:#484038;
-  --text:#d4cdc6; --dim:#6a6058;
-  --accent:#4dba88; --accent2:#37966c;
-  --green:#4dba88; --green-dim:#37966c; --red:#c45868; --gold:#cc9438;
-  --mono:'DM Mono','JetBrains Mono',monospace;
-}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(102,126,234,0.025)1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,0.025)1px,transparent 1px);background-size:40px 40px;}
-
-.header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:1px solid var(--border);background:rgba(8,12,20,0.85);backdrop-filter:blur(12px);}
-.back-btn{font-size:12px;color:var(--dim);text-decoration:none;display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:8px;transition:all .2s;}
-.back-btn:hover{color:var(--accent);border-color:var(--accent);}
-.header-title{display:flex;flex-direction:column;align-items:center;}
-.header-title h1{font-size:16px;font-weight:800;color:#e8f0fe;}
-.header-title p{font-size:11px;color:var(--dim);}
-.status-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600;}
-.status-badge.running{background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);}
-.status-badge.done{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
-
-.pipeline{display:flex;align-items:center;justify-content:center;gap:0;padding:12px 32px;background:rgba(10,15,25,0.7);border-bottom:1px solid var(--border);position:relative;z-index:5;}
-.pipe-step{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:20px;font-size:11px;font-weight:600;color:var(--dim);border:1px solid transparent;transition:all .3s;white-space:nowrap;}
-.pipe-step.active{background:rgba(102,126,234,0.15);border-color:rgba(102,126,234,0.3);color:var(--accent);}
-.pipe-step.done{color:var(--green);}
-.pipe-arrow{color:var(--border2);font-size:14px;margin:0 2px;}
-
-.layout{display:grid;grid-template-columns:300px 1fr;gap:0;height:calc(100vh - 116px);position:relative;z-index:1;}
-.sidebar{border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);}
-.main-area{overflow-y:auto;padding:20px 24px;}
-
-/* Instrument list */
-.inst-header{padding:14px 16px;border-bottom:1px solid var(--border);}
-.inst-header h2{font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:4px;}
-.inst-header p{font-size:11px;color:var(--dim);}
-.inst-filter{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;}
-.filter-btn{font-size:10px;padding:3px 10px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;transition:all .2s;}
-.filter-btn.active{background:rgba(102,126,234,0.15);border-color:rgba(102,126,234,0.3);color:var(--accent);}
-.inst-list{padding:8px;}
-.inst-item{padding:10px 12px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;}
-.inst-item:hover{background:var(--card2);border-color:rgba(102,126,234,0.25);}
-.inst-item.active{background:rgba(102,126,234,0.1);border-color:rgba(102,126,234,0.4);}
-.inst-emoji{font-size:20px;width:32px;text-align:center;}
-.inst-info{flex:1;}
-.inst-name{font-size:12px;font-weight:700;color:#e8f0fe;}
-.inst-ticker{font-size:10px;color:var(--dim);}
-.inst-badges{display:flex;gap:4px;margin-top:2px;}
-.inst-badge{font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(102,126,234,0.1);color:var(--accent);}
-.inst-badge.trending{background:rgba(34,197,94,0.1);color:var(--green);}
-.inst-badge.meanrev{background:rgba(239,68,68,0.1);color:var(--red);}
-.inst-hurst{font-size:11px;font-weight:700;text-align:right;}
-
-/* Cards */
-.step-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;}
-.step-card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.step-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;}
-.step-title{font-size:14px;font-weight:700;color:#e8f0fe;}
-.step-desc{font-size:11px;color:var(--dim);}
-
-/* Charts */
-.charts-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-.charts-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.chart-box{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px;}
-.chart-box h3{font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:2px;}
-.chart-box p{font-size:10px;color:var(--dim);margin-bottom:10px;}
-.chart-wrap{position:relative;height:160px;}
-.chart-wrap-lg{position:relative;height:220px;}
-
-/* Metrics */
-.metrics-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
-.metric{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center;}
-.metric-value{font-size:18px;font-weight:800;color:#e8f0fe;font-variant-numeric:tabular-nums;}
-.metric-label{font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:0.4px;}
-.metric.good .metric-value{color:var(--green);}
-.metric.bad  .metric-value{color:var(--red);}
-
-/* Signal config */
-.signal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
-.param-group label{display:block;font-size:11px;color:var(--dim);margin-bottom:4px;}
-.param-group input,
-.param-group select{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);color:#e8f0fe;border-radius:8px;padding:7px 10px;font-size:13px;}
-.param-group input:focus,
-.param-group select:focus{outline:none;border-color:var(--accent);}
-
-/* Results */
-.interp-box{background:rgba(102,126,234,0.06);border:1px solid rgba(102,126,234,0.15);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--dim);line-height:1.6;margin-top:12px;}
-.interp-box strong{color:#e8f0fe;}
-
-/* Regime bar */
-.regime-bars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
-.regime-bar-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px;}
-.regime-name{font-size:11px;font-weight:700;color:#e8f0fe;margin-bottom:6px;}
-.regime-bar-wrap{background:rgba(255,255,255,0.06);border-radius:3px;height:6px;overflow:hidden;}
-.regime-bar-fill{height:100%;border-radius:3px;}
-.regime-stats{margin-top:5px;font-size:10px;color:var(--dim);}
-
-/* Buttons */
-.btn{padding:8px 18px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
-.btn-primary:hover{opacity:0.9;transform:translateY(-1px);}
-.btn-secondary{background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text);}
-.btn-secondary:hover{background:var(--card2);}
-.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-
-/* IC table */
-.ic-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
-.ic-table th{text-align:center;color:var(--dim);font-weight:600;padding:4px 8px;border-bottom:1px solid var(--border);}
-.ic-table td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:center;font-variant-numeric:tabular-nums;}
-.ic-table tr:last-child td{border:none;}
-.ic-pos{color:var(--green);} .ic-neg{color:var(--red);}
-
-::-webkit-scrollbar{width:5px;}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px;}
+body{font-family:'Inter',system-ui,sans-serif;font-size:14px;background:var(--bg-base);color:var(--fg-primary);min-height:100vh;display:flex;flex-direction:column;}
+.lx-nav{height:48px;background:var(--bg-surface);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:8px;padding:0 16px;flex-shrink:0;font-size:12px;}
+.lx-nav a{color:var(--fg-subtle);text-decoration:none;padding:4px 6px;border-radius:4px;}
+.lx-nav a:hover{color:var(--fg-primary);background:var(--bg-raised);}
+.lx-nav .sep{color:var(--border-mid);}
+.nav-logo{color:var(--gold)!important;font-weight:700;font-size:13px;}
+.nav-right{margin-left:auto;}
+.nav-pill{background:var(--bg-raised);border:1px solid var(--border-dim);border-radius:16px;padding:2px 10px;font-size:11px;color:var(--fg-subtle);}
+.mode-bar{background:var(--bg-panel);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;padding:0 20px;flex-shrink:0;}
+.mode-tab{padding:12px 20px;font-size:13px;font-weight:600;border-bottom:2px solid transparent;color:var(--fg-subtle);cursor:pointer;transition:all .15s;}
+.mode-tab.active{color:var(--coral);border-bottom-color:var(--coral);}
+.mode-tab:hover:not(.active){color:var(--fg-primary);}
+.api-link{margin-left:auto;font-size:12px;color:var(--fg-subtle);text-decoration:none;padding:4px 10px;border:1px solid var(--border-dim);border-radius:6px;}
+.api-link:hover{color:var(--coral);border-color:var(--coral);}
+.workspace{flex:1;display:flex;overflow:hidden;}
+#manual-mode{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.manual-top{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg-panel);border-bottom:1px solid var(--border-dim);flex-shrink:0;flex-wrap:wrap;}
+.inst-select{background:var(--bg-raised);border:1px solid var(--border-dim);color:var(--fg-primary);padding:6px 10px;border-radius:6px;font-size:12px;}
+.stat-pill{background:var(--bg-raised);border:1px solid var(--border-dim);border-radius:8px;padding:4px 10px;font-size:12px;display:flex;gap:6px;align-items:center;}
+.stat-pill .sv{font-weight:700;font-family:monospace;}
+.stat-pill.pos{border-color:var(--green);background:var(--green-bg);}
+.stat-pill.neg{border-color:var(--red);background:var(--red-bg);}
+.btn-sm{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;}
+.btn-long{background:var(--green);color:#fff;}
+.btn-short{background:var(--red);color:#fff;}
+.btn-flat{background:var(--bg-overlay);border:1px solid var(--border-mid);color:var(--fg-primary);}
+.btn-sm:disabled{opacity:.35;cursor:not-allowed;}
+.manual-body{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;overflow:hidden;}
+.chart-panel{background:var(--bg-surface);border-right:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);display:flex;flex-direction:column;overflow:hidden;}
+.chart-panel:nth-child(2n){border-right:none;}
+.chart-panel:nth-child(n+3){border-bottom:none;}
+.chart-label{padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-subtle);border-bottom:1px solid var(--border-dim);flex-shrink:0;}
+.chart-canvas-wrap{flex:1;position:relative;overflow:hidden;}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;}
+#code-mode{flex:1;display:flex;overflow:hidden;}
+.editor-pane{width:46%;min-width:320px;border-right:1px solid var(--border-dim);display:flex;flex-direction:column;background:var(--bg-panel);overflow:hidden;}
+.results-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.pane-header{padding:9px 14px;background:var(--bg-surface);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.pane-title{font-size:11px;font-weight:700;color:var(--fg-subtle);text-transform:uppercase;letter-spacing:.07em;}
+.run-btn{margin-left:auto;background:var(--coral);color:#fff;border:none;padding:6px 18px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
+.run-btn:hover{opacity:.88;}
+.template-bar{padding:5px 14px;background:var(--bg-raised);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+.tmpl-btn{font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--border-dim);background:var(--bg-surface);color:var(--fg-subtle);cursor:pointer;}
+.tmpl-btn:hover{border-color:var(--coral);color:var(--coral);}
+.tmpl-label{font-size:11px;color:var(--fg-subtle);}
+.code-editor{flex:1;font-family:'JetBrains Mono','Fira Code',monospace;font-size:12px;line-height:1.7;padding:14px;background:var(--bg-base);color:var(--fg-primary);border:none;resize:none;outline:none;tab-size:2;}
+.code-error{padding:8px 14px;background:var(--red-bg);border-top:1px solid var(--red);color:var(--red);font-size:12px;font-family:monospace;flex-shrink:0;display:none;}
+.results-charts{flex:1;display:grid;grid-template-rows:1fr 1fr;overflow:hidden;}
+.rc-panel{border-bottom:1px solid var(--border-dim);display:flex;flex-direction:column;overflow:hidden;}
+.rc-panel:last-child{border-bottom:none;}
+.stats-bar{padding:10px 16px;background:var(--bg-surface);border-top:1px solid var(--border-dim);display:flex;gap:20px;flex-shrink:0;flex-wrap:wrap;}
+.stat-item{display:flex;flex-direction:column;gap:2px;}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle);}
+.stat-value{font-size:15px;font-weight:700;font-family:monospace;}
+.stat-value.pos{color:var(--green);}
+.stat-value.neg{color:var(--red);}
+.stat-value.neu{color:var(--fg-primary);}
 </style>
 </head>
-<body data-desk="momentum-trainer">
+<body>
+<nav class="lx-nav">
+  <a href="index.html" class="nav-logo">LeXie</a>
+  <span class="sep">|</span>
+  <a href="momentum-trainer.html" style="color:var(--fg-primary);font-weight:600">🚀 Momentum Trainer</a>
+  <span class="sep">·</span>
+  <a href="spread-trader.html">Spread</a>
+  <a href="price-war.html">Price War</a>
+  <a href="regime-rider.html">Regime</a>
+  <a href="terminal.html">Terminal</a>
+  <div class="nav-right"><a href="api-reference.html" class="nav-pill">📖 API Ref</a></div>
+</nav>
+<div class="mode-bar">
+  <div class="mode-tab active" id="tab-manual" onclick="switchMode('manual')">🖱 Manual</div>
+  <div class="mode-tab" id="tab-code" onclick="switchMode('code')">💻 Code Lab</div>
+  <a href="api-reference.html#momentum" class="api-link">📖 API Reference</a>
+</div>
+<div class="workspace">
 
-<header class="header">
-  <a href="index.html" class="back-btn">&#x2190; Lobby</a>
-  <div class="header-title">
-    <h1>&#x1F680; Trend &amp; Momentum Desk</h1>
-    <p>Multi-timeframe momentum &bull; Regime awareness &bull; IC analysis</p>
+<!-- MANUAL MODE -->
+<div id="manual-mode">
+  <div class="manual-top">
+    <select class="inst-select" id="inst-select" onchange="resetManual()">
+      <option value="spx">SPX (Trend)</option>
+      <option value="ndx">NDX (Tech)</option>
+      <option value="hy">HY Credit</option>
+      <option value="em">EM Equity</option>
+      <option value="btc">BTC (Crypto)</option>
+    </select>
+    <div class="stat-pill" id="sp-cross">SMA <span class="sv" id="cross-val">—</span></div>
+    <div class="stat-pill" id="sp-mom">1M Ret <span class="sv" id="mom-val">—</span></div>
+    <div class="stat-pill" id="sp-pos">Pos <span class="sv" id="pos-val">FLAT</span></div>
+    <div class="stat-pill" id="sp-pnl">PnL <span class="sv" id="pnl-val">$0</span></div>
+    <button class="btn-sm btn-long"  id="btn-long"  onclick="manualTrade('LONG')"  disabled>▲ Long</button>
+    <button class="btn-sm btn-short" id="btn-short" onclick="manualTrade('SHORT')" disabled>▼ Short</button>
+    <button class="btn-sm btn-flat"  id="btn-flat"  onclick="manualTrade('FLAT')"  disabled>✕ Flat</button>
+    <button class="btn-sm" style="margin-left:auto;background:var(--bg-raised);border:1px solid var(--border-dim);color:var(--fg-primary)" onclick="resetManual()">↺ Reset</button>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    
-    <span class="status-badge" id="status-badge">Select Instrument</span>
+  <div class="manual-body">
+    <div class="chart-panel"><div class="chart-label">Price + SMA(10) + SMA(30)</div><div class="chart-canvas-wrap"><canvas id="c-price"></canvas></div></div>
+    <div class="chart-panel"><div class="chart-label">Momentum (20-bar)</div><div class="chart-canvas-wrap"><canvas id="c-mom"></canvas></div></div>
+    <div class="chart-panel"><div class="chart-label">SMA Crossover Signal</div><div class="chart-canvas-wrap"><canvas id="c-cross"></canvas></div></div>
+    <div class="chart-panel"><div class="chart-label">Equity Curve</div><div class="chart-canvas-wrap"><canvas id="c-equity-m"></canvas></div></div>
   </div>
-</header>
-
-<div class="pipeline">
-  <div class="pipe-step active" id="step-1">1 Instrument</div>
-  <div class="pipe-arrow">&#x203A;</div>
-  <div class="pipe-step" id="step-2">2 Price &amp; Regime</div>
-  <div class="pipe-arrow">&#x203A;</div>
-  <div class="pipe-step" id="step-3">3 Signal Design</div>
-  <div class="pipe-arrow">&#x203A;</div>
-  <div class="pipe-step" id="step-4">4 Backtest</div>
-  <div class="pipe-arrow">&#x203A;</div>
-  <div class="pipe-step" id="step-5">5 IC &amp; Results</div>
 </div>
 
-<div class="layout">
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="inst-header">
-      <h2>Instruments</h2>
-      <p>Select an instrument to research its momentum characteristics.</p>
+<!-- CODE MODE -->
+<div id="code-mode" style="display:none">
+  <div class="editor-pane">
+    <div class="pane-header">
+      <span class="pane-title">Strategy Code</span>
+      <select class="inst-select" id="code-inst" style="padding:4px 8px;font-size:12px">
+        <option value="spx">SPX</option>
+        <option value="ndx">NDX</option>
+        <option value="hy">HY Credit</option>
+        <option value="em">EM Equity</option>
+        <option value="btc">BTC</option>
+      </select>
+      <button class="run-btn" onclick="runCodeStrategy()">▶ Run</button>
     </div>
-    <div class="inst-filter" id="inst-filter">
-      <button class="filter-btn active" onclick="filterInstruments('all',this)">All</button>
-      <button class="filter-btn" onclick="filterInstruments('equity',this)">Equities</button>
-      <button class="filter-btn" onclick="filterInstruments('commodity',this)">Commodities</button>
-      <button class="filter-btn" onclick="filterInstruments('crypto',this)">Crypto</button>
-      <button class="filter-btn" onclick="filterInstruments('fx',this)">FX</button>
-      <button class="filter-btn" onclick="filterInstruments('index',this)">Index/ETF</button>
+    <div class="template-bar">
+      <span class="tmpl-label">Load:</span>
+      <button class="tmpl-btn" onclick="loadTemplate('sma')">SMA Cross</button>
+      <button class="tmpl-btn" onclick="loadTemplate('mom')">Pure Momentum</button>
+      <button class="tmpl-btn" onclick="loadTemplate('trend')">Trend Filter</button>
+      <button class="tmpl-btn" onclick="loadTemplate('breakout')">Breakout</button>
     </div>
-    <div class="inst-list" id="inst-list"></div>
+    <textarea class="code-editor" id="strategy-code" spellcheck="false"></textarea>
+    <div class="code-error" id="code-error"></div>
   </div>
-
-  <!-- Main -->
-  <div class="main-area">
-    <div id="no-inst-msg" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:80%;gap:16px;color:var(--dim);">
-      <div style="font-size:48px">&#x1F680;</div>
-      <div style="font-size:16px;font-weight:700;color:#e8f0fe;">Select an Instrument</div>
-      <div style="font-size:13px;max-width:360px;text-align:center;line-height:1.6;">
-        Each instrument has different momentum, mean-reversion and regime characteristics.
-        Research the signal quality before committing to a strategy.
-      </div>
+  <div class="results-pane">
+    <div class="pane-header">
+      <span class="pane-title">Simulation</span>
+      <span id="run-status" style="font-size:11px;color:var(--fg-subtle);margin-left:4px">Press ▶ Run</span>
     </div>
-
-    <div id="research-content" style="display:none">
-
-      <!-- Step 1: Instrument profile -->
-      <div class="step-card">
-        <div class="step-card-header">
-          <div class="step-num">1</div>
-          <div>
-            <div class="step-title" id="inst-title">Instrument Profile</div>
-            <div class="step-desc" id="inst-sub">Loading...</div>
-          </div>
-          <button class="btn btn-secondary" onclick="simulate()" style="margin-left:auto">&#x1F504; Resimulate</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
-          <div class="metric"><div class="metric-value" id="p-vol">-</div><div class="metric-label">Ann. Volatility</div></div>
-          <div class="metric" id="p-hurst-m"><div class="metric-value" id="p-hurst">-</div><div class="metric-label">Hurst (regime)</div></div>
-          <div class="metric"><div class="metric-value" id="p-drift">-</div><div class="metric-label">Ann. Drift</div></div>
-          <div class="metric"><div class="metric-value" id="p-beta">-</div><div class="metric-label">Market Beta</div></div>
-        </div>
-        <div style="font-size:12px;color:var(--dim);margin-top:12px;line-height:1.6;padding:12px;background:rgba(255,255,255,0.02);border-radius:8px" id="inst-desc-full"></div>
-      </div>
-
-      <!-- Step 2: Price & Regime -->
-      <div class="step-card">
-        <div class="step-card-header">
-          <div class="step-num">2</div>
-          <div>
-            <div class="step-title">Price Path &amp; Regime Analysis</div>
-            <div class="step-desc">300-bar simulation using real instrument parameters</div>
-          </div>
-        </div>
-        <div class="charts-grid-2" style="margin-bottom:14px">
-          <div class="chart-box">
-            <h3>Price Path</h3>
-            <p>Simulated with Hurst-adjusted GBM</p>
-            <div class="chart-wrap"><canvas id="chart-price"></canvas></div>
-          </div>
-          <div class="chart-box">
-            <h3>Rolling Regime</h3>
-            <p>Hurst &gt; 0.55 = trend, &lt; 0.45 = mean-rev</p>
-            <div class="chart-wrap"><canvas id="chart-regime"></canvas></div>
-          </div>
-        </div>
-        <div class="regime-bars" id="regime-bars">
-          <!-- filled -->
-        </div>
-      </div>
-
-      <!-- Step 3: Signal design -->
-      <div class="step-card">
-        <div class="step-card-header">
-          <div class="step-num">3</div>
-          <div>
-            <div class="step-title">Momentum Signal Design</div>
-            <div class="step-desc">Multi-timeframe momentum with optional regime filter</div>
-          </div>
-        </div>
-        <div class="signal-grid">
-          <div class="param-group">
-            <label>Fast window (bars)</label>
-            <input type="number" id="p-fast" value="10" min="2" max="50">
-          </div>
-          <div class="param-group">
-            <label>Slow window (bars)</label>
-            <input type="number" id="p-slow" value="30" min="5" max="120">
-          </div>
-          <div class="param-group">
-            <label>Signal type</label>
-            <select id="p-signal-type">
-              <option value="roc">Rate of Change</option>
-              <option value="ma-cross">MA Crossover</option>
-              <option value="rsi">RSI Momentum</option>
-              <option value="breakout">Breakout</option>
-            </select>
-          </div>
-          <div class="param-group">
-            <label>Position sizing</label>
-            <select id="p-pos-sizing">
-              <option value="flat">Flat (long/short)</option>
-              <option value="vol">Vol-scaled</option>
-              <option value="conv">Conviction-graded</option>
-            </select>
-          </div>
-          <div class="param-group">
-            <label>Regime filter</label>
-            <select id="p-regime-filter">
-              <option value="none">No filter</option>
-              <option value="trend-only">Trend regime only</option>
-              <option value="mr-only">Mean-rev regime only</option>
-            </select>
-          </div>
-          <div class="param-group">
-            <label>Stop loss (%)</label>
-            <input type="number" id="p-stoploss" value="5" min="1" max="20" step="0.5">
-          </div>
-        </div>
-        <div class="chart-box">
-          <h3>Signal &amp; Price</h3>
-          <p>Momentum signal overlaid on price. Green = long, red = short.</p>
-          <div class="chart-wrap-lg"><canvas id="chart-signal"></canvas></div>
-        </div>
-        <button class="btn btn-secondary" onclick="recomputeSignal()" style="margin-top:12px">&#x1F4CA; Update Signal</button>
-      </div>
-
-      <!-- Step 4 + 5: Backtest + IC -->
-      <div class="step-card">
-        <div class="step-card-header">
-          <div class="step-num">4</div>
-          <div>
-            <div class="step-title">Backtest &amp; IC Analysis</div>
-            <div class="step-desc">20 simulations. IC at 1/3/5/10/20 bar horizons.</div>
-          </div>
-          <button class="btn btn-primary" id="run-btn" onclick="runBacktest()" style="margin-left:auto">&#x25B6; Run (20 paths)</button>
-        </div>
-
-        <div id="bt-placeholder" style="color:var(--dim);font-size:13px;padding:8px 0">Configure signal above and run backtest.</div>
-        <div id="bt-results" style="display:none">
-          <div class="metrics-strip" style="margin-bottom:14px">
-            <div class="metric" id="bm-sharpe"><div class="metric-value" id="bmv-sharpe">-</div><div class="metric-label">Sharpe</div></div>
-            <div class="metric" id="bm-maxdd"><div class="metric-value"  id="bmv-maxdd">-</div><div class="metric-label">Max DD</div></div>
-            <div class="metric" id="bm-winrate"><div class="metric-value" id="bmv-winrate">-</div><div class="metric-label">Win Rate</div></div>
-            <div class="metric" id="bm-trades"><div class="metric-value"  id="bmv-trades">-</div><div class="metric-label">Avg Trades</div></div>
-            <div class="metric" id="bm-ic1"><div class="metric-value"    id="bmv-ic1">-</div><div class="metric-label">IC@1</div></div>
-            <div class="metric" id="bm-ic5"><div class="metric-value"    id="bmv-ic5">-</div><div class="metric-label">IC@5</div></div>
-          </div>
-          <div class="charts-grid-2" style="margin-bottom:14px">
-            <div class="chart-box">
-              <h3>Equity Curves (20 paths)</h3>
-              <p>Mean (blue), p10 (red), p90 (green)</p>
-              <div class="chart-wrap-lg"><canvas id="chart-equity-mom"></canvas></div>
-            </div>
-            <div class="chart-box">
-              <h3>IC at Multiple Horizons</h3>
-              <p>Information coefficient — signal-return correlation</p>
-              <div class="chart-wrap-lg"><canvas id="chart-ic"></canvas></div>
-            </div>
-          </div>
-          <div class="interp-box" id="bt-interp"></div>
-        </div>
-      </div>
-
-    </div><!-- /research-content -->
-  </div><!-- /main-area -->
+    <div class="results-charts">
+      <div class="rc-panel"><div class="chart-label">Price + SMA + Signals</div><div class="chart-canvas-wrap"><canvas id="c-code-price"></canvas></div></div>
+      <div class="rc-panel"><div class="chart-label">Equity Curve</div><div class="chart-canvas-wrap"><canvas id="c-code-eq"></canvas></div></div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-label">Sharpe</div><div class="stat-value neu" id="cs-sharpe">—</div></div>
+      <div class="stat-item"><div class="stat-label">Total PnL</div><div class="stat-value neu" id="cs-pnl">—</div></div>
+      <div class="stat-item"><div class="stat-label">Max DD</div><div class="stat-value neu" id="cs-dd">—</div></div>
+      <div class="stat-item"><div class="stat-label">Trades</div><div class="stat-value neu" id="cs-trades">—</div></div>
+      <div class="stat-item"><div class="stat-label">Win Rate</div><div class="stat-value neu" id="cs-wr">—</div></div>
+      <div class="stat-item"><div class="stat-label">% Time Invested</div><div class="stat-value neu" id="cs-exp">—</div></div>
+    </div>
+  </div>
 </div>
 
+</div>
+<script src="lexie-core.js"></script>
 <script>
-/* ── State ── */
-var currentInst = null;
-var priceArr = [], signalArr = [], regimeArr = [];
-var charts = {};
+const INSTS={
+  spx: {name:'SPX', drift:0.0003, sigma:0.012, initPrice:4500, color:'#4dba88', regimes:[{len:60,drift:0.0006,sigma:0.008},{len:40,drift:-0.001,sigma:0.02},{len:80,drift:0.0004,sigma:0.010},{len:60,drift:-0.0005,sigma:0.018},{len:60,drift:0.0007,sigma:0.009}]},
+  ndx:  {name:'NDX', drift:0.0004, sigma:0.016, initPrice:15000,color:'#60a5fa', regimes:[{len:50,drift:0.0008,sigma:0.010},{len:50,drift:-0.0015,sigma:0.025},{len:80,drift:0.0006,sigma:0.012},{len:60,drift:0.0009,sigma:0.011},{len:60,drift:-0.0003,sigma:0.016}]},
+  hy:   {name:'HY',  drift:0.0001, sigma:0.006, initPrice:100,  color:'#f59e0b', regimes:[{len:80,drift:0.0002,sigma:0.004},{len:40,drift:-0.0008,sigma:0.012},{len:80,drift:0.0003,sigma:0.005},{len:40,drift:-0.0006,sigma:0.010},{len:60,drift:0.0002,sigma:0.005}]},
+  em:   {name:'EM',  drift:0.0002, sigma:0.014, initPrice:1200, color:'#c084fc', regimes:[{len:60,drift:0.0005,sigma:0.010},{len:50,drift:-0.001,sigma:0.020},{len:80,drift:0.0004,sigma:0.012},{len:50,drift:-0.0008,sigma:0.018},{len:60,drift:0.0006,sigma:0.011}]},
+  btc:  {name:'BTC', drift:0.0005, sigma:0.030, initPrice:45000,color:'#fb923c', regimes:[{len:40,drift:0.002,sigma:0.020},{len:30,drift:-0.003,sigma:0.045},{len:60,drift:0.001,sigma:0.025},{len:40,drift:-0.002,sigma:0.040},{len:80,drift:0.0015,sigma:0.022}]},
+};
+const NB=300;
 
-Chart.defaults.color = '#667890';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+function sma(arr,n,i){if(i<n-1)return null;const s=arr.slice(i-n+1,i+1);return s.reduce((a,b)=>a+b,0)/n;}
 
-function mkChart(id, cfg) {
-  if (charts[id]) charts[id].destroy();
-  var ctx = document.getElementById(id);
-  if (!ctx) return null;
-  charts[id] = new Chart(ctx, cfg);
-  return charts[id];
-}
-
-function setStep(n) {
-  for (var i = 1; i <= 5; i++) {
-    var el = document.getElementById('step-'+i);
-    if (!el) continue;
-    el.className = 'pipe-step'+(i<n?' done':i===n?' active':'');
+function genData(cfg){
+  const prices=[cfg.initPrice];
+  const regimes=cfg.regimes||[];
+  let bar=0,ri=0,rbar=0;
+  const rLabel=[];
+  for(let i=1;i<NB;i++){
+    if(regimes.length&&rbar>=regimes[ri%regimes.length].len){ri++;rbar=0;}
+    const r=regimes.length?regimes[ri%regimes.length]:{drift:cfg.drift,sigma:cfg.sigma};
+    rbar++;
+    const ret=r.drift+(Math.random()+Math.random()-1)*r.sigma*1.414;
+    prices.push(Math.max(prices[i-1]*Math.exp(ret),1));
+    rLabel.push(ri);
   }
-}
-
-/* ── Instrument list ── */
-var activeFilter = 'all';
-
-function buildInstList() {
-  var el = document.getElementById('inst-list');
-  if (!el || !window.LX_INSTRUMENTS) return;
-  var keys = Object.keys(LX_INSTRUMENTS);
-  var filtered = keys.filter(function(k) {
-    if (activeFilter === 'all') return true;
-    var inst = LX_INSTRUMENTS[k];
-    if (activeFilter === 'index') return inst.type === 'index' || inst.type === 'etf';
-    return inst.type === activeFilter;
+  // Compute indicators
+  const sma10=prices.map((_,i)=>sma(prices,10,i));
+  const sma30=prices.map((_,i)=>sma(prices,30,i));
+  const mom20=prices.map((_,i)=>i<20?null:(prices[i]/prices[i-20]-1));
+  const crossSig=prices.map((_,i)=>{
+    if(sma10[i]==null||sma30[i]==null)return 0;
+    return sma10[i]>sma30[i]?1:-1;
   });
-  el.innerHTML = filtered.map(function(k) {
-    var inst = LX_INSTRUMENTS[k];
-    var hurst = inst.hurst;
-    var regime = hurst > 0.55 ? 'trending' : hurst < 0.45 ? 'meanrev' : '';
-    var regimeLabel = hurst > 0.55 ? 'Trending' : hurst < 0.45 ? 'Mean-Rev' : 'Random';
-    var hColor = hurst > 0.55 ? '#22c55e' : hurst < 0.45 ? '#ef4444' : '#667890';
-    return '<div class="inst-item" id="ii-'+k+'" onclick="selectInstrument(\''+k+'\')">'+
-      '<div class="inst-emoji">'+inst.emoji+'</div>'+
-      '<div class="inst-info">'+
-        '<div class="inst-name">'+inst.name+'</div>'+
-        '<div class="inst-ticker">'+inst.ticker+' &bull; '+inst.type+'</div>'+
-        '<div class="inst-badges">'+
-          '<span class="inst-badge '+regime+'">'+regimeLabel+'</span>'+
-          '<span class="inst-badge">&#x3C3; '+(inst.vol*100).toFixed(0)+'%</span>'+
-        '</div>'+
-      '</div>'+
-      '<div class="inst-hurst" style="color:'+hColor+'">H='+hurst.toFixed(2)+'</div>'+
-    '</div>';
-  }).join('');
+  return{prices,sma10,sma30,mom20,crossSig};
 }
 
-function filterInstruments(type, btn) {
-  activeFilter = type;
-  document.querySelectorAll('.filter-btn').forEach(function(b){ b.className='filter-btn'; });
-  btn.className = 'filter-btn active';
-  buildInstList();
-  if (currentInst) {
-    var el = document.getElementById('ii-'+currentInst);
-    if (el) el.className = 'inst-item active';
-  }
-}
+function getTC(){const d=document.documentElement.getAttribute('data-theme')!=='light';return{grid:d?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.06)',text:d?'#6a6058':'#8a8070',bg:d?'#0f0e0c':'#faf8f5',axis:d?'#3a3530':'#d0c8bc'};}
 
-function selectInstrument(key) {
-  currentInst = key;
-  document.querySelectorAll('.inst-item').forEach(function(el){ el.className='inst-item'; });
-  var el = document.getElementById('ii-'+key);
-  if (el) el.className = 'inst-item active';
-  document.getElementById('no-inst-msg').style.display = 'none';
-  document.getElementById('research-content').style.display = 'block';
-  populateProfile();
-  simulate();
-  setStep(2);
-}
-
-function populateProfile() {
-  var inst = LX_INSTRUMENTS[currentInst];
-  if (!inst) return;
-  document.getElementById('inst-title').textContent = inst.emoji + ' ' + inst.name + ' (' + inst.ticker + ')';
-  document.getElementById('inst-sub').textContent = inst.type + ' &bull; ' + inst.sector;
-  document.getElementById('p-vol').textContent   = (inst.vol*100).toFixed(0) + '%';
-  document.getElementById('p-hurst').textContent = inst.hurst.toFixed(3);
-  document.getElementById('p-drift').textContent = (inst.annDrift*100 > 0 ? '+' : '') + (inst.annDrift*100).toFixed(1) + '%';
-  document.getElementById('p-beta').textContent  = inst.beta.toFixed(2);
-  var hClass = inst.hurst > 0.55 ? 'metric good' : inst.hurst < 0.45 ? 'metric bad' : 'metric';
-  document.getElementById('p-hurst-m').className = hClass;
-  document.getElementById('inst-desc-full').innerHTML =
-    '<strong>Description:</strong> ' + (inst.desc || '') + '<br><br>' +
-    '<strong>Regime:</strong> Hurst=' + inst.hurst.toFixed(3) + ' — ' +
-    (inst.hurst > 0.55 ? 'This instrument tends to trend. Momentum strategies should perform well.' :
-     inst.hurst < 0.45 ? 'This instrument mean-reverts. Momentum strategies may underperform; pairs/mean-rev preferred.' :
-     'Random walk characteristics. Both momentum and mean-reversion will struggle; factor quality matters.') + '<br>' +
-    (inst.microDesc ? '<strong>Edge:</strong> ' + inst.microDesc : '');
-}
-
-/* ── Simulate ── */
-function simulate() {
-  if (!currentInst) return;
-  var seed = Math.floor(Date.now()/1000) & 0xFFFFFF;
-  priceArr = lxSimulate(currentInst, 300, seed);
-  computeRegime();
-  computeSignal();
-  drawPriceChart();
-  drawRegimeChart();
-  drawSignalChart();
-  setStep(3);
-}
-
-function computeRegime() {
-  var window = 40;
-  regimeArr = priceArr.map(function(_, i) {
-    if (i < window) return 0.5;
-    var sub = priceArr.slice(i-window, i);
-    return estimateHurst(sub);
-  });
-}
-
-function computeSignal() {
-  var fast = parseInt(document.getElementById('p-fast').value) || 10;
-  var slow = parseInt(document.getElementById('p-slow').value) || 30;
-  var type = document.getElementById('p-signal-type').value;
-  var regFilter = document.getElementById('p-regime-filter').value;
-
-  signalArr = priceArr.map(function(_, i) {
-    if (i < slow) return 0;
-    var rawSignal = 0;
-
-    if (type === 'roc') {
-      var fastRoc = (priceArr[i] - priceArr[i-fast]) / priceArr[i-fast];
-      var slowRoc = (priceArr[i] - priceArr[i-slow]) / priceArr[i-slow];
-      rawSignal = fastRoc - slowRoc;
-    } else if (type === 'ma-cross') {
-      var fastMA = mean(priceArr.slice(i-fast, i));
-      var slowMA = mean(priceArr.slice(i-slow, i));
-      rawSignal = fastMA > slowMA ? 1 : -1;
-    } else if (type === 'rsi') {
-      var gains = 0, losses = 0, n = Math.min(fast, i);
-      for (var j = i-n; j < i; j++) {
-        var d = priceArr[j+1] - priceArr[j];
-        if (d > 0) gains += d; else losses -= d;
-      }
-      var rs = (losses < 1e-9) ? 100 : gains / losses;
-      var rsi = 100 - 100 / (1 + rs);
-      rawSignal = (rsi - 50) / 50;  // centered momentum
-    } else if (type === 'breakout') {
-      var hiN = Math.max.apply(null, priceArr.slice(i-slow, i));
-      var loN = Math.min.apply(null, priceArr.slice(i-slow, i));
-      rawSignal = priceArr[i] > hiN * 0.99 ? 1 : priceArr[i] < loN * 1.01 ? -1 : 0;
-    }
-
-    // Regime filter
-    if (regFilter !== 'none' && i < regimeArr.length) {
-      var h = regimeArr[i];
-      if (regFilter === 'trend-only' && h < 0.55) return 0;
-      if (regFilter === 'mr-only'    && h > 0.45) return 0;
-    }
-    return rawSignal;
-  });
-}
-
-function recomputeSignal() { computeSignal(); drawSignalChart(); }
-
-/* ── Charts ── */
-function drawPriceChart() {
-  var labels = priceArr.map(function(_,i){return i;});
-  mkChart('chart-price', {
-    type:'line',
-    data:{labels:labels, datasets:[{label:'Price', data:priceArr, borderColor:'#667eea', borderWidth:1.5, pointRadius:0, tension:0.2, fill:true, backgroundColor:'rgba(102,126,234,0.06)'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
-  });
-}
-
-function drawRegimeChart() {
-  var labels = regimeArr.map(function(_,i){return i;});
-  mkChart('chart-regime', {
-    type:'line',
-    data:{labels:labels, datasets:[
-      {label:'Hurst', data:regimeArr, borderColor:'#f59e0b', borderWidth:1.5, pointRadius:0, tension:0.3, fill:false},
-      {label:'Trend threshold',   data:Array(regimeArr.length).fill(0.55), borderColor:'rgba(34,197,94,0.4)',  borderWidth:1, borderDash:[4,3], pointRadius:0},
-      {label:'MR threshold',      data:Array(regimeArr.length).fill(0.45), borderColor:'rgba(239,68,68,0.4)', borderWidth:1, borderDash:[4,3], pointRadius:0}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:10}}}},scales:{x:{display:false},y:{min:0.2,max:0.8,grid:{color:'rgba(255,255,255,0.04)'}}}}
-  });
-
-  // Regime bars
-  var trendBars = regimeArr.filter(function(h){return h>0.55;}).length;
-  var mrBars    = regimeArr.filter(function(h){return h<0.45;}).length;
-  var randBars  = regimeArr.length - trendBars - mrBars;
-  var total     = regimeArr.length || 1;
-  document.getElementById('regime-bars').innerHTML =
-    '<div class="regime-bar-card"><div class="regime-name">&#x1F7E2; Trending</div><div class="regime-bar-wrap"><div class="regime-bar-fill" style="width:'+(trendBars/total*100).toFixed(0)+'%;background:#22c55e"></div></div><div class="regime-stats">'+(trendBars/total*100).toFixed(0)+'% of bars &bull; Hurst &gt; 0.55 &bull; Momentum favoured</div></div>'+
-    '<div class="regime-bar-card"><div class="regime-name">&#x1F534; Mean-Reverting</div><div class="regime-bar-wrap"><div class="regime-bar-fill" style="width:'+(mrBars/total*100).toFixed(0)+'%;background:#ef4444"></div></div><div class="regime-stats">'+(mrBars/total*100).toFixed(0)+'% of bars &bull; Hurst &lt; 0.45 &bull; Pairs strategies preferred</div></div>'+
-    '<div class="regime-bar-card"><div class="regime-name">&#x26AA; Random Walk</div><div class="regime-bar-wrap"><div class="regime-bar-fill" style="width:'+(randBars/total*100).toFixed(0)+'%;background:#667eea"></div></div><div class="regime-stats">'+(randBars/total*100).toFixed(0)+'% of bars &bull; 0.45&ndash;0.55 &bull; Signal quality variable</div></div>';
-}
-
-function drawSignalChart() {
-  var labels = signalArr.map(function(_,i){return i;});
-  var normPrice = priceArr.map(function(v){return v/priceArr[0];});
-  mkChart('chart-signal', {
-    type:'line',
-    data:{labels:labels, datasets:[
-      {label:'Normalised price', data:normPrice,   borderColor:'rgba(255,255,255,0.5)', borderWidth:1.5, pointRadius:0, tension:0.2, yAxisID:'yp'},
-      {label:'Signal',          data:signalArr,    borderColor:'#667eea', borderWidth:1.5, pointRadius:0, tension:0.2, yAxisID:'ys', fill:true, backgroundColor:'rgba(102,126,234,0.12)'}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{boxWidth:10,font:{size:10}}}},
-      scales:{
-        x:{display:false},
-        yp:{position:'left',  grid:{color:'rgba(255,255,255,0.04)'}},
-        ys:{position:'right', grid:{display:false}, title:{display:true,text:'Signal',color:'#667eea',font:{size:10}}}
+function drawMulti(canvas,series,opts={}){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  if(!W||!H)return;
+  canvas.width=W;canvas.height=H;
+  const tc=getTC();
+  const p={t:6,b:22,l:52,r:6};
+  const w=W-p.l-p.r,h=H-p.t-p.b;
+  ctx.fillStyle=tc.bg;ctx.fillRect(0,0,W,H);
+  const all=series.filter(s=>s&&s.length);
+  if(!all.length)return;
+  let yMin=Infinity,yMax=-Infinity;
+  all.forEach(s=>s.forEach(v=>{if(v!=null&&isFinite(v)){if(v<yMin)yMin=v;if(v>yMax)yMax=v;}}));
+  if(opts.yMin!==undefined)yMin=opts.yMin;
+  const yr=yMax-yMin||1;
+  const n=all[0].length;
+  const toX=i=>p.l+i*(w/Math.max(n-1,1));
+  const toY=v=>p.t+h-((v-yMin)/yr)*h;
+  const colors=opts.colors||['#4dba88','#60a5fa','#f59e0b','#c084fc'];
+  ctx.strokeStyle=tc.grid;ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){const y=p.t+(g/4)*h;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+w,y);ctx.stroke();const val=yMax-(g/4)*yr;ctx.fillStyle=tc.text;ctx.font='9px Inter,sans-serif';ctx.textAlign='right';const fmt=opts.fmt||(v=>v.toFixed(2));ctx.fillText(fmt(val),p.l-3,y+3);}
+  if(opts.zeroLine&&yMin<0&&yMax>0){const y0=toY(0);ctx.strokeStyle=tc.axis;ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(p.l,y0);ctx.lineTo(p.l+w,y0);ctx.stroke();ctx.setLineDash([]);}
+  // Background shading for signals
+  if(opts.sigs){
+    let prev=0;
+    for(let i=0;i<n;i++){
+      const s=opts.sigs[i]||0;
+      if(s!==prev){
+        if(s===1){ctx.fillStyle='rgba(34,197,94,0.06)';}
+        else if(s===-1){ctx.fillStyle='rgba(239,68,68,0.06)';}
+        if(s!==0){const x1=toX(i),x2=i<n-1?toX(n-1):toX(i);ctx.fillRect(x1,p.t,x2-x1,h);}
+        prev=s;
       }
     }
-  });
+  }
+  all.forEach((s,si)=>{ctx.strokeStyle=colors[si%colors.length];ctx.lineWidth=si===0?1.5:1;ctx.setLineDash(si>0?[3,3]:[]);ctx.beginPath();let started=false;s.forEach((v,i)=>{if(v==null||!isFinite(v))return;if(!started){ctx.moveTo(toX(i),toY(v));started=true;}else ctx.lineTo(toX(i),toY(v));});ctx.stroke();ctx.setLineDash([]);});
+  (opts.markers||[]).forEach(({i,type})=>{if(i>=n)return;const x=toX(i),y=toY(all[0][i]||yMin);ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=type==='LONG'?'#22c55e':type==='SHORT'?'#ef4444':'#f59e0b';ctx.fill();});
 }
 
-/* ── Backtest ── */
-function runBacktest() {
-  if (!currentInst) return;
-  var btn = document.getElementById('run-btn');
-  btn.disabled = true; btn.textContent = 'Running 20 paths...';
-  var sb = document.getElementById('status-badge');
-  sb.className = 'status-badge running'; sb.textContent = 'Running';
-  setStep(4);
+// Manual
+let M={data:null,pos:0,entry:0,pnl:0,equity:[0],cfg:null};
+let mTick=null,mBar=40;
 
-  setTimeout(function() {
-    var results = [];
-    for (var sim = 0; sim < 20; sim++) {
-      var seed = (Date.now() & 0xFFFFFF) ^ (sim * 31337);
-      var prices = lxSimulate(currentInst, 300, seed);
-      var res = runOnePath(prices);
-      results.push(res);
-    }
-    displayBtResults(results);
-    btn.disabled = false; btn.textContent = 'Re-run (20 paths)';
-    sb.className = 'status-badge done'; sb.textContent = 'Done';
-    setStep(5);
-
-    if (window.LX) {
-      var avgSharpe = results.reduce(function(s,r){return s+r.sharpe;},0)/results.length;
-      var avgIC1    = results.reduce(function(s,r){return s+r.ic[0];},0)/results.length;
-      var avgIC5    = results.reduce(function(s,r){return s+r.ic[2];},0)/results.length;
-      LX.recordRun({sharpe:avgSharpe, ic1:avgIC1, ic5:avgIC5, isBacktest:true, desk:'momentum-trainer'});
-    }
-  }, 300);
+function resetManual(){
+  clearInterval(mTick);
+  const cfg=INSTS[document.getElementById('inst-select').value];
+  M={data:genData(cfg),pos:0,entry:0,pnl:0,equity:[0],cfg};
+  mBar=40;
+  updateUI();
+  mTick=setInterval(()=>{
+    if(mBar>=NB-1){clearInterval(mTick);return;}
+    mBar++;
+    const uP=M.pos!==0?(M.data.prices[mBar]-M.entry)*M.pos*10:0;
+    M.equity.push(M.pnl+uP);
+    updateUI();renderCharts();
+  },500);
 }
 
-function runOnePath(prices) {
-  // Re-derive signal for this path
-  var fast = parseInt(document.getElementById('p-fast').value) || 10;
-  var slow = parseInt(document.getElementById('p-slow').value) || 30;
-  var type = document.getElementById('p-signal-type').value;
-  var sizingMode = document.getElementById('p-pos-sizing').value;
-  var stopPct = parseFloat(document.getElementById('p-stoploss').value)/100 || 0.05;
-  var regFilter = document.getElementById('p-regime-filter').value;
+function manualTrade(a){
+  if(!M.data)return;
+  const p=M.data.prices[mBar];
+  if(a==='LONG'&&M.pos===0){M.pos=1;M.entry=p;}
+  else if(a==='SHORT'&&M.pos===0){M.pos=-1;M.entry=p;}
+  else if(a==='FLAT'&&M.pos!==0){M.pnl+=(p-M.entry)*M.pos*10;M.pos=0;M.entry=0;}
+  updateUI();
+}
 
-  var regimes = prices.map(function(_,i) {
-    if (i<40) return 0.5;
-    return estimateHurst(prices.slice(i-40,i));
-  });
+function updateUI(){
+  if(!M.data)return;
+  const d=M.data,i=mBar;
+  const s10=d.sma10[i],s30=d.sma30[i],m=d.mom20[i];
+  const cross=s10&&s30?s10>s30?'SMA10 > SMA30 ▲':'SMA10 < SMA30 ▼':'—';
+  const p=d.prices[i];
+  const uP=M.pos!==0?(p-M.entry)*M.pos*10:0,tot=M.pnl+uP;
+  document.getElementById('cross-val').textContent=cross;
+  document.getElementById('sp-cross').className='stat-pill'+(s10&&s30?(s10>s30?' pos':' neg'):'');
+  document.getElementById('mom-val').textContent=m!=null?(m>=0?'+':''+(m*100).toFixed(1)+'%'):'—';
+  document.getElementById('sp-mom').className='stat-pill'+(m!=null?(m>0?' pos':' neg'):'');
+  document.getElementById('pos-val').textContent=M.pos===1?'LONG':M.pos===-1?'SHORT':'FLAT';
+  document.getElementById('pnl-val').textContent=(tot>=0?'+':'')+'$'+tot.toFixed(0);
+  document.getElementById('sp-pnl').className='stat-pill'+(tot>0?' pos':tot<0?' neg':'');
+  document.getElementById('btn-long').disabled=M.pos!==0;
+  document.getElementById('btn-short').disabled=M.pos!==0;
+  document.getElementById('btn-flat').disabled=M.pos===0;
+}
 
-  var signals = prices.map(function(_, i) {
-    if (i < slow) return 0;
-    var s = 0;
-    if (type === 'roc') {
-      s = (prices[i]-prices[i-fast])/prices[i-fast] - (prices[i]-prices[i-slow])/prices[i-slow];
-    } else if (type === 'ma-cross') {
-      s = mean(prices.slice(i-fast,i)) > mean(prices.slice(i-slow,i)) ? 1 : -1;
-    } else if (type === 'rsi') {
-      var g=0,l=0,n=Math.min(fast,i);
-      for(var j=i-n;j<i;j++){var d=prices[j+1]-prices[j];if(d>0)g+=d;else l-=d;}
-      var rs=l<1e-9?100:g/l; s=(100-100/(1+rs)-50)/50;
-    } else if (type === 'breakout') {
-      var hi=Math.max.apply(null,prices.slice(i-slow,i));
-      var lo=Math.min.apply(null,prices.slice(i-slow,i));
-      s = prices[i]>hi*0.99?1:prices[i]<lo*1.01?-1:0;
-    }
-    if (regFilter==='trend-only' && regimes[i]<0.55) s=0;
-    if (regFilter==='mr-only'    && regimes[i]>0.45) s=0;
-    return s;
-  });
+function renderCharts(){
+  if(!M.data)return;
+  const d=M.data,n=mBar+1;
+  drawMulti(document.getElementById('c-price'),[d.prices.slice(0,n),d.sma10.slice(0,n),d.sma30.slice(0,n)],{colors:[M.cfg.color,'#f59e0b','#60a5fa'],fmt:v=>v.toFixed(0),sigs:d.crossSig.slice(0,n)});
+  const momViz=d.mom20.slice(0,n).map(v=>v==null?0:v*100);
+  drawMulti(document.getElementById('c-mom'),[momViz],{colors:['#c084fc'],zeroLine:true,fmt:v=>v.toFixed(1)+'%'});
+  drawMulti(document.getElementById('c-cross'),[d.crossSig.slice(0,n)],{colors:['#4dba88'],zeroLine:true,yMin:-1.2});
+  drawMulti(document.getElementById('c-equity-m'),[M.equity],{colors:[M.pnl>=0?'#22c55e':'#ef4444'],zeroLine:true,fmt:v=>'$'+v.toFixed(0)});
+}
 
-  // Simulate equity
-  var equity = [100]; var pos = 0; var entryPx = 0;
-  var trades = 0, wins = 0;
-  var maxDD = 0, peak = 100;
-  var returns = [];
+// Templates
+const T={
+sma:`// Momentum Trainer — SMA Crossover Strategy
+// ctx object available each bar:
+//   ctx.price    — current price
+//   ctx.sma_fast — fast SMA (default: 10 bars)
+//   ctx.sma_slow — slow SMA (default: 30 bars)
+//   ctx.mom_20   — 20-bar momentum (return, e.g. 0.05 = +5%)
+//   ctx.mom_5    — 5-bar momentum
+//   ctx.pos      — position: +1 long, -1 short, 0 flat
+//   ctx.bar      — current bar index
+//   ctx.atr      — 20-bar ATR (average true range)
+//   ctx.high, ctx.low — 20-bar rolling high/low
+//
+// Return: 'LONG' | 'SHORT' | 'FLAT' | 'HOLD'
 
-  for (var i = slow+1; i < prices.length; i++) {
-    var sig = signals[i];
-    var prevSig = signals[i-1];
-    var ret = (prices[i] - prices[i-1]) / prices[i-1];
+const FAST = 10;   // fast SMA period
+const SLOW = 30;   // slow SMA period
 
-    // Entry/exit
-    if (pos === 0 && Math.abs(sig) > 0.01) {
-      pos = sig > 0 ? 1 : -1;
-      entryPx = prices[i]; trades++;
-    } else if (pos !== 0) {
-      // Flip or exit
-      if ((pos > 0 && sig < -0.01) || (pos < 0 && sig > 0.01)) {
-        if (pos * (prices[i] - entryPx) > 0) wins++;
-        pos = sig > 0 ? 1 : -1; entryPx = prices[i]; trades++;
-      }
-      // Stop loss
-      if (Math.abs((prices[i]-entryPx)/entryPx) > stopPct && (pos*(prices[i]-entryPx)<0)) {
-        if (pos * (prices[i]-entryPx) > 0) wins++;
-        pos = 0;
-      }
-    }
+function signal(ctx) {
+  const { sma_fast, sma_slow, pos } = ctx;
 
-    var sizing = sizingMode==='vol' ? 1/(Math.abs(ret)+0.01)*0.01 :
-                 sizingMode==='conv' ? Math.min(2,Math.abs(sig)) : 1.0;
-    var pnl = pos * ret * Math.min(sizing, 2);
-    var last = equity[equity.length-1];
-    equity.push(last * (1 + pnl*0.5));
-    returns.push(pnl*0.5);
-    if (equity[equity.length-1] > peak) peak = equity[equity.length-1];
-    var dd = (peak - equity[equity.length-1]) / peak;
-    if (dd > maxDD) maxDD = dd;
+  if (sma_fast == null || sma_slow == null) return 'HOLD';
+
+  const bullish = sma_fast > sma_slow;
+  const bearish = sma_fast < sma_slow;
+
+  if (bullish && pos <= 0) return 'LONG';    // cross up → go long
+  if (bearish && pos >= 0) return 'SHORT';   // cross down → go short
+
+  return 'HOLD';
+}`,
+mom:`// Pure Momentum — enter on strong recent returns
+
+const MOM_THRESH = 0.04;   // 4% 20-bar momentum to go long
+const EXIT_THRESH = -0.01; // exit if momentum turns negative
+
+function signal(ctx) {
+  const { mom_20, mom_5, pos } = ctx;
+
+  if (mom_20 == null) return 'HOLD';
+
+  if (pos === 0) {
+    if (mom_20 >  MOM_THRESH) return 'LONG';
+    if (mom_20 < -MOM_THRESH) return 'SHORT';
+  } else if (pos === 1) {
+    // Exit long if short-term momentum fades
+    if (mom_5 != null && mom_5 < EXIT_THRESH) return 'FLAT';
+  } else if (pos === -1) {
+    if (mom_5 != null && mom_5 > -EXIT_THRESH) return 'FLAT';
   }
 
-  // Sharpe
-  var meanR = mean(returns);
-  var sdR   = stdDev(returns) + 1e-9;
-  var sharpe = meanR/sdR*Math.sqrt(252);
+  return 'HOLD';
+}`,
+trend:`// Trend Filter — only trade when longer trend aligns
 
-  // IC at [1,3,5,10,20] bars
-  var horizons = [1,3,5,10,20];
-  var ic = horizons.map(function(h) {
-    var pairs = [];
-    for (var i = slow; i+h < prices.length; i++) {
-      var fwdRet = (prices[i+h]-prices[i])/prices[i];
-      pairs.push([signals[i], fwdRet]);
-    }
-    return pearsonCorr(pairs.map(function(p){return p[0];}), pairs.map(function(p){return p[1];}));
-  });
+const FAST = 10, SLOW = 30, LONG_TREND = 60;
+var prices = [];  // maintain rolling history manually if needed
 
-  return {equity:equity, sharpe:sharpe, maxDD:maxDD, trades:trades,
-    winRate: trades>0?wins/trades:0, returns:returns, ic:ic};
-}
+function signal(ctx) {
+  const { sma_fast, sma_slow, mom_20, pos, price } = ctx;
 
-function displayBtResults(results) {
-  var avgSharpe  = mean(results.map(function(r){return r.sharpe;}));
-  var avgMaxDD   = mean(results.map(function(r){return r.maxDD;}));
-  var avgWR      = mean(results.map(function(r){return r.winRate;}));
-  var avgTrades  = mean(results.map(function(r){return r.trades;}));
-  var avgIC      = [0,1,2,3,4].map(function(h){ return mean(results.map(function(r){return r.ic[h];})); });
+  if (sma_fast == null || sma_slow == null) return 'HOLD';
 
-  document.getElementById('bmv-sharpe').textContent  = avgSharpe.toFixed(2);
-  document.getElementById('bmv-maxdd').textContent   = (avgMaxDD*100).toFixed(1)+'%';
-  document.getElementById('bmv-winrate').textContent = (avgWR*100).toFixed(0)+'%';
-  document.getElementById('bmv-trades').textContent  = Math.round(avgTrades);
-  document.getElementById('bmv-ic1').textContent     = avgIC[0].toFixed(3);
-  document.getElementById('bmv-ic5').textContent     = avgIC[2].toFixed(3);
+  // Primary trend: SMA crossover
+  const primary_bull = sma_fast > sma_slow;
+  const primary_bear = sma_fast < sma_slow;
 
-  document.getElementById('bm-sharpe').className  = 'metric'+(avgSharpe>1?' good':avgSharpe>0?'':' bad');
-  document.getElementById('bm-maxdd').className   = 'metric'+(avgMaxDD<0.1?' good':avgMaxDD<0.2?'':' bad');
-  document.getElementById('bm-ic1').className     = 'metric'+(avgIC[0]>0.05?' good':avgIC[0]>0?'':' bad');
-  document.getElementById('bm-ic5').className     = 'metric'+(avgIC[2]>0.03?' good':avgIC[2]>0?'':' bad');
+  // Confirm with momentum filter (only trade in direction of momentum)
+  const mom_confirm_bull = mom_20 != null && mom_20 > 0;
+  const mom_confirm_bear = mom_20 != null && mom_20 < 0;
 
-  drawEquityChart(results);
-  drawICChart(avgIC);
-
-  var inst = LX_INSTRUMENTS[currentInst];
-  var interp = '<strong>Results for ' + (inst?inst.name:currentInst) + ':</strong> ';
-  interp += 'Mean Sharpe across 20 paths: <strong>'+avgSharpe.toFixed(2)+'</strong>. ';
-  interp += 'IC at 1-bar horizon: <strong>'+avgIC[0].toFixed(3)+'</strong> ';
-  interp += (avgIC[0]>0.05?'(strong — signal has predictive power)':avgIC[0]>0?'(weak positive — marginal edge)':'(negative — signal may need inverting or regime filter)');
-  interp += '. IC at 5-bar: <strong>'+avgIC[2].toFixed(3)+'</strong>. ';
-  if (inst && inst.hurst > 0.55) interp += 'Hurst='+inst.hurst+' confirms trending behaviour — momentum strategies are well-suited. ';
-  else if (inst && inst.hurst < 0.45) interp += 'Hurst='+inst.hurst+' indicates mean-reversion — momentum struggles here. Consider the Pairs Desk. ';
-  interp += 'Max drawdown averaged '+(avgMaxDD*100).toFixed(1)+'%. ';
-  if (avgMaxDD > 0.2) interp += 'Consider tightening stop-loss to control tail risk.';
-  document.getElementById('bt-interp').innerHTML = interp;
-
-  document.getElementById('bt-placeholder').style.display = 'none';
-  document.getElementById('bt-results').style.display     = 'block';
-}
-
-function drawEquityChart(results) {
-  var n = Math.max.apply(null, results.map(function(r){return r.equity.length;}));
-  var labels = Array.from({length:n},function(_,i){return i;});
-  var meanEq=[],p10Eq=[],p90Eq=[];
-  for (var i=0;i<n;i++) {
-    var vals = results.map(function(r){return r.equity[Math.min(i,r.equity.length-1)];}).sort(function(a,b){return a-b;});
-    meanEq.push(mean(vals));
-    p10Eq.push(vals[Math.floor(vals.length*0.1)]);
-    p90Eq.push(vals[Math.floor(vals.length*0.9)]);
+  if (pos === 0) {
+    if (primary_bull && mom_confirm_bull) return 'LONG';
+    if (primary_bear && mom_confirm_bear) return 'SHORT';
+  } else if (pos === 1) {
+    // Exit when primary trend reverses
+    if (primary_bear) return 'FLAT';
+  } else if (pos === -1) {
+    if (primary_bull) return 'FLAT';
   }
-  mkChart('chart-equity-mom', {
-    type:'line',
-    data:{labels:labels, datasets:[
-      {label:'p90',  data:p90Eq, borderColor:'rgba(34,197,94,0.4)',  borderWidth:1, pointRadius:0, fill:false},
-      {label:'Mean', data:meanEq,borderColor:'#667eea',              borderWidth:2, pointRadius:0, fill:false},
-      {label:'p10',  data:p10Eq, borderColor:'rgba(239,68,68,0.4)',  borderWidth:1, pointRadius:0, fill:false}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:8,font:{size:10}}}},scales:{x:{display:false},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
+
+  return 'HOLD';
+}`,
+breakout:`// Breakout Strategy — enter on 20-bar high/low breaks
+
+const HOLD_BARS = 10;  // minimum hold time
+var entryBar = 0;
+
+function signal(ctx) {
+  const { price, high, low, pos, bar, atr } = ctx;
+
+  if (high == null || low == null) return 'HOLD';
+
+  const heldLong = bar - entryBar;
+
+  if (pos === 0) {
+    if (price >= high) { entryBar = bar; return 'LONG';  }  // 20-bar breakout long
+    if (price <= low)  { entryBar = bar; return 'SHORT'; }  // 20-bar breakdown short
+  } else if (pos === 1) {
+    // Exit after hold + if price falls below midpoint
+    if (heldLong > HOLD_BARS && price < (high + low) / 2) return 'FLAT';
+    if (atr != null && price < price - 2 * atr) return 'FLAT'; // trailing stop
+  } else if (pos === -1) {
+    if (heldLong > HOLD_BARS && price > (high + low) / 2) return 'FLAT';
+  }
+
+  return 'HOLD';
+}`};
+
+function loadTemplate(n){document.getElementById('strategy-code').value=T[n];document.getElementById('code-error').style.display='none';}
+
+function runCodeStrategy(){
+  const errEl=document.getElementById('code-error');
+  errEl.style.display='none';
+  const code=document.getElementById('strategy-code').value;
+  const cfg=INSTS[document.getElementById('code-inst').value];
+  const data=genData(cfg);
+
+  // Pre-compute extra indicators
+  const atr20=data.prices.map((_,i)=>{
+    if(i<20)return null;
+    const sl=data.prices.slice(i-20,i);
+    const rets=sl.map((v,j)=>j>0?Math.abs(v-sl[j-1]):0).slice(1);
+    return rets.reduce((a,b)=>a+b,0)/rets.length;
   });
+  const roll20h=data.prices.map((_,i)=>i<20?null:Math.max(...data.prices.slice(i-20,i)));
+  const roll20l=data.prices.map((_,i)=>i<20?null:Math.min(...data.prices.slice(i-20,i)));
+  const mom5=data.prices.map((_,i)=>i<5?null:data.prices[i]/data.prices[i-5]-1);
+
+  let fn;
+  try{fn=(new Function(code+'\nreturn signal;'))();if(typeof fn!=='function')throw new Error('signal() not found');}
+  catch(e){errEl.textContent='⚠ '+e.message;errEl.style.display='block';return;}
+
+  let pos=0,entry=0,pnl=0;
+  const equity=[0],markers=[],trades=[];
+  let wins=0,invested=0;
+
+  for(let i=0;i<NB;i++){
+    const ctx={price:data.prices[i],sma_fast:data.sma10[i],sma_slow:data.sma30[i],mom_20:data.mom20[i],mom_5:mom5[i],pos,bar:i,atr:atr20[i],high:roll20h[i],low:roll20l[i]};
+    let act;
+    try{act=fn(ctx);}catch(e){errEl.textContent='⚠ bar '+i+': '+e.message;errEl.style.display='block';return;}
+    const p=data.prices[i];
+    if((act==='LONG'||act==='SHORT')&&pos===0){pos=act==='LONG'?1:-1;entry=p;markers.push({i,type:act});}
+    else if(act==='FLAT'&&pos!==0){const prof=(p-entry)*pos*10;pnl+=prof;if(prof>0)wins++;trades.push(prof);markers.push({i,type:'FLAT'});pos=0;}
+    if(pos!==0)invested++;
+    const uP=pos!==0?(p-entry)*pos*10:0;equity.push(pnl+uP);
+  }
+  if(pos!==0){const prof=(data.prices[NB-1]-entry)*pos*10;pnl+=prof;if(prof>0)wins++;trades.push(prof);}
+
+  const rets=equity.slice(1).map((v,i)=>v-equity[i]);
+  const mu=rets.reduce((a,b)=>a+b,0)/rets.length;
+  const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-mu)**2,0)/rets.length)||1;
+  const sharpe=+(mu/sd*Math.sqrt(252)).toFixed(2);
+  const dd=(()=>{let pk=equity[0],d=0;equity.forEach(v=>{pk=Math.max(pk,v);d=Math.min(d,v-pk);});return d;})();
+  const wr=trades.length?Math.round(wins/trades.length*100):0;
+  const exp=Math.round(invested/NB*100);
+
+  const sv=(id,v,cls)=>{const e=document.getElementById(id);e.textContent=v;e.className='stat-value '+cls;};
+  sv('cs-sharpe',sharpe.toFixed(2),sharpe>0?'pos':'neg');
+  sv('cs-pnl',(pnl>=0?'+':'')+'$'+pnl.toFixed(0),pnl>=0?'pos':'neg');
+  sv('cs-dd','$'+dd.toFixed(0),'neg');
+  sv('cs-trades',trades.length,'neu');
+  sv('cs-wr',wr+'%',wr>=50?'pos':'neg');
+  sv('cs-exp',exp+'%','neu');
+  document.getElementById('run-status').textContent=NB+' bars · '+trades.length+' trades · Sharpe '+sharpe.toFixed(2);
+
+  // Draw price + SMAs + signals
+  drawMulti(document.getElementById('c-code-price'),
+    [data.prices,data.sma10,data.sma30],
+    {colors:[cfg.color,'#f59e0b','#60a5fa'],fmt:v=>v.toFixed(0),markers});
+  drawMulti(document.getElementById('c-code-eq'),[equity],{colors:[pnl>=0?'#22c55e':'#ef4444'],zeroLine:true,fmt:v=>'$'+v.toFixed(0)});
+
+  if(window.LX){LX.visitDesk('momentum-trainer');LX.addXP(Math.max(20,Math.min(150,50+Math.round(sharpe*40))),'Momentum Trainer');LX.recordRun({sharpe,isBacktest:false,desk:'momentum-trainer'});}
 }
 
-function drawICChart(avgIC) {
-  var horizons = ['1 bar','3 bar','5 bar','10 bar','20 bar'];
-  var colors   = avgIC.map(function(v){ return v>0.03?'rgba(34,197,94,0.8)':v>0?'rgba(102,126,234,0.8)':'rgba(239,68,68,0.8)'; });
-  mkChart('chart-ic', {
-    type:'bar',
-    data:{labels:horizons, datasets:[{label:'IC', data:avgIC, backgroundColor:colors, borderRadius:6}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.04)'}}}}
-  });
+function switchMode(m){
+  document.getElementById('manual-mode').style.display=m==='manual'?'flex':'none';
+  document.getElementById('code-mode').style.display=m==='code'?'flex':'none';
+  document.getElementById('tab-manual').className='mode-tab'+(m==='manual'?' active':'');
+  document.getElementById('tab-code').className='mode-tab'+(m==='code'?' active':'');
+  if(m==='code'&&!document.getElementById('strategy-code').value)loadTemplate('sma');
+  if(m==='manual')renderCharts();
 }
 
-/* ── Math utils ── */
-function mean(arr) { return arr.length ? arr.reduce(function(s,v){return s+v;},0)/arr.length : 0; }
-function stdDev(arr) {
-  if (arr.length<2) return 0;
-  var m=mean(arr);
-  return Math.sqrt(arr.reduce(function(s,v){return s+(v-m)*(v-m);},0)/(arr.length-1));
-}
-function pearsonCorr(a,b) {
-  var ma=mean(a),mb=mean(b);
-  var num=a.reduce(function(s,v,i){return s+(v-ma)*(b[i]-mb);},0);
-  var da=Math.sqrt(a.reduce(function(s,v){return s+(v-ma)*(v-ma);},0));
-  var db=Math.sqrt(b.reduce(function(s,v){return s+(v-mb)*(v-mb);},0));
-  return da*db<1e-9?0:num/(da*db);
-}
-function estimateHurst(arr) {
-  if (arr.length<16) return 0.5;
-  var lags=[2,4,8]; var logLags=[],logRS=[];
-  lags.forEach(function(lag){
-    if (arr.length<lag*2) return;
-    var subs=[];
-    for(var i=0;i+lag<=arr.length;i+=lag){
-      var sub=arr.slice(i,i+lag),mu=mean(sub);
-      var cs=sub.map(function(v,j){return sub.slice(0,j+1).reduce(function(s,x){return s+x-mu;},0);});
-      var R=Math.max.apply(null,cs)-Math.min.apply(null,cs),S=stdDev(sub)+1e-9;
-      subs.push(R/S);
-    }
-    if(subs.length){logLags.push(Math.log(lag));logRS.push(Math.log(mean(subs)));}
-  });
-  if(logLags.length<2) return 0.5;
-  var mX=mean(logLags),mY=mean(logRS);
-  var num=logLags.reduce(function(s,x,i){return s+(x-mX)*(logRS[i]-mY);},0);
-  var den=logLags.reduce(function(s,x){return s+(x-mX)*(x-mX);},0);
-  return den<1e-9?0.5:Math.max(0.1,Math.min(0.9,num/den));
-}
-
-/* ── Init ── */
-document.addEventListener('DOMContentLoaded', function() {
-  buildInstList();
-  if (window.LX) LX.visitDesk('momentum-trainer');
+window.addEventListener('load',()=>{
+  if(window.LX)LX.visitDesk('momentum-trainer');
+  resetManual();
+  new ResizeObserver(renderCharts).observe(document.querySelector('.manual-body'));
 });
 </script>
-
 </body>
 </html>
