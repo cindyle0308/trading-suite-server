@@ -43,19 +43,19 @@ const LX_LEVELS = [
 ];
 
 const LX_DESKS = [
-  { id:'terminal',        name:'Quant Research Lab',   icon:'🖥️',  file:'terminal.html',       minLevel:0, desc:'Build and backtest alpha factors in Python-style.' },
-  { id:'spread-trader',   name:'Pairs Research Desk',  icon:'⚖️',  file:'spread-trader.html',  minLevel:1, desc:'Research co-integrated pairs and trade mean-reversion.' },
-  { id:'momentum-trainer',name:'Trend & Momentum Desk',icon:'🚀',  file:'momentum-trainer.html',minLevel:2,desc:'Ride multi-timeframe momentum across 30 instruments.' },
-  { id:'regime-rider',    name:'Macro Strategy Desk',  icon:'🌐',  file:'regime-rider.html',   minLevel:4, desc:'Navigate rate cycles, inflation regimes and risk-off.' },
-  { id:'price-war',       name:'Market Making Desk',   icon:'🎯',  file:'price-war.html',      minLevel:2, desc:'Quote two-sided markets and manage inventory risk.' },
-  { id:'algo-blitz',      name:'Quant Tech Interview', icon:'💻',  file:'algo-blitz.html',     minLevel:1, desc:'Solve signal and data-structure puzzles under pressure.' },
-  { id:'arbitrage-sprint',name:'Arb & Relative Value', icon:'🔗',  file:'arbitrage-sprint.html',minLevel:3,desc:'Exploit mispricings across linked instruments.' },
-  { id:'bot-builder',     name:'Algorithm Lab',        icon:'🤖',  file:'bot-builder.html',    minLevel:2, desc:'Wire up execution logic for your alpha signals.' },
-  { id:'cmi-challenge',   name:'Portfolio Manager Desk',icon:'📂', file:'cmi-challenge.html',  minLevel:3, desc:'Run a multi-asset book with risk limits and drawdown controls.' },
-  { id:'quant-relay',     name:'Research Sprint Desk', icon:'🏃',  file:'quant-relay.html',    minLevel:1, desc:'Time-boxed quant research sprints across factor families.' },
-  { id:'alpha-factory',   name:'Alt Data Lab',         icon:'🧪',  file:'alpha-factory.html',  minLevel:3, desc:'Mine alternative data signals and measure IC decay.' },
-  { id:'basket-blitz',    name:'ETF & Index Desk',     icon:'🧺',  file:'basket-blitz.html',   minLevel:2, desc:'Decompose factor exposure in baskets and hedge the residual.' },
-  { id:'options-outcry',  name:'Options Pit',          icon:'📣',  file:'options-outcry.html', minLevel:4, desc:'Price and trade vanilla options with live Greeks.' },
+  { id:'terminal',        name:'Research Terminal',    icon:'🖥️',  file:'terminal.html',          minLevel:0, desc:'Build and backtest alpha factors in Python-style.' },
+  { id:'spread-trader',   name:'Spread Trader',        icon:'⚖️',  file:'spread-trader.html',     minLevel:1, desc:'Code or manually trade co-integrated pairs via z-score mean-reversion.' },
+  { id:'momentum-trainer',name:'Momentum Trainer',     icon:'🚀',  file:'momentum-trainer.html',  minLevel:2, desc:'Code or manually ride SMA crossover momentum across instruments.' },
+  { id:'regime-rider',    name:'Regime Rider',         icon:'🌐',  file:'regime-rider.html',      minLevel:4, desc:'Navigate rate cycles, inflation regimes and risk-off.' },
+  { id:'price-war',       name:'Price War',            icon:'🎯',  file:'price-war.html',         minLevel:2, desc:'Code or manually quote two-sided markets and manage inventory risk.' },
+  { id:'algo-blitz',      name:'Algo Blitz',           icon:'💻',  file:'algo-blitz.html',        minLevel:1, desc:'Solve signal and data-structure puzzles under pressure.' },
+  { id:'arbitrage-sprint',name:'Arbitrage Sprint',     icon:'🔗',  file:'arbitrage-sprint.html',  minLevel:3, desc:'Exploit mispricings across linked instruments.' },
+  { id:'bot-builder',     name:'Bot Builder',          icon:'🤖',  file:'bot-builder.html',       minLevel:2, desc:'Wire up execution logic for your alpha signals.' },
+  { id:'cmi-challenge',   name:'CMI Challenge',        icon:'📂',  file:'cmi-challenge.html',     minLevel:3, desc:'Run a multi-asset book with risk limits and drawdown controls.' },
+  { id:'quant-relay',     name:'Quant Relay',          icon:'🏃',  file:'quant-relay.html',       minLevel:1, desc:'Time-boxed quant research sprints across factor families.' },
+  { id:'alpha-factory',   name:'Alpha Factory',        icon:'🧪',  file:'alpha-factory.html',     minLevel:3, desc:'Mine alternative data signals and measure IC decay.' },
+  { id:'basket-blitz',    name:'Basket Blitz',         icon:'🧺',  file:'basket-blitz.html',      minLevel:2, desc:'Decompose factor exposure in baskets and hedge the residual.' },
+  { id:'options-outcry',  name:'Options Outcry',       icon:'📣',  file:'options-outcry.html',    minLevel:4, desc:'Price and trade vanilla options with live Greeks.' },
 ];
 
 const LX_MISSIONS = [
