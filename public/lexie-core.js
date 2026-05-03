@@ -87,6 +87,13 @@ const LX_MISSIONS = [
   { id:'trend_sharpe',  title:'Momentum Edge',        desc:'Achieve Sharpe > 1.2 on trend strategy.',        xp:200, icon:'📈', desk:'momentum-trainer', check: s => s.trendBestSharpe >= 1.2 },
 ];
 
+/* ─── Debounced cloud sync ────────────────────────────────────────── */
+var _syncTimer = null;
+function _debouncedSync() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(function(){ if (window.LX) window.LX.syncProfile(); }, 2000);
+}
+
 /* ─── State management ────────────────────────────────────────────── */
 function _defaultState() {
   return {
@@ -159,6 +166,7 @@ const LX = (() => {
 
     _checkMissions();
     _renderHUDs();
+    _debouncedSync();
     return { xp: state.xp, level: state.level, promoted };
   }
 
@@ -305,9 +313,34 @@ const LX = (() => {
     location.reload();
   }
 
+  /* ── Cloud sync ─────────────────────────────────────────────── */
+  function syncProfile() {
+    // Reads active profile ID from localStorage and POSTs career data to server.
+    // Falls back silently if server is unavailable.
+    try {
+      var activeId = localStorage.getItem('lx_active_profile');
+      if (!activeId) return;
+      var profs = JSON.parse(localStorage.getItem('lx_profiles_v2') || '{}');
+      var prof  = profs[activeId];
+      if (!prof) return;
+      var payload = {
+        id:     activeId,
+        name:   prof.name,
+        color:  prof.color,
+        career: localStorage.getItem(LX_STORAGE_KEY) || null
+      };
+      fetch('/api/profile/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(function(){});  // silent fail — localStorage is the source of truth
+    } catch(e) {}
+  }
+
   return {
     addXP, visitDesk, recordRun, recordStrategySaved, recordDailyChallenge,
-    getState, getLevelInfo, canAccess, getMissions,
+    getState, getLevelInfo, canAccess, getMissions, syncProfile,
     levels: LX_LEVELS, desks: LX_DESKS, missions: LX_MISSIONS,
     _reset,
   };
@@ -324,6 +357,9 @@ function lxDailyState() {
   if (typeof document === 'undefined') return;
 
   document.addEventListener('DOMContentLoaded', () => {
+    // Skip HUD on the lobby — the sidebar renders career info there instead
+    if (document.body.dataset.noHud === 'true') return;
+
     const info = LX.getLevelInfo();
 
     const hud = document.createElement('div');
