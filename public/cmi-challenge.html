@@ -370,7 +370,7 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:6px 14p
   <a href="basket-blitz.html">Basket</a>
   <a href="options-outcry.html">Outcry</a>
   <span class="cur">Asset Manager Challenge</span>
-<span class="theme-nav-btns"><button class="tnb" data-t="light" onclick="setTheme('light',true)" title="Light">☀</button><button class="tnb" data-t="system" onclick="setTheme('system',true)" title="System">⊙</button><button class="tnb" data-t="dark" onclick="setTheme('dark',true)" title="Dark">☾</button></span>
+<button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
 
     <a href="terminal.html">⌨ Terminal</a>
 </nav>
@@ -1054,5 +1054,13 @@ function restartAssetMgr() {
 })();
 </script>
 <script src="lexie-core.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var b=document.getElementById("lx-theme-btn-2");
+  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
+  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
+});
+</script>
 </body>
 </html>
