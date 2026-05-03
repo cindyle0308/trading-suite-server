@@ -363,7 +363,7 @@ summary.rules-sum{font-size:.78rem;color:var(--dim);cursor:pointer;padding:6px 0
     <a href="regime-rider.html">Regime</a>
   
     <a href="terminal.html">⌨ Terminal</a>
-    <button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
+    
   </div>
   <div class="setup-card">
     <div class="setup-icon">📈</div>
@@ -1122,12 +1122,5 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 <script src="lexie-core.js"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  var b=document.getElementById("lx-theme-btn-2");
-  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
-  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
-});
-</script>
 </body>
 </html>
