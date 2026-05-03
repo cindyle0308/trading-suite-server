@@ -6,6 +6,7 @@
 <title>Options Outcry — LeXie Trading Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lx-design.css">
 <style>
   /* ══════════════════════════════════════════════
      CROSS-PLATFORM TYPOGRAPHY + VISUAL POLISH
@@ -156,7 +157,7 @@
   /* Section labels */
   .section-label,.spec-section-title,.section-title{font-size:0.68rem!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:0.14em!important;color:var(--dim)!important;margin-bottom:12px!important;}
 
-:root{--bg:#06090f;--bg2:#0b111c;--bg3:#101824;--bg4:#162030;--border:#1a2d46;--border2:#243d5a;--text:#b0c8e4;--dim:#4a6a8a;--bright:#e0eefa;--green:#00d888;--red:#ff3d5a;--yellow:#ffc840;--blue:#3a90ff;--purple:#9d60ff;--shadow:rgba(0,0,0,.45)}
+:root{--bg:#0e0c0b;--bg2:#141210;--bg3:#1a1714;--bg4:#211e1a;--border:#332e28;--border2:#484038;--text:#d4cdc6;--dim:#6a6058;--bright:#f0ebe4;--green:#4dba88;--red:#c45868;--yellow:#cc9438;--blue:#6a9fd4;--purple:#9878d0;--shadow:rgba(0,0,0,.55)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.5;overflow:hidden}
 .mono{font-family:'DM Mono',monospace} .dim{color:var(--dim)} .bright{color:var(--bright)}
@@ -1118,5 +1119,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   setTheme(localStorage.getItem('imc-theme')||'system', false);
 })();
 </script>
+<script src="lexie-core.js"></script>
 </body>
 </html>
