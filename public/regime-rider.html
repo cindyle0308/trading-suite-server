@@ -93,7 +93,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     <h1>&#x1F310; Macro Strategy Desk</h1>
     <p>Regime identification &bull; Asset allocation &bull; Risk-off navigation</p>
   </div>
-  <div style="display:flex;align-items:center;gap:10px"><button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button><span class="status-badge" id="status-badge">Select Scenario</span></div>
+  <div style="display:flex;align-items:center;gap:10px">
+<span class="status-badge" id="status-badge">Select Scenario</span></div>
 </header>
 
 <div class="pipeline">
@@ -553,12 +554,5 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  var b=document.getElementById("lx-theme-btn-2");
-  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
-  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
-});
-</script>
 </body>
 </html>
