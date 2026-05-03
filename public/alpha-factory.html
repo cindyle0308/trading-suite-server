@@ -1284,6 +1284,12 @@ function showResults() {
     return {name:t.name, color:t.color, pnl:pnl, sharpe:sharpe, maxDD:maxDD, alphaScore:alphaScore, adaptScore:adaptScore, finalScore:finalScore};
   });
   teamResults.sort((a,b)=>b.finalScore-a.finalScore);
+  var _playerResult = teamResults.find(function(r){return r.name===AF.teams[0].name;}) || teamResults[teamResults.length-1];
+  if(window.LX){
+    LX.visitDesk('alpha-factory');
+    LX.addXP(_playerResult.finalScore, 'Alpha Factory');
+    LX.recordRun({sharpe: _playerResult.sharpe, isBacktest:false, desk:'alpha-factory'});
+  }
 
   document.getElementById('res-winner').textContent = teamResults[0].name + ' wins!';
 
