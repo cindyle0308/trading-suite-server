@@ -468,10 +468,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
       <button class="round-item" id="ri-6" data-round="6" onclick="startRound(6)"><span class="ri-num">06</span> Multi-Asset<span class="ri-check" id="rc-6"></span></button>
     </div>
     <div class="sidebar-section">
-      <div class="sidebar-label">More Games</div>
-      <button class="sidebar-btn" onclick="submitSignal()"><span class="icon">🏆</span> Submit Signal <span class="sidebar-badge">Live</span></button>
-      <button class="sidebar-btn" onclick="window.location.href='quant-relay.html'"><span class="icon">🔬</span> Quant Relay</button>
-      <button class="sidebar-btn" onclick="window.location.href='alpha-factory.html'"><span class="icon">🏭</span> Alpha Factory</button>
+      <div class="sidebar-label">Trading Desks</div>
+      <button class="sidebar-btn" onclick="window.location.href='index.html'" style="color:var(--green);font-weight:700;"><span class="icon">⌂</span> Lobby</button>
+      <button class="sidebar-btn" onclick="window.location.href='spread-trader.html'"><span class="icon">🔗</span> Pairs Desk</button>
+      <button class="sidebar-btn" onclick="window.location.href='momentum-trainer.html'"><span class="icon">📈</span> Trend Desk</button>
+      <button class="sidebar-btn" onclick="window.location.href='regime-rider.html'"><span class="icon">🌀</span> Macro Desk</button>
+      <button class="sidebar-btn" onclick="window.location.href='price-war.html'"><span class="icon">⚡</span> MM Desk</button>
     </div>
   </div>
 
@@ -1831,6 +1833,8 @@ async function runStrategy() {
         if (replayBtn && _lastEquity) replayBtn.style.display = '';
         // Check missions
         checkMissions(s, currentScenario, null);
+        // LX career tracking
+        if (typeof LX !== 'undefined') LX.recordRun({sharpe:s.sharpe, ic1:s.ic, ic5: (s.icHorizons?.[4] ?? s.ic), desk:'terminal', isBacktest:false});
         // Show rich result panel (with IC horizons and regime)
         showResultTab_Result(s, currentScenario);
         // Advance pipeline
@@ -1955,6 +1959,8 @@ async function runBacktest() {
   // Show rich result tab
   showBacktestResult(avgS, stdS, minS, maxS, avgIC, avgDD, pctPos, robust, overfit);
   setPipelineStep(avgS >= 0.3 ? 4 : 3);
+  // LX career tracking
+  if (typeof LX !== 'undefined') LX.recordRun({sharpe:avgS, ic1:avgIC ?? null, ic5:avgIC ?? null, isBacktest:true, desk:'terminal'});
 }
 
 function showBacktestDistribution(sharpes) {
@@ -2587,6 +2593,8 @@ async function runWalkForward() {
         <div class="interp-next">${verdict.next}</div>
       </div>`;
     checkMissions(_lastResult, currentScenario, {oosSharpe});
+    // LX career tracking
+    if (typeof LX !== 'undefined') LX.recordRun({sharpe:oosSharpe, isWalkFwd:true, wfPassed:oosSharpe>0, desk:'terminal'});
     showResultTab('result');
     setPipelineStep(oosSharpe > 0 ? 5 : 3);
 
@@ -3801,5 +3809,6 @@ window.runDataExplorer = runDataExplorer;
 window.clearUserPlots = clearUserPlots;
 window.updateTickPill = updateTickPill;
 </script>
+<script src="lexie-core.js"></script>
 </body>
 </html>
