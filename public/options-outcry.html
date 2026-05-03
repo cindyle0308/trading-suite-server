@@ -1030,6 +1030,13 @@ function endGame(){
 
   // Finalize bot PnLs (simple estimate)
   G.bots[0].pnl -= Math.random()*1.5; // ThetaGrinder gave back some theta
+  if(window.LX){
+    LX.visitDesk('options-outcry');
+    var ooXP = Math.max(20, Math.min(200, 100 + Math.round((settlePnl+undPnl)/10)));
+    LX.addXP(ooXP, 'Options Outcry');
+    var ooSharpe = +((settlePnl+undPnl) / Math.max(1, Math.abs(settlePnl+undPnl)+100) * 2).toFixed(2);
+    LX.recordRun({sharpe: ooSharpe, isBacktest:false, desk:'options-outcry'});
+  }
   G.bots[2].pnl += (Math.random()-.5)*2; // Directional random outcome
 
   const all=[
