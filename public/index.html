@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>!function(){var t=localStorage.getItem("lx_theme")||"dark";document.documentElement.setAttribute("data-theme",t);}();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LeXie Capital — Trading Floor</title>
 <link rel="stylesheet" href="lx-design.css">
@@ -16,7 +17,7 @@ body::before { content:'';position:fixed;inset:0;pointer-events:none;z-index:0;b
   position:sticky;top:0;z-index:50;
   display:flex;align-items:center;justify-content:space-between;
   padding:0 var(--sp-8);height:56px;
-  background:rgba(20,18,16,0.92);backdrop-filter:blur(14px);
+  background:var(--bg-header-glass);backdrop-filter:blur(14px);
   border-bottom:1.5px solid var(--border-dim);
 }
 .logo { display:flex;align-items:center;gap:var(--sp-3); }
@@ -227,6 +228,7 @@ body::before { content:'';position:fixed;inset:0;pointer-events:none;z-index:0;b
     </button>
     <a href="#desks" class="lx-btn lx-btn-ghost lx-btn-sm">Desks</a>
     <a href="#missions" class="lx-btn lx-btn-ghost lx-btn-sm">Missions</a>
+    <button class="lx-btn lx-btn-ghost lx-btn-sm" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light / dark mode">☀</button>
     <a href="terminal.html" class="lx-btn lx-btn-primary lx-btn-sm">&#x25B6; Terminal</a>
   </nav>
 </header>
