@@ -77,7 +77,7 @@ body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index
 
 /* ── SIDEBAR ── */
 .lx-sidebar {
-  width:252px; flex-shrink:0;
+  width:35%; max-width:420px; min-width:220px; flex-shrink:0;
   background:var(--bg-panel); border-right:1.5px solid var(--border-dim);
   overflow-y:auto; overflow-x:hidden;
   display:flex; flex-direction:column;
@@ -287,7 +287,7 @@ body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index
 .io-btn:hover { background:var(--bg-raised); }
 
 /* ── Responsive ── */
-@media(max-width:680px){
+@media(max-width:700px){
   .lx-sidebar { display:none; }
   .nav-sep:nth-child(3),.nav-clock { display:none; }
   .desk-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
