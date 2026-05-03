@@ -591,6 +591,12 @@ function showResults() {
   document.getElementById('results').classList.remove('hidden');
   const total = G.roundScores.reduce((a,b)=>a+b,0);
   G.totalScore = total;
+  if(window.LX){
+    LX.visitDesk('arbitrage-sprint');
+    var arbXP = Math.round(total * 0.3);   // 0-150 XP
+    LX.addXP(arbXP, 'Arbitrage Sprint');
+    LX.recordRun({sharpe: +((total/500)*4-2).toFixed(2), isBacktest:false, desk:'arbitrage-sprint'});
+  }
   document.getElementById('res-total').textContent = total;
   let medal = '📊', title = 'Sprint Complete!', sub = 'Review your weak rounds and try again';
   if (total >= 400) { medal = '🥇'; title = 'Elite Trader!'; sub = 'LeXie would be impressed — top-tier performance'; }
