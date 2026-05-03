@@ -371,7 +371,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
     <div class="status-dot" title="Market live"></div>
     <span id="market-clock" style="font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);">T+0</span>
     <span id="score-display" class="score-pill" style="display:none;"></span>
-    <button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
+    
   </div>
 </nav>
 
@@ -3814,12 +3814,5 @@ window.updateTickPill = updateTickPill;
 </script>
 <script src="lexie-core.js"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-  var b=document.getElementById("lx-theme-btn-2");
-  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
-  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
-});
-</script>
 </body>
 </html>
