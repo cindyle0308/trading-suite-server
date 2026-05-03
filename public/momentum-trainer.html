@@ -135,6 +135,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
     <p>Multi-timeframe momentum &bull; Regime awareness &bull; IC analysis</p>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
+    <button class="lx-theme-toggle" id="lx-theme-btn-2" onclick="window.lxTheme&&lxTheme.toggle()" title="Toggle light/dark">☀</button>
     <span class="status-badge" id="status-badge">Select Instrument</span>
   </div>
 </header>
@@ -779,6 +780,14 @@ function estimateHurst(arr) {
 document.addEventListener('DOMContentLoaded', function() {
   buildInstList();
   if (window.LX) LX.visitDesk('momentum-trainer');
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var b=document.getElementById("lx-theme-btn-2");
+  if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";
+  window.addEventListener("lx:update",function(){var b=document.getElementById("lx-theme-btn-2");if(b&&window.lxTheme)b.textContent=lxTheme.isDark()?"☀":"☾";});
 });
 </script>
 </body>
