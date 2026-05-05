@@ -82,6 +82,22 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 /* Inventory positive = long (green from center right), negative = short (red from center left) */
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px;}
+
+/* Mode bar */
+.mode-bar { display:flex; gap:0; padding:8px 32px; background:rgba(10,15,25,0.7); border-bottom:1px solid var(--border); position:relative; z-index:5; }
+.mode-btn { padding:8px 20px; border:none; background:transparent; color:var(--dim); font-weight:600; font-size:12px; cursor:pointer; border-bottom:2px solid transparent; transition:all .3s; }
+.mode-btn:hover { color:var(--accent); }
+.mode-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+.codelab-pane { display:none; }
+.codelab-pane.active { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.code-editor { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; }
+.code-editor-header { display:flex; gap:12px; margin-bottom:12px; align-items:center; }
+.code-textarea { flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#e8f0fe; font-family:monospace; font-size:12px; padding:12px; border-radius:8px; resize:none; line-height:1.5; }
+.code-textarea:focus { outline:none; border-color:var(--accent); }
+.results-pane { display:flex; flex-direction:column; }
+.results-chart { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; flex:1; margin-bottom:16px; }
+.results-stats { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 </style>
 </head>
 <body data-desk="price-war">
@@ -102,8 +118,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
   <div class="pipe-step" id="step-3">3 Simulate Flow</div>
   <div class="pipe-arrow">&#x203A;</div>
   <div class="pipe-step" id="step-4">4 P&amp;L &amp; Risk</div>
+</div><div class="mode-bar">
+  <button class="mode-btn active" onclick="switchMode('manual')" id="btn-manual">🖱 Manual</button>
+  <button class="mode-btn" onclick="switchMode('codelab')" id="btn-codelab">💻 Code Lab</button>
 </div>
 
+<div id="manual-content">
 <div class="main">
 
 <!-- Step 1: Instrument -->
@@ -427,5 +447,55 @@ function stdDev(arr){if(arr.length<2)return 0;var m=mean(arr);return Math.sqrt(a
 document.addEventListener('DOMContentLoaded',function(){buildPicker();if(window.LX)LX.visitDesk('price-war');});
 </script>
 
+
+<script>
+function switchMode(mode) {
+  const manualContent = document.getElementById('manual-content');
+  const codelabContent = document.getElementById('codelab-content');
+  const btnManual = document.getElementById('btn-manual');
+  const btnCodelab = document.getElementById('btn-codelab');
+  
+  if (mode === 'manual') {
+    manualContent.style.display = 'block';
+    codelabContent.classList.remove('active');
+    btnManual.classList.add('active');
+    btnCodelab.classList.remove('active');
+  } else {
+    manualContent.style.display = 'none';
+    codelabContent.classList.add('active');
+    btnManual.classList.remove('active');
+    btnCodelab.classList.add('active');
+  }
+}
+
+const codelabTemplates = {
+  fixed: `function quote(ctx) {
+  return { half_spread_bps: 5 };
+}`,
+  dynamic: `function quote(ctx) {
+  const vol = ctx.vol || 1;
+  const half_spread = Math.max(2, 5 + vol * 2);
+  return { half_spread_bps: half_spread };
+}`,
+  inventory: `function quote(ctx) {
+  const inv = ctx.inventory || 0;
+  const skew = 1 + (inv / ctx.inventory_limit) * 0.5;
+  return { half_spread_bps: 5, skew_factor: skew };
+}`
+};
+
+function loadTemplate(name) {
+  document.getElementById('code-editor-textarea').value = codelabTemplates[name] || codelabTemplates.fixed;
+}
+
+function runCodeLab() {
+  alert('Code Lab simulation: Coming soon! This will animate order flow and update PnL/inventory charts in real-time.');
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+  loadTemplate('fixed');
+});
+</script>
 </body>
 </html>
