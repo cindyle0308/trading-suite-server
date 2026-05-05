@@ -366,9 +366,9 @@ function lxDailyState() {
     hud.id = 'lx-hud';
     // Use CSS vars from lx-design.css so it respects dark/light theme
     hud.style.cssText = `
-      position:fixed; bottom:16px; right:16px; z-index:9999;
+      position:fixed; bottom:24px; right:16px; z-index:9999;
       background:var(--bg-elevated,#282420); border:1.5px solid var(--border-dim,#332e28);
-      border-radius:14px; padding:10px 14px; min-width:210px;
+      border-radius:14px; padding:14px 18px; min-width:240px;
       font-family:'Sora','Inter',sans-serif; font-size:12px; color:var(--fg-secondary,#b8b0a8);
       box-shadow:var(--shadow-card,0 4px 24px rgba(0,0,0,0.4));
       user-select:none;
@@ -377,15 +377,15 @@ function lxDailyState() {
     const themeIcon = window.lxTheme.isDark() ? '☀' : '☾';
     hud.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span id="lx-hud-badge" style="font-size:18px;line-height:1">${info.badge}</span>
+        <span id="lx-hud-badge" style="font-size:22px;line-height:1">${info.badge}</span>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;color:var(--fg-bright,#f0ebe4);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="lx-hud-title">${info.title}</div>
-          <div style="color:var(--green,#4dba88);font-size:10px;font-family:'DM Mono',monospace" id="lx-hud-xp">${info.xp.toLocaleString()} XP</div>
+          <div style="font-weight:700;color:var(--fg-bright,#f0ebe4);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="lx-hud-title">${info.title}</div>
+          <div style="color:var(--green,#4dba88);font-size:13px;font-weight:800;font-family:'DM Mono',monospace" id="lx-hud-xp">${info.xp.toLocaleString()} XP</div>
         </div>
         <button id="lx-theme-btn" title="Toggle light/dark mode" style="background:none;border:1px solid var(--border-mid,#484038);border-radius:6px;color:var(--fg-subtle,#6a6058);font-size:12px;cursor:pointer;padding:2px 6px;line-height:1.4;flex-shrink:0">${themeIcon}</button>
         <a href="index.html" style="flex-shrink:0;font-size:14px;color:var(--fg-subtle,#6a6058);text-decoration:none;line-height:1" title="Lobby">⌂</a>
       </div>
-      <div style="background:var(--bg-overlay,#302b26);border-radius:var(--r-pill,999px);height:4px;overflow:hidden">
+      <div style="background:var(--bg-overlay,#302b26);border-radius:var(--r-pill,999px);height:8px;overflow:hidden;margin-top:8px;margin-bottom:8px">
         <div id="lx-hud-bar" style="background:linear-gradient(90deg,var(--green,#4dba88),var(--coral,#d4728a));height:100%;width:${info.pct}%;transition:width .4s ease"></div>
       </div>
       <div style="margin-top:4px;color:var(--fg-subtle,#6a6058);font-size:10px;font-family:'DM Mono',monospace" id="lx-hud-next">${info.next ? `${info.xpInLevel}/${info.xpToNext} → ${info.next.title}` : '✦ MAX LEVEL'}</div>
@@ -443,7 +443,7 @@ function lxDailyState() {
     t.style.cssText = `
       background:var(--bg-elevated,#282420); border-left:3px solid ${color};
       border:1.5px solid var(--border-mid,#484038); border-left:3px solid ${color};
-      color:var(--fg-primary,#d4cdc6); padding:8px 14px; border-radius:8px; font-size:12px;
+      color:var(--fg-primary,#d4cdc6); padding:12px 18px; border-radius:8px; font-size:18px; font-weight:900;
       font-family:'Sora','Inter',sans-serif; box-shadow:var(--shadow-card,0 2px 12px rgba(0,0,0,0.4));
       opacity:0; transform:translateX(20px); transition:all .3s;
       pointer-events:none; white-space:nowrap;
