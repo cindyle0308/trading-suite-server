@@ -7,482 +7,603 @@
 <title>Momentum Trainer — LeXie Capital</title>
 <link rel="stylesheet" href="lx-design.css">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',system-ui,sans-serif;font-size:14px;background:var(--bg-base);color:var(--fg-primary);min-height:100vh;display:flex;flex-direction:column;}
-.lx-nav{height:48px;background:var(--bg-surface);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:8px;padding:0 16px;flex-shrink:0;font-size:12px;}
-.lx-nav a{color:var(--fg-subtle);text-decoration:none;padding:4px 6px;border-radius:4px;}
-.lx-nav a:hover{color:var(--fg-primary);background:var(--bg-raised);}
-.lx-nav .sep{color:var(--border-mid);}
-.nav-logo{color:var(--gold)!important;font-weight:700;font-size:13px;}
-.nav-right{margin-left:auto;}
-.nav-pill{background:var(--bg-raised);border:1px solid var(--border-dim);border-radius:16px;padding:2px 10px;font-size:11px;color:var(--fg-subtle);}
-.mode-bar{background:var(--bg-panel);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;padding:0 20px;flex-shrink:0;}
-.mode-tab{padding:12px 20px;font-size:13px;font-weight:600;border-bottom:2px solid transparent;color:var(--fg-subtle);cursor:pointer;transition:all .15s;}
-.mode-tab.active{color:var(--coral);border-bottom-color:var(--coral);}
-.mode-tab:hover:not(.active){color:var(--fg-primary);}
-.api-link{margin-left:auto;font-size:12px;color:var(--fg-subtle);text-decoration:none;padding:4px 10px;border:1px solid var(--border-dim);border-radius:6px;}
-.api-link:hover{color:var(--coral);border-color:var(--coral);}
-.workspace{flex:1;display:flex;overflow:hidden;}
-#manual-mode{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.manual-top{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg-panel);border-bottom:1px solid var(--border-dim);flex-shrink:0;flex-wrap:wrap;}
-.inst-select{background:var(--bg-raised);border:1px solid var(--border-dim);color:var(--fg-primary);padding:6px 10px;border-radius:6px;font-size:12px;}
-.stat-pill{background:var(--bg-raised);border:1px solid var(--border-dim);border-radius:8px;padding:4px 10px;font-size:12px;display:flex;gap:6px;align-items:center;}
-.stat-pill .sv{font-weight:700;font-family:monospace;}
-.stat-pill.pos{border-color:var(--green);background:var(--green-bg);}
-.stat-pill.neg{border-color:var(--red);background:var(--red-bg);}
-.btn-sm{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;}
-.btn-long{background:var(--green);color:#fff;}
-.btn-short{background:var(--red);color:#fff;}
-.btn-flat{background:var(--bg-overlay);border:1px solid var(--border-mid);color:var(--fg-primary);}
-.btn-sm:disabled{opacity:.35;cursor:not-allowed;}
-.manual-body{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;overflow:hidden;}
-.chart-panel{background:var(--bg-surface);border-right:1px solid var(--border-dim);border-bottom:1px solid var(--border-dim);display:flex;flex-direction:column;overflow:hidden;}
-.chart-panel:nth-child(2n){border-right:none;}
-.chart-panel:nth-child(n+3){border-bottom:none;}
-.chart-label{padding:7px 12px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-subtle);border-bottom:1px solid var(--border-dim);flex-shrink:0;}
-.chart-canvas-wrap{flex:1;position:relative;overflow:hidden;}
-canvas{position:absolute;top:0;left:0;width:100%;height:100%;}
-#code-mode{flex:1;display:flex;overflow:hidden;}
-.editor-pane{width:46%;min-width:320px;border-right:1px solid var(--border-dim);display:flex;flex-direction:column;background:var(--bg-panel);overflow:hidden;}
-.results-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.pane-header{padding:9px 14px;background:var(--bg-surface);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.pane-title{font-size:11px;font-weight:700;color:var(--fg-subtle);text-transform:uppercase;letter-spacing:.07em;}
-.run-btn{margin-left:auto;background:var(--coral);color:#fff;border:none;padding:6px 18px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;}
-.run-btn:hover{opacity:.88;}
-.template-bar{padding:5px 14px;background:var(--bg-raised);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;}
-.tmpl-btn{font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--border-dim);background:var(--bg-surface);color:var(--fg-subtle);cursor:pointer;}
-.tmpl-btn:hover{border-color:var(--coral);color:var(--coral);}
-.tmpl-label{font-size:11px;color:var(--fg-subtle);}
-.code-editor{flex:1;font-family:'JetBrains Mono','Fira Code',monospace;font-size:12px;line-height:1.7;padding:14px;background:var(--bg-base);color:var(--fg-primary);border:none;resize:none;outline:none;tab-size:2;}
-.code-error{padding:8px 14px;background:var(--red-bg);border-top:1px solid var(--red);color:var(--red);font-size:12px;font-family:monospace;flex-shrink:0;display:none;}
-.results-charts{flex:1;display:grid;grid-template-rows:1fr 1fr;overflow:hidden;}
-.rc-panel{border-bottom:1px solid var(--border-dim);display:flex;flex-direction:column;overflow:hidden;}
-.rc-panel:last-child{border-bottom:none;}
-.stats-bar{padding:10px 16px;background:var(--bg-surface);border-top:1px solid var(--border-dim);display:flex;gap:20px;flex-shrink:0;flex-wrap:wrap;}
-.stat-item{display:flex;flex-direction:column;gap:2px;}
-.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle);}
-.stat-value{font-size:15px;font-weight:700;font-family:monospace;}
-.stat-value.pos{color:var(--green);}
-.stat-value.neg{color:var(--red);}
-.stat-value.neu{color:var(--fg-primary);}
+html,body { height:100%; overflow:hidden; margin:0; }
+body { display:flex; flex-direction:column; background:var(--bg-base); color:var(--fg-primary); font-family:var(--font-sans); }
+
+.mt-header {
+  height:52px; flex-shrink:0; display:flex; align-items:center; gap:12px; padding:0 18px;
+  background:var(--bg-header-glass); backdrop-filter:blur(14px); border-bottom:1.5px solid var(--border-dim);
+  z-index:100;
+}
+.mt-logo { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--fg-bright); font-weight:800; font-size:15px; }
+.mt-sep { width:1px; height:20px; background:var(--border-mid); margin:0 6px; }
+.mt-title { font-size:13px; font-weight:600; color:var(--fg-secondary); }
+.mt-spacer { flex:1; }
+.mt-nav { display:flex; gap:8px; align-items:center; }
+.mt-nav a { font-size:12px; color:var(--fg-subtle); text-decoration:none; padding:6px 12px; border-radius:var(--r-md); transition:all var(--t-fast); }
+.mt-nav a:hover { background:var(--bg-raised); color:var(--fg-primary); }
+
+.mt-intro { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:500; }
+.mt-intro-card { background:var(--bg-elevated); border:1.5px solid var(--border-mid); border-radius:var(--r-lg); padding:40px; max-width:500px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+.mt-intro-icon { font-size:56px; margin-bottom:16px; }
+.mt-intro-title { font-size:28px; font-weight:800; color:var(--fg-bright); margin-bottom:8px; }
+.mt-intro-subtitle { font-size:13px; color:var(--fg-secondary); margin-bottom:20px; line-height:1.6; }
+.mt-howto { background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:var(--r-md); padding:16px; margin:20px 0; text-align:left; font-size:12px; color:var(--fg-secondary); line-height:1.7; }
+.mt-howto-item { margin-bottom:10px; }
+.mt-howto-item strong { color:var(--fg-primary); }
+
+.mt-instrument-selector { margin:20px 0; display:flex; flex-direction:column; gap:8px; }
+.mt-instrument-label { font-size:11px; font-weight:700; color:var(--fg-muted); text-transform:uppercase; }
+.mt-instrument-select { padding:10px 14px; background:var(--bg-panel); border:1.5px solid var(--border-dim); border-radius:var(--r-md); color:var(--fg-primary); font-family:var(--font-sans); font-size:13px; cursor:pointer; }
+.mt-instrument-select:focus { outline:none; border-color:var(--teal); background:var(--bg-raised); }
+
+.mt-buttons { display:flex; gap:12px; margin-top:24px; }
+.mt-btn { flex:1; padding:12px 20px; border:1.5px solid var(--border-mid); border-radius:var(--r-md); background:var(--bg-raised); color:var(--fg-primary); font-weight:600; font-size:13px; cursor:pointer; transition:all var(--t-fast); }
+.mt-btn:hover { background:var(--teal); color:white; border-color:var(--teal); }
+.mt-btn-primary { background:var(--teal); color:white; border-color:var(--teal); }
+
+.mt-main { flex:1; display:flex; overflow:hidden; }
+.mt-content { flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; }
+
+.mt-manual { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.mt-controls { display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1.5px solid var(--border-dim); background:var(--bg-panel); flex-wrap:wrap; }
+.mt-control-group { display:flex; align-items:center; gap:8px; }
+.mt-control-label { font-size:11px; font-weight:700; color:var(--fg-muted); text-transform:uppercase; }
+.mt-pill { padding:4px 10px; border-radius:var(--r-pill); background:var(--bg-base); border:1px solid var(--border-dim); font-size:11px; color:var(--fg-secondary); font-family:var(--font-mono); }
+.mt-action-buttons { display:flex; gap:6px; margin-left:auto; }
+.mt-action-btn { padding:6px 12px; border:1.5px solid var(--border-dim); border-radius:var(--r-md); background:var(--bg-raised); color:var(--fg-primary); font-weight:600; font-size:11px; cursor:pointer; transition:all var(--t-fast); }
+.mt-action-btn:hover { background:var(--teal); color:white; border-color:var(--teal); }
+
+.mt-charts { flex:1; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:12px; padding:12px; overflow:auto; }
+.mt-chart-box { background:var(--bg-panel); border:1.5px solid var(--border-dim); border-radius:var(--r-md); padding:12px; display:flex; flex-direction:column; min-height:0; }
+.mt-chart-title { font-size:11px; font-weight:700; color:var(--fg-muted); text-transform:uppercase; margin-bottom:8px; }
+.mt-chart-canvas { flex:1; }
+
+.mt-codelab { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px; overflow:hidden; }
+.mt-editor-pane, .mt-results-pane { display:flex; flex-direction:column; min-height:0; }
+.mt-pane-title { font-size:11px; font-weight:700; color:var(--fg-muted); text-transform:uppercase; margin-bottom:8px; }
+.mt-editor-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+.mt-editor { flex:1; display:flex; flex-direction:column; background:var(--bg-elevated); border:1.5px solid var(--border-dim); border-radius:var(--r-md); overflow:hidden; }
+.mt-textarea { flex:1; padding:12px; background:var(--bg-elevated); color:var(--fg-primary); font-family:var(--font-mono); font-size:12px; border:none; outline:none; resize:none; line-height:1.5; }
+
+.mt-run-btn { padding:10px 20px; background:var(--teal); color:white; border:none; border-radius:var(--r-md); font-weight:600; font-size:12px; cursor:pointer; transition:all var(--t-fast); }
+.mt-run-btn:hover { background:#4aa77b; }
+.mt-run-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+.mt-results { flex:1; display:flex; flex-direction:column; background:var(--bg-panel); border:1.5px solid var(--border-dim); border-radius:var(--r-md); overflow:hidden; }
+.mt-chart-small { flex:1; }
+.mt-stats { padding:12px; background:var(--bg-raised); border-top:1.5px solid var(--border-dim); font-size:11px; color:var(--fg-secondary); display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.mt-stat-item { padding:6px; background:var(--bg-base); border-radius:var(--r-md); }
+.mt-stat-label { font-weight:700; color:var(--fg-muted); text-transform:uppercase; font-size:9px; }
+.mt-stat-val { font-family:var(--font-mono); font-weight:700; color:var(--fg-bright); margin-top:2px; }
+
+.mt-trade-log { flex:0 0 120px; background:var(--bg-elevated); border-top:1.5px solid var(--border-dim); overflow-y:auto; padding:8px; font-size:10px; font-family:var(--font-mono); }
+.mt-trade-log-entry { padding:4px; margin-bottom:2px; border-radius:var(--r-md); }
+.mt-trade-log-long { background:rgba(77,186,136,0.2); color:var(--green); }
+.mt-trade-log-short { background:rgba(212,114,138,0.2); color:var(--red); }
+.mt-trade-log-flat { background:rgba(204,148,56,0.2); color:var(--amber); }
+
+.mt-status { height:28px; padding:0 12px; background:var(--bg-raised); border-top:1.5px solid var(--border-dim); display:flex; align-items:center; gap:16px; font-size:11px; color:var(--fg-secondary); }
+.mt-status-item { display:flex; align-items:center; gap:6px; }
+.mt-status-val { font-family:var(--font-mono); font-weight:700; color:var(--fg-bright); }
+
+.mt-select, .mt-input { padding:6px 10px; background:var(--bg-raised); border:1.5px solid var(--border-dim); border-radius:var(--r-md); color:var(--fg-primary); font-family:var(--font-mono); font-size:12px; }
+.mt-select:focus, .mt-input:focus { outline:none; border-color:var(--teal); }
 </style>
 </head>
-<body>
-<nav class="lx-nav">
-  <a href="index.html" class="nav-logo">LeXie</a>
-  <span class="sep">|</span>
-  <a href="momentum-trainer.html" style="color:var(--fg-primary);font-weight:600">🚀 Momentum Trainer</a>
-  <span class="sep">·</span>
-  <a href="spread-trader.html">Spread</a>
-  <a href="price-war.html">Price War</a>
-  <a href="regime-rider.html">Regime</a>
-  <a href="terminal.html">Terminal</a>
-  <div class="nav-right"><a href="api-reference.html" class="nav-pill">📖 API Ref</a></div>
-</nav>
-<div class="mode-bar">
-  <div class="mode-tab active" id="tab-manual" onclick="switchMode('manual')">🖱 Manual</div>
-  <div class="mode-tab" id="tab-code" onclick="switchMode('code')">💻 Code Lab</div>
-  <a href="api-reference.html#momentum" class="api-link">📖 API Reference</a>
-</div>
-<div class="workspace">
+<body data-desk="momentum-trainer">
 
-<!-- MANUAL MODE -->
-<div id="manual-mode">
-  <div class="manual-top">
-    <select class="inst-select" id="inst-select" onchange="resetManual()">
-      <option value="spx">SPX (Trend)</option>
-      <option value="ndx">NDX (Tech)</option>
-      <option value="hy">HY Credit</option>
-      <option value="em">EM Equity</option>
-      <option value="btc">BTC (Crypto)</option>
-    </select>
-    <div class="stat-pill" id="sp-cross">SMA <span class="sv" id="cross-val">—</span></div>
-    <div class="stat-pill" id="sp-mom">1M Ret <span class="sv" id="mom-val">—</span></div>
-    <div class="stat-pill" id="sp-pos">Pos <span class="sv" id="pos-val">FLAT</span></div>
-    <div class="stat-pill" id="sp-pnl">PnL <span class="sv" id="pnl-val">$0</span></div>
-    <button class="btn-sm btn-long"  id="btn-long"  onclick="manualTrade('LONG')"  disabled>▲ Long</button>
-    <button class="btn-sm btn-short" id="btn-short" onclick="manualTrade('SHORT')" disabled>▼ Short</button>
-    <button class="btn-sm btn-flat"  id="btn-flat"  onclick="manualTrade('FLAT')"  disabled>✕ Flat</button>
-    <button class="btn-sm" style="margin-left:auto;background:var(--bg-raised);border:1px solid var(--border-dim);color:var(--fg-primary)" onclick="resetManual()">↺ Reset</button>
-  </div>
-  <div class="manual-body">
-    <div class="chart-panel"><div class="chart-label">Price + SMA(10) + SMA(30)</div><div class="chart-canvas-wrap"><canvas id="c-price"></canvas></div></div>
-    <div class="chart-panel"><div class="chart-label">Momentum (20-bar)</div><div class="chart-canvas-wrap"><canvas id="c-mom"></canvas></div></div>
-    <div class="chart-panel"><div class="chart-label">SMA Crossover Signal</div><div class="chart-canvas-wrap"><canvas id="c-cross"></canvas></div></div>
-    <div class="chart-panel"><div class="chart-label">Equity Curve</div><div class="chart-canvas-wrap"><canvas id="c-equity-m"></canvas></div></div>
+<div class="mt-header">
+  <a href="index.html" class="mt-logo"><span style="font-size:18px">🚀</span> LeXie</a>
+  <div class="mt-sep"></div>
+  <div class="mt-title">Momentum Trainer</div>
+  <div class="mt-spacer"></div>
+  <div class="mt-nav">
+    <a href="spread-trader.html">Spread Trader</a>
+    <a href="price-war.html">Price War</a>
+    <a href="regime-rider.html">Regime Rider</a>
+    <a href="terminal.html">Terminal</a>
+    <a href="api-reference.html" style="color:var(--teal)">📖 API Ref</a>
   </div>
 </div>
 
-<!-- CODE MODE -->
-<div id="code-mode" style="display:none">
-  <div class="editor-pane">
-    <div class="pane-header">
-      <span class="pane-title">Strategy Code</span>
-      <select class="inst-select" id="code-inst" style="padding:4px 8px;font-size:12px">
-        <option value="spx">SPX</option>
-        <option value="ndx">NDX</option>
-        <option value="hy">HY Credit</option>
-        <option value="em">EM Equity</option>
-        <option value="btc">BTC</option>
-      </select>
-      <button class="run-btn" onclick="runCodeStrategy()">▶ Run</button>
+<div class="mt-main">
+  <div class="mt-content">
+    <div id="introScreen" class="mt-intro">
+      <div class="mt-intro-card">
+        <div class="mt-intro-icon">🚀</div>
+        <div class="mt-intro-title">Momentum Trainer</div>
+        <div class="mt-intro-subtitle">Capture trends with SMA crossover momentum strategies</div>
+
+        <div class="mt-howto">
+          <div class="mt-howto-item"><strong>Track SMAs</strong> — fast (10) vs slow (30) period moving averages</div>
+          <div class="mt-howto-item"><strong>Cross above:</strong> when SMA10 > SMA30, enter LONG</div>
+          <div class="mt-howto-item"><strong>Cross below:</strong> when SMA10 < SMA30, exit to FLAT</div>
+          <div class="mt-howto-item"><strong>Filter by momentum</strong> — only trade when 20-bar momentum confirms</div>
+        </div>
+
+        <div class="mt-instrument-selector">
+          <div class="mt-instrument-label">Select Instrument:</div>
+          <select id="instrumentSelect" class="mt-instrument-select">
+            <option value="SPX">SPX — S&P 500 (large cap equity)</option>
+            <option value="NDX">NDX — Nasdaq-100 (tech-heavy)</option>
+            <option value="HY">HY — High-yield bonds</option>
+            <option value="EM">EM — Emerging markets</option>
+            <option value="BTC">BTC — Bitcoin (crypto)</option>
+          </select>
+        </div>
+
+        <div class="mt-buttons">
+          <button class="mt-btn mt-btn-primary" onclick="startGame('manual')">🖱 Manual Trading</button>
+          <button class="mt-btn" onclick="startGame('codelab')">💻 Code Lab</button>
+        </div>
+      </div>
     </div>
-    <div class="template-bar">
-      <span class="tmpl-label">Load:</span>
-      <button class="tmpl-btn" onclick="loadTemplate('sma')">SMA Cross</button>
-      <button class="tmpl-btn" onclick="loadTemplate('mom')">Pure Momentum</button>
-      <button class="tmpl-btn" onclick="loadTemplate('trend')">Trend Filter</button>
-      <button class="tmpl-btn" onclick="loadTemplate('breakout')">Breakout</button>
+
+    <div id="manualMode" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+      <div class="mt-controls">
+        <div class="mt-control-group">
+          <span class="mt-control-label">Instrument:</span>
+          <select id="manualInstrSelect" class="mt-select" onchange="switchInstrument(this.value)">
+            <option value="SPX">SPX</option>
+            <option value="NDX">NDX</option>
+            <option value="HY">HY</option>
+            <option value="EM">EM</option>
+            <option value="BTC">BTC</option>
+          </select>
+        </div>
+        <div class="mt-control-group">
+          <span class="mt-pill" id="pricePill">Price: —</span>
+          <span class="mt-pill" id="smaPill">SMA10/30: —</span>
+          <span class="mt-pill" id="momPill">Momentum: —</span>
+          <span class="mt-pill" id="posPill">Position: —</span>
+        </div>
+        <div class="mt-action-buttons">
+          <button class="mt-action-btn" style="color:var(--green);border-color:var(--green)" onclick="setPosition('LONG')">📈 LONG</button>
+          <button class="mt-action-btn" style="color:var(--amber);border-color:var(--amber)" onclick="setPosition('FLAT')">➖ FLAT</button>
+        </div>
+      </div>
+      <div class="mt-charts">
+        <div class="mt-chart-box">
+          <div class="mt-chart-title">Price + SMA10 + SMA30</div>
+          <canvas id="priceChart" class="mt-chart-canvas"></canvas>
+        </div>
+        <div class="mt-chart-box">
+          <div class="mt-chart-title">20-Bar Momentum %</div>
+          <canvas id="momChart" class="mt-chart-canvas"></canvas>
+        </div>
+        <div class="mt-chart-box">
+          <div class="mt-chart-title">SMA Cross Signal</div>
+          <canvas id="crossChart" class="mt-chart-canvas"></canvas>
+        </div>
+        <div class="mt-chart-box">
+          <div class="mt-chart-title">Equity Curve</div>
+          <canvas id="equityChart" class="mt-chart-canvas"></canvas>
+        </div>
+      </div>
+      <div class="mt-status">
+        <div class="mt-status-item">Bar: <span class="mt-status-val" id="barNum">0</span></div>
+        <div class="mt-status-item">ATR: <span class="mt-status-val" id="atrVal">0.00</span></div>
+        <div class="mt-status-item">Volatility: <span class="mt-status-val" id="volVal">0.00%</span></div>
+        <div class="mt-status-item">Status: <span class="mt-status-val" id="statusVal">Running...</span></div>
+      </div>
     </div>
-    <textarea class="code-editor" id="strategy-code" spellcheck="false"></textarea>
-    <div class="code-error" id="code-error"></div>
-  </div>
-  <div class="results-pane">
-    <div class="pane-header">
-      <span class="pane-title">Simulation</span>
-      <span id="run-status" style="font-size:11px;color:var(--fg-subtle);margin-left:4px">Press ▶ Run</span>
-    </div>
-    <div class="results-charts">
-      <div class="rc-panel"><div class="chart-label">Price + SMA + Signals</div><div class="chart-canvas-wrap"><canvas id="c-code-price"></canvas></div></div>
-      <div class="rc-panel"><div class="chart-label">Equity Curve</div><div class="chart-canvas-wrap"><canvas id="c-code-eq"></canvas></div></div>
-    </div>
-    <div class="stats-bar">
-      <div class="stat-item"><div class="stat-label">Sharpe</div><div class="stat-value neu" id="cs-sharpe">—</div></div>
-      <div class="stat-item"><div class="stat-label">Total PnL</div><div class="stat-value neu" id="cs-pnl">—</div></div>
-      <div class="stat-item"><div class="stat-label">Max DD</div><div class="stat-value neu" id="cs-dd">—</div></div>
-      <div class="stat-item"><div class="stat-label">Trades</div><div class="stat-value neu" id="cs-trades">—</div></div>
-      <div class="stat-item"><div class="stat-label">Win Rate</div><div class="stat-value neu" id="cs-wr">—</div></div>
-      <div class="stat-item"><div class="stat-label">% Time Invested</div><div class="stat-value neu" id="cs-exp">—</div></div>
+
+    <div id="codelabMode" style="display:none;flex:1;overflow:hidden">
+      <div class="mt-codelab">
+        <div class="mt-editor-pane">
+          <div class="mt-editor-header">
+            <span class="mt-control-label">Template:</span>
+            <select id="templateSelect" class="mt-select" onchange="loadTemplate(this.value)">
+              <option value="sma">SMA Cross</option>
+              <option value="momentum">Pure Momentum</option>
+              <option value="trend">Trend Filter</option>
+              <option value="breakout">Breakout</option>
+            </select>
+            <button class="mt-run-btn" id="runBtn" onclick="runSimulation()">▶ Run</button>
+          </div>
+          <div class="mt-editor">
+            <textarea id="codeEditor" class="mt-textarea" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div class="mt-results-pane">
+          <div class="mt-pane-title">Simulation Results</div>
+          <div class="mt-results">
+            <canvas id="resultsChart" class="mt-chart-small"></canvas>
+            <div class="mt-trade-log" id="tradeLog"></div>
+          </div>
+          <div class="mt-stats" id="statsDisplay"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-</div>
-<script src="lexie-core.js"></script>
+<script src="instruments.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+
 <script>
-const INSTS={
-  spx: {name:'SPX', drift:0.0003, sigma:0.012, initPrice:4500, color:'#4dba88', regimes:[{len:60,drift:0.0006,sigma:0.008},{len:40,drift:-0.001,sigma:0.02},{len:80,drift:0.0004,sigma:0.010},{len:60,drift:-0.0005,sigma:0.018},{len:60,drift:0.0007,sigma:0.009}]},
-  ndx:  {name:'NDX', drift:0.0004, sigma:0.016, initPrice:15000,color:'#60a5fa', regimes:[{len:50,drift:0.0008,sigma:0.010},{len:50,drift:-0.0015,sigma:0.025},{len:80,drift:0.0006,sigma:0.012},{len:60,drift:0.0009,sigma:0.011},{len:60,drift:-0.0003,sigma:0.016}]},
-  hy:   {name:'HY',  drift:0.0001, sigma:0.006, initPrice:100,  color:'#f59e0b', regimes:[{len:80,drift:0.0002,sigma:0.004},{len:40,drift:-0.0008,sigma:0.012},{len:80,drift:0.0003,sigma:0.005},{len:40,drift:-0.0006,sigma:0.010},{len:60,drift:0.0002,sigma:0.005}]},
-  em:   {name:'EM',  drift:0.0002, sigma:0.014, initPrice:1200, color:'#c084fc', regimes:[{len:60,drift:0.0005,sigma:0.010},{len:50,drift:-0.001,sigma:0.020},{len:80,drift:0.0004,sigma:0.012},{len:50,drift:-0.0008,sigma:0.018},{len:60,drift:0.0006,sigma:0.011}]},
-  btc:  {name:'BTC', drift:0.0005, sigma:0.030, initPrice:45000,color:'#fb923c', regimes:[{len:40,drift:0.002,sigma:0.020},{len:30,drift:-0.003,sigma:0.045},{len:60,drift:0.001,sigma:0.025},{len:40,drift:-0.002,sigma:0.040},{len:80,drift:0.0015,sigma:0.022}]},
-};
-const NB=300;
+let currentInstrument = 'SPX';
+let currentMode = null;
+let manualGame = null;
 
-function sma(arr,n,i){if(i<n-1)return null;const s=arr.slice(i-n+1,i+1);return s.reduce((a,b)=>a+b,0)/n;}
+function generateGBMData(instrument, bars = 300) {
+  const params = {
+    SPX: { mu: 0.08, sigma: 0.14 },
+    NDX: { mu: 0.12, sigma: 0.18 },
+    HY: { mu: 0.04, sigma: 0.08 },
+    EM: { mu: 0.09, sigma: 0.16 },
+    BTC: { mu: 0.15, sigma: 0.35 }
+  };
 
-function genData(cfg){
-  const prices=[cfg.initPrice];
-  const regimes=cfg.regimes||[];
-  let bar=0,ri=0,rbar=0;
-  const rLabel=[];
-  for(let i=1;i<NB;i++){
-    if(regimes.length&&rbar>=regimes[ri%regimes.length].len){ri++;rbar=0;}
-    const r=regimes.length?regimes[ri%regimes.length]:{drift:cfg.drift,sigma:cfg.sigma};
-    rbar++;
-    const ret=r.drift+(Math.random()+Math.random()-1)*r.sigma*1.414;
-    prices.push(Math.max(prices[i-1]*Math.exp(ret),1));
-    rLabel.push(ri);
+  const p = params[instrument] || params.SPX;
+  let price = 100;
+  const prices = [];
+
+  for (let i = 0; i < bars; i++) {
+    const z = Math.random() * 2 - 1;
+    const dlog = p.mu / 252 + p.sigma / Math.sqrt(252) * z;
+    price *= Math.exp(dlog);
+    prices.push(price);
   }
-  // Compute indicators
-  const sma10=prices.map((_,i)=>sma(prices,10,i));
-  const sma30=prices.map((_,i)=>sma(prices,30,i));
-  const mom20=prices.map((_,i)=>i<20?null:(prices[i]/prices[i-20]-1));
-  const crossSig=prices.map((_,i)=>{
-    if(sma10[i]==null||sma30[i]==null)return 0;
-    return sma10[i]>sma30[i]?1:-1;
-  });
-  return{prices,sma10,sma30,mom20,crossSig};
-}
 
-function getTC(){const d=document.documentElement.getAttribute('data-theme')!=='light';return{grid:d?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.06)',text:d?'#6a6058':'#8a8070',bg:d?'#0f0e0c':'#faf8f5',axis:d?'#3a3530':'#d0c8bc'};}
+  // Compute SMAs, momentum, ATR
+  const sma10 = [], sma30 = [], mom20 = [], atr20 = [];
 
-function drawMulti(canvas,series,opts={}){
-  const ctx=canvas.getContext('2d');
-  const W=canvas.offsetWidth,H=canvas.offsetHeight;
-  if(!W||!H)return;
-  canvas.width=W;canvas.height=H;
-  const tc=getTC();
-  const p={t:6,b:22,l:52,r:6};
-  const w=W-p.l-p.r,h=H-p.t-p.b;
-  ctx.fillStyle=tc.bg;ctx.fillRect(0,0,W,H);
-  const all=series.filter(s=>s&&s.length);
-  if(!all.length)return;
-  let yMin=Infinity,yMax=-Infinity;
-  all.forEach(s=>s.forEach(v=>{if(v!=null&&isFinite(v)){if(v<yMin)yMin=v;if(v>yMax)yMax=v;}}));
-  if(opts.yMin!==undefined)yMin=opts.yMin;
-  const yr=yMax-yMin||1;
-  const n=all[0].length;
-  const toX=i=>p.l+i*(w/Math.max(n-1,1));
-  const toY=v=>p.t+h-((v-yMin)/yr)*h;
-  const colors=opts.colors||['#4dba88','#60a5fa','#f59e0b','#c084fc'];
-  ctx.strokeStyle=tc.grid;ctx.lineWidth=1;
-  for(let g=0;g<=4;g++){const y=p.t+(g/4)*h;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+w,y);ctx.stroke();const val=yMax-(g/4)*yr;ctx.fillStyle=tc.text;ctx.font='9px Inter,sans-serif';ctx.textAlign='right';const fmt=opts.fmt||(v=>v.toFixed(2));ctx.fillText(fmt(val),p.l-3,y+3);}
-  if(opts.zeroLine&&yMin<0&&yMax>0){const y0=toY(0);ctx.strokeStyle=tc.axis;ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(p.l,y0);ctx.lineTo(p.l+w,y0);ctx.stroke();ctx.setLineDash([]);}
-  // Background shading for signals
-  if(opts.sigs){
-    let prev=0;
-    for(let i=0;i<n;i++){
-      const s=opts.sigs[i]||0;
-      if(s!==prev){
-        if(s===1){ctx.fillStyle='rgba(34,197,94,0.06)';}
-        else if(s===-1){ctx.fillStyle='rgba(239,68,68,0.06)';}
-        if(s!==0){const x1=toX(i),x2=i<n-1?toX(n-1):toX(i);ctx.fillRect(x1,p.t,x2-x1,h);}
-        prev=s;
-      }
+  for (let i = 0; i < bars; i++) {
+    if (i >= 9) {
+      const s10 = prices.slice(i - 9, i + 1).reduce((a, b) => a + b) / 10;
+      sma10.push(s10);
+    } else {
+      sma10.push(prices[i]);
+    }
+
+    if (i >= 29) {
+      const s30 = prices.slice(i - 29, i + 1).reduce((a, b) => a + b) / 30;
+      sma30.push(s30);
+    } else {
+      sma30.push(prices[i]);
+    }
+
+    if (i >= 19) {
+      const ret = (prices[i] - prices[i - 20]) / prices[i - 20] * 100;
+      mom20.push(ret);
+    } else {
+      mom20.push(0);
+    }
+
+    if (i >= 19) {
+      const high = Math.max(...prices.slice(i - 19, i + 1));
+      const low = Math.min(...prices.slice(i - 19, i + 1));
+      atr20.push((high - low) / prices[i] * 100);
+    } else {
+      atr20.push(0);
     }
   }
-  all.forEach((s,si)=>{ctx.strokeStyle=colors[si%colors.length];ctx.lineWidth=si===0?1.5:1;ctx.setLineDash(si>0?[3,3]:[]);ctx.beginPath();let started=false;s.forEach((v,i)=>{if(v==null||!isFinite(v))return;if(!started){ctx.moveTo(toX(i),toY(v));started=true;}else ctx.lineTo(toX(i),toY(v));});ctx.stroke();ctx.setLineDash([]);});
-  (opts.markers||[]).forEach(({i,type})=>{if(i>=n)return;const x=toX(i),y=toY(all[0][i]||yMin);ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=type==='LONG'?'#22c55e':type==='SHORT'?'#ef4444':'#f59e0b';ctx.fill();});
+
+  return { prices, sma10, sma30, mom20, atr20 };
 }
 
-// Manual
-let M={data:null,pos:0,entry:0,pnl:0,equity:[0],cfg:null};
-let mTick=null,mBar=40;
+function startGame(mode) {
+  currentInstrument = document.getElementById('instrumentSelect').value;
+  currentMode = mode;
+  document.getElementById('introScreen').style.display = 'none';
 
-function resetManual(){
-  clearInterval(mTick);
-  const cfg=INSTS[document.getElementById('inst-select').value];
-  M={data:genData(cfg),pos:0,entry:0,pnl:0,equity:[0],cfg};
-  mBar=40;
-  updateUI();
-  mTick=setInterval(()=>{
-    if(mBar>=NB-1){clearInterval(mTick);return;}
-    mBar++;
-    const uP=M.pos!==0?(M.data.prices[mBar]-M.entry)*M.pos*10:0;
-    M.equity.push(M.pnl+uP);
-    updateUI();renderCharts();
-  },500);
+  if (mode === 'manual') {
+    document.getElementById('manualMode').style.display = 'flex';
+    startManualGame();
+  } else {
+    document.getElementById('codelabMode').style.display = 'flex';
+    initCodeLab();
+  }
 }
 
-function manualTrade(a){
-  if(!M.data)return;
-  const p=M.data.prices[mBar];
-  if(a==='LONG'&&M.pos===0){M.pos=1;M.entry=p;}
-  else if(a==='SHORT'&&M.pos===0){M.pos=-1;M.entry=p;}
-  else if(a==='FLAT'&&M.pos!==0){M.pnl+=(p-M.entry)*M.pos*10;M.pos=0;M.entry=0;}
-  updateUI();
-}
+class ManualGame {
+  constructor(instrument) {
+    this.instrument = instrument;
+    const data = generateGBMData(instrument);
+    Object.assign(this, data);
 
-function updateUI(){
-  if(!M.data)return;
-  const d=M.data,i=mBar;
-  const s10=d.sma10[i],s30=d.sma30[i],m=d.mom20[i];
-  const cross=s10&&s30?s10>s30?'SMA10 > SMA30 ▲':'SMA10 < SMA30 ▼':'—';
-  const p=d.prices[i];
-  const uP=M.pos!==0?(p-M.entry)*M.pos*10:0,tot=M.pnl+uP;
-  document.getElementById('cross-val').textContent=cross;
-  document.getElementById('sp-cross').className='stat-pill'+(s10&&s30?(s10>s30?' pos':' neg'):'');
-  document.getElementById('mom-val').textContent=m!=null?(m>=0?'+':''+(m*100).toFixed(1)+'%'):'—';
-  document.getElementById('sp-mom').className='stat-pill'+(m!=null?(m>0?' pos':' neg'):'');
-  document.getElementById('pos-val').textContent=M.pos===1?'LONG':M.pos===-1?'SHORT':'FLAT';
-  document.getElementById('pnl-val').textContent=(tot>=0?'+':'')+'$'+tot.toFixed(0);
-  document.getElementById('sp-pnl').className='stat-pill'+(tot>0?' pos':tot<0?' neg':'');
-  document.getElementById('btn-long').disabled=M.pos!==0;
-  document.getElementById('btn-short').disabled=M.pos!==0;
-  document.getElementById('btn-flat').disabled=M.pos===0;
-}
+    this.bar = 0;
+    this.position = 0;
+    this.entryPrice = null;
+    this.pnl = 0;
+    this.equity = [10000];
+    this.trades = [];
 
-function renderCharts(){
-  if(!M.data)return;
-  const d=M.data,n=mBar+1;
-  drawMulti(document.getElementById('c-price'),[d.prices.slice(0,n),d.sma10.slice(0,n),d.sma30.slice(0,n)],{colors:[M.cfg.color,'#f59e0b','#60a5fa'],fmt:v=>v.toFixed(0),sigs:d.crossSig.slice(0,n)});
-  const momViz=d.mom20.slice(0,n).map(v=>v==null?0:v*100);
-  drawMulti(document.getElementById('c-mom'),[momViz],{colors:['#c084fc'],zeroLine:true,fmt:v=>v.toFixed(1)+'%'});
-  drawMulti(document.getElementById('c-cross'),[d.crossSig.slice(0,n)],{colors:['#4dba88'],zeroLine:true,yMin:-1.2});
-  drawMulti(document.getElementById('c-equity-m'),[M.equity],{colors:[M.pnl>=0?'#22c55e':'#ef4444'],zeroLine:true,fmt:v=>'$'+v.toFixed(0)});
-}
-
-// Templates
-const T={
-sma:`// Momentum Trainer — SMA Crossover Strategy
-// ctx object available each bar:
-//   ctx.price    — current price
-//   ctx.sma_fast — fast SMA (default: 10 bars)
-//   ctx.sma_slow — slow SMA (default: 30 bars)
-//   ctx.mom_20   — 20-bar momentum (return, e.g. 0.05 = +5%)
-//   ctx.mom_5    — 5-bar momentum
-//   ctx.pos      — position: +1 long, -1 short, 0 flat
-//   ctx.bar      — current bar index
-//   ctx.atr      — 20-bar ATR (average true range)
-//   ctx.high, ctx.low — 20-bar rolling high/low
-//
-// Return: 'LONG' | 'SHORT' | 'FLAT' | 'HOLD'
-
-const FAST = 10;   // fast SMA period
-const SLOW = 30;   // slow SMA period
-
-function signal(ctx) {
-  const { sma_fast, sma_slow, pos } = ctx;
-
-  if (sma_fast == null || sma_slow == null) return 'HOLD';
-
-  const bullish = sma_fast > sma_slow;
-  const bearish = sma_fast < sma_slow;
-
-  if (bullish && pos <= 0) return 'LONG';    // cross up → go long
-  if (bearish && pos >= 0) return 'SHORT';   // cross down → go short
-
-  return 'HOLD';
-}`,
-mom:`// Pure Momentum — enter on strong recent returns
-
-const MOM_THRESH = 0.04;   // 4% 20-bar momentum to go long
-const EXIT_THRESH = -0.01; // exit if momentum turns negative
-
-function signal(ctx) {
-  const { mom_20, mom_5, pos } = ctx;
-
-  if (mom_20 == null) return 'HOLD';
-
-  if (pos === 0) {
-    if (mom_20 >  MOM_THRESH) return 'LONG';
-    if (mom_20 < -MOM_THRESH) return 'SHORT';
-  } else if (pos === 1) {
-    // Exit long if short-term momentum fades
-    if (mom_5 != null && mom_5 < EXIT_THRESH) return 'FLAT';
-  } else if (pos === -1) {
-    if (mom_5 != null && mom_5 > -EXIT_THRESH) return 'FLAT';
+    this.charts = { price: null, mom: null, cross: null, equity: null };
+    this.running = true;
+    this.tickTimer = null;
+    this.initCharts();
+    this.start();
   }
 
-  return 'HOLD';
-}`,
-trend:`// Trend Filter — only trade when longer trend aligns
+  initCharts() {
+    const ctx1 = document.getElementById('priceChart').getContext('2d');
+    const ctx2 = document.getElementById('momChart').getContext('2d');
+    const ctx3 = document.getElementById('crossChart').getContext('2d');
+    const ctx4 = document.getElementById('equityChart').getContext('2d');
 
-const FAST = 10, SLOW = 30, LONG_TREND = 60;
-var prices = [];  // maintain rolling history manually if needed
+    this.charts.price = new Chart(ctx1, {
+      type: 'line',
+      data: { labels: [], datasets: [
+        { label: 'Price', data: [], borderColor: 'var(--teal)', tension: 0.2 },
+        { label: 'SMA10', data: [], borderColor: 'var(--green)', tension: 0.2 },
+        { label: 'SMA30', data: [], borderColor: 'var(--amber)', tension: 0.2 }
+      ] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top' } } }
+    });
 
-function signal(ctx) {
-  const { sma_fast, sma_slow, mom_20, pos, price } = ctx;
+    this.charts.mom = new Chart(ctx2, {
+      type: 'line',
+      data: { labels: [], datasets: [{ label: 'Momentum', data: [], borderColor: 'var(--coral)', tension: 0.2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
 
-  if (sma_fast == null || sma_slow == null) return 'HOLD';
+    this.charts.cross = new Chart(ctx3, {
+      type: 'line',
+      data: { labels: [], datasets: [
+        { label: 'Spread', data: [], borderColor: 'var(--green)', tension: 0.2 },
+        { label: '0', data: [], borderColor: 'var(--border-mid)', borderDash: [5, 5] }
+      ] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
 
-  // Primary trend: SMA crossover
-  const primary_bull = sma_fast > sma_slow;
-  const primary_bear = sma_fast < sma_slow;
-
-  // Confirm with momentum filter (only trade in direction of momentum)
-  const mom_confirm_bull = mom_20 != null && mom_20 > 0;
-  const mom_confirm_bear = mom_20 != null && mom_20 < 0;
-
-  if (pos === 0) {
-    if (primary_bull && mom_confirm_bull) return 'LONG';
-    if (primary_bear && mom_confirm_bear) return 'SHORT';
-  } else if (pos === 1) {
-    // Exit when primary trend reverses
-    if (primary_bear) return 'FLAT';
-  } else if (pos === -1) {
-    if (primary_bull) return 'FLAT';
+    this.charts.equity = new Chart(ctx4, {
+      type: 'line',
+      data: { labels: [], datasets: [{ label: 'Equity', data: [], borderColor: 'var(--green)', tension: 0.2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
   }
 
-  return 'HOLD';
-}`,
-breakout:`// Breakout Strategy — enter on 20-bar high/low breaks
-
-const HOLD_BARS = 10;  // minimum hold time
-var entryBar = 0;
-
-function signal(ctx) {
-  const { price, high, low, pos, bar, atr } = ctx;
-
-  if (high == null || low == null) return 'HOLD';
-
-  const heldLong = bar - entryBar;
-
-  if (pos === 0) {
-    if (price >= high) { entryBar = bar; return 'LONG';  }  // 20-bar breakout long
-    if (price <= low)  { entryBar = bar; return 'SHORT'; }  // 20-bar breakdown short
-  } else if (pos === 1) {
-    // Exit after hold + if price falls below midpoint
-    if (heldLong > HOLD_BARS && price < (high + low) / 2) return 'FLAT';
-    if (atr != null && price < price - 2 * atr) return 'FLAT'; // trailing stop
-  } else if (pos === -1) {
-    if (heldLong > HOLD_BARS && price > (high + low) / 2) return 'FLAT';
+  start() {
+    this.tickTimer = setInterval(() => this.tick(), 500);
   }
 
+  tick() {
+    if (this.bar >= this.prices.length - 1) {
+      this.stop();
+      return;
+    }
+
+    this.bar++;
+    const sma10 = this.sma10[this.bar];
+    const sma30 = this.sma30[this.bar];
+    const price = this.prices[this.bar];
+
+    // Auto-exit on crossover
+    if (this.position === 1 && sma10 < sma30) {
+      this.closePosition();
+    }
+
+    this.updateCharts();
+    this.updateUI();
+  }
+
+  setPosition(action) {
+    const sma10 = this.sma10[this.bar];
+    const sma30 = this.sma30[this.bar];
+
+    if (action === 'LONG' && this.position !== 1 && sma10 > sma30) {
+      this.position = 1;
+      this.entryPrice = this.prices[this.bar];
+    } else if (action === 'FLAT') {
+      this.closePosition();
+    }
+  }
+
+  closePosition() {
+    if (this.position === 0) return;
+    const exitPrice = this.prices[this.bar];
+    const pnl = (exitPrice - this.entryPrice) / this.entryPrice * 10000;
+    this.trades.push({ bar: this.bar, pnl });
+    this.pnl += pnl;
+    this.position = 0;
+  }
+
+  updateCharts() {
+    const labels = Array.from({length: this.bar + 1}, (_, i) => i);
+
+    this.charts.price.data.labels = labels;
+    this.charts.price.data.datasets[0].data = this.prices.slice(0, this.bar + 1);
+    this.charts.price.data.datasets[1].data = this.sma10.slice(0, this.bar + 1);
+    this.charts.price.data.datasets[2].data = this.sma30.slice(0, this.bar + 1);
+    this.charts.price.update('none');
+
+    this.charts.mom.data.labels = labels;
+    this.charts.mom.data.datasets[0].data = this.mom20.slice(0, this.bar + 1);
+    this.charts.mom.update('none');
+
+    const spread = [];
+    for (let i = 0; i <= this.bar; i++) {
+      spread.push(this.sma10[i] - this.sma30[i]);
+    }
+    this.charts.cross.data.labels = labels;
+    this.charts.cross.data.datasets[0].data = spread;
+    this.charts.cross.data.datasets[1].data = new Array(this.bar + 1).fill(0);
+    this.charts.cross.update('none');
+
+    this.equity.push(10000 + this.pnl);
+    this.charts.equity.data.labels = labels;
+    this.charts.equity.data.datasets[0].data = this.equity;
+    this.charts.equity.update('none');
+  }
+
+  updateUI() {
+    document.getElementById('barNum').textContent = this.bar;
+    document.getElementById('atrVal').textContent = this.atr20[this.bar].toFixed(2);
+    document.getElementById('volVal').textContent = (Math.abs(this.mom20[this.bar])).toFixed(2);
+    document.getElementById('pricePill').textContent = `Price: ${this.prices[this.bar].toFixed(2)}`;
+    document.getElementById('smaPill').textContent = `SMA10/30: ${this.sma10[this.bar].toFixed(2)}/${this.sma30[this.bar].toFixed(2)}`;
+    document.getElementById('momPill').textContent = `Momentum: ${this.mom20[this.bar].toFixed(2)}%`;
+    document.getElementById('posPill').textContent = `Position: ${this.position === 1 ? 'LONG' : 'FLAT'}`;
+  }
+
+  stop() {
+    clearInterval(this.tickTimer);
+    this.running = false;
+    document.getElementById('statusVal').textContent = 'Complete';
+    if (window.LX) {
+      LX.visitDesk('momentum-trainer');
+      LX.addXP(Math.max(50, Math.floor(Math.abs(this.pnl) / 10)));
+      LX.recordRun({ desk: 'momentum-trainer', pnl: this.pnl, sharpe: 0, trades: this.trades.length });
+    }
+  }
+}
+
+function startManualGame() {
+  manualGame = new ManualGame(currentInstrument);
+  document.getElementById('manualInstrSelect').value = currentInstrument;
+}
+
+function switchInstrument(instr) {
+  if (manualGame && manualGame.running) {
+    manualGame.stop();
+  }
+  currentInstrument = instr;
+  manualGame = new ManualGame(instr);
+}
+
+function setPosition(action) {
+  if (manualGame) manualGame.setPosition(action);
+}
+
+const templates = {
+  sma: `function signal(ctx) {
+  if (ctx.sma_fast > ctx.sma_slow && ctx.pos === 0) return 'LONG';
+  if (ctx.sma_fast < ctx.sma_slow && ctx.pos === 1) return 'FLAT';
   return 'HOLD';
-}`};
+}`,
+  momentum: `function signal(ctx) {
+  const mom_strong = ctx.mom_20 > 5;
+  if (ctx.sma_fast > ctx.sma_slow && mom_strong && ctx.pos === 0) return 'LONG';
+  if (ctx.sma_fast < ctx.sma_slow && ctx.pos === 1) return 'FLAT';
+  return 'HOLD';
+}`,
+  trend: `function signal(ctx) {
+  const trend_strength = Math.abs(ctx.sma_fast - ctx.sma_slow) / ctx.price;
+  if (trend_strength > 0.01 && ctx.sma_fast > ctx.sma_slow && ctx.pos === 0) return 'LONG';
+  if (ctx.sma_fast < ctx.sma_slow && ctx.pos === 1) return 'FLAT';
+  return 'HOLD';
+}`,
+  breakout: `function signal(ctx) {
+  const breakout = ctx.price > ctx.high20 * 0.99;
+  if (breakout && ctx.sma_fast > ctx.sma_slow && ctx.pos === 0) return 'LONG';
+  if (ctx.sma_fast < ctx.sma_slow && ctx.pos === 1) return 'FLAT';
+  return 'HOLD';
+}`
+};
 
-function loadTemplate(n){document.getElementById('strategy-code').value=T[n];document.getElementById('code-error').style.display='none';}
+function loadTemplate(name) {
+  document.getElementById('codeEditor').value = templates[name] || templates.sma;
+}
 
-function runCodeStrategy(){
-  const errEl=document.getElementById('code-error');
-  errEl.style.display='none';
-  const code=document.getElementById('strategy-code').value;
-  const cfg=INSTS[document.getElementById('code-inst').value];
-  const data=genData(cfg);
+function initCodeLab() {
+  loadTemplate('sma');
+}
 
-  // Pre-compute extra indicators
-  const atr20=data.prices.map((_,i)=>{
-    if(i<20)return null;
-    const sl=data.prices.slice(i-20,i);
-    const rets=sl.map((v,j)=>j>0?Math.abs(v-sl[j-1]):0).slice(1);
-    return rets.reduce((a,b)=>a+b,0)/rets.length;
+function runSimulation() {
+  const code = document.getElementById('codeEditor').value;
+  let signal;
+
+  try {
+    eval(`signal = ${code.match(/function signal[^}]+}/s)[0]}`);
+  } catch (e) {
+    alert('Code error: ' + e.message);
+    return;
+  }
+
+  const data = generateGBMData(currentInstrument, 300);
+  const results = { pnl: 0, trades: [], equity: [10000], signals: [] };
+
+  let position = 0, entryPrice = 0;
+
+  document.getElementById('tradeLog').innerHTML = '<div style="color:var(--fg-muted)">Running...</div>';
+  document.getElementById('runBtn').disabled = true;
+
+  let bar = 0;
+  const animInterval = setInterval(() => {
+    if (bar >= data.prices.length - 1) {
+      clearInterval(animInterval);
+      finishSimulation(data, results);
+      document.getElementById('runBtn').disabled = false;
+      return;
+    }
+
+    const ctx = {
+      price: data.prices[bar],
+      sma_fast: data.sma10[bar],
+      sma_slow: data.sma30[bar],
+      mom_20: data.mom20[bar],
+      mom_5: bar >= 4 ? (data.prices[bar] - data.prices[bar - 5]) / data.prices[bar - 5] * 100 : 0,
+      atr: data.atr20[bar],
+      high: Math.max(...data.prices.slice(Math.max(0, bar - 19), bar + 1)),
+      low: Math.min(...data.prices.slice(Math.max(0, bar - 19), bar + 1)),
+      pos: position,
+      bar
+    };
+
+    const action = signal(ctx);
+    results.signals.push(action);
+
+    if (action === 'LONG' && position === 0) {
+      position = 1;
+      entryPrice = ctx.price;
+      addTradeLog(`Bar ${bar} · LONG at ${ctx.price.toFixed(2)}`, 'long');
+    } else if (action === 'FLAT' && position === 1) {
+      const pnl = (ctx.price - entryPrice) / entryPrice * 10000;
+      results.pnl += pnl;
+      results.trades.push({ bar, pnl });
+      addTradeLog(`Bar ${bar} · FLAT at ${ctx.price.toFixed(2)}, PnL +$${pnl.toFixed(0)}`, 'flat');
+      position = 0;
+    }
+
+    results.equity.push(10000 + results.pnl);
+    bar++;
+  }, 25);
+}
+
+function addTradeLog(msg, type) {
+  const log = document.getElementById('tradeLog');
+  const entry = document.createElement('div');
+  entry.className = `mt-trade-log-entry mt-trade-log-${type}`;
+  entry.textContent = msg;
+  log.insertBefore(entry, log.firstChild);
+  while (log.children.length > 30) log.removeChild(log.lastChild);
+}
+
+function finishSimulation(data, results) {
+  const ctx = document.getElementById('resultsChart').getContext('2d');
+  if (window.resultsChartInstance) window.resultsChartInstance.destroy();
+
+  window.resultsChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Array.from({length: results.equity.length}, (_, i) => i),
+      datasets: [{ label: 'Equity', data: results.equity, borderColor: 'var(--green)', tension: 0.2 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
   });
-  const roll20h=data.prices.map((_,i)=>i<20?null:Math.max(...data.prices.slice(i-20,i)));
-  const roll20l=data.prices.map((_,i)=>i<20?null:Math.min(...data.prices.slice(i-20,i)));
-  const mom5=data.prices.map((_,i)=>i<5?null:data.prices[i]/data.prices[i-5]-1);
 
-  let fn;
-  try{fn=(new Function(code+'\nreturn signal;'))();if(typeof fn!=='function')throw new Error('signal() not found');}
-  catch(e){errEl.textContent='⚠ '+e.message;errEl.style.display='block';return;}
+  const sharpe = results.trades.length > 0 ? (results.pnl / Math.sqrt(results.trades.length)) : 0;
+  const winRate = results.trades.filter(t => t.pnl > 0).length / Math.max(1, results.trades.length);
 
-  let pos=0,entry=0,pnl=0;
-  const equity=[0],markers=[],trades=[];
-  let wins=0,invested=0;
+  document.getElementById('statsDisplay').innerHTML = `
+    <div class="mt-stat-item"><div class="mt-stat-label">Total PnL</div><div class="mt-stat-val">$${results.pnl.toFixed(0)}</div></div>
+    <div class="mt-stat-item"><div class="mt-stat-label">Trades</div><div class="mt-stat-val">${results.trades.length}</div></div>
+    <div class="mt-stat-item"><div class="mt-stat-label">Sharpe</div><div class="mt-stat-val">${sharpe.toFixed(2)}</div></div>
+    <div class="mt-stat-item"><div class="mt-stat-label">Win Rate</div><div class="mt-stat-val">${(winRate * 100).toFixed(0)}%</div></div>
+  `;
 
-  for(let i=0;i<NB;i++){
-    const ctx={price:data.prices[i],sma_fast:data.sma10[i],sma_slow:data.sma30[i],mom_20:data.mom20[i],mom_5:mom5[i],pos,bar:i,atr:atr20[i],high:roll20h[i],low:roll20l[i]};
-    let act;
-    try{act=fn(ctx);}catch(e){errEl.textContent='⚠ bar '+i+': '+e.message;errEl.style.display='block';return;}
-    const p=data.prices[i];
-    if((act==='LONG'||act==='SHORT')&&pos===0){pos=act==='LONG'?1:-1;entry=p;markers.push({i,type:act});}
-    else if(act==='FLAT'&&pos!==0){const prof=(p-entry)*pos*10;pnl+=prof;if(prof>0)wins++;trades.push(prof);markers.push({i,type:'FLAT'});pos=0;}
-    if(pos!==0)invested++;
-    const uP=pos!==0?(p-entry)*pos*10:0;equity.push(pnl+uP);
+  if (window.LX) {
+    LX.visitDesk('momentum-trainer');
+    LX.addXP(Math.max(100, Math.floor(Math.abs(results.pnl) / 5)));
+    LX.recordRun({ desk: 'momentum-trainer', pnl: results.pnl, sharpe, trades: results.trades.length });
   }
-  if(pos!==0){const prof=(data.prices[NB-1]-entry)*pos*10;pnl+=prof;if(prof>0)wins++;trades.push(prof);}
-
-  const rets=equity.slice(1).map((v,i)=>v-equity[i]);
-  const mu=rets.reduce((a,b)=>a+b,0)/rets.length;
-  const sd=Math.sqrt(rets.reduce((a,b)=>a+(b-mu)**2,0)/rets.length)||1;
-  const sharpe=+(mu/sd*Math.sqrt(252)).toFixed(2);
-  const dd=(()=>{let pk=equity[0],d=0;equity.forEach(v=>{pk=Math.max(pk,v);d=Math.min(d,v-pk);});return d;})();
-  const wr=trades.length?Math.round(wins/trades.length*100):0;
-  const exp=Math.round(invested/NB*100);
-
-  const sv=(id,v,cls)=>{const e=document.getElementById(id);e.textContent=v;e.className='stat-value '+cls;};
-  sv('cs-sharpe',sharpe.toFixed(2),sharpe>0?'pos':'neg');
-  sv('cs-pnl',(pnl>=0?'+':'')+'$'+pnl.toFixed(0),pnl>=0?'pos':'neg');
-  sv('cs-dd','$'+dd.toFixed(0),'neg');
-  sv('cs-trades',trades.length,'neu');
-  sv('cs-wr',wr+'%',wr>=50?'pos':'neg');
-  sv('cs-exp',exp+'%','neu');
-  document.getElementById('run-status').textContent=NB+' bars · '+trades.length+' trades · Sharpe '+sharpe.toFixed(2);
-
-  // Draw price + SMAs + signals
-  drawMulti(document.getElementById('c-code-price'),
-    [data.prices,data.sma10,data.sma30],
-    {colors:[cfg.color,'#f59e0b','#60a5fa'],fmt:v=>v.toFixed(0),markers});
-  drawMulti(document.getElementById('c-code-eq'),[equity],{colors:[pnl>=0?'#22c55e':'#ef4444'],zeroLine:true,fmt:v=>'$'+v.toFixed(0)});
-
-  if(window.LX){LX.visitDesk('momentum-trainer');LX.addXP(Math.max(20,Math.min(150,50+Math.round(sharpe*40))),'Momentum Trainer');LX.recordRun({sharpe,isBacktest:false,desk:'momentum-trainer'});}
 }
-
-function switchMode(m){
-  document.getElementById('manual-mode').style.display=m==='manual'?'flex':'none';
-  document.getElementById('code-mode').style.display=m==='code'?'flex':'none';
-  document.getElementById('tab-manual').className='mode-tab'+(m==='manual'?' active':'');
-  document.getElementById('tab-code').className='mode-tab'+(m==='code'?' active':'');
-  if(m==='code'&&!document.getElementById('strategy-code').value)loadTemplate('sma');
-  if(m==='manual')renderCharts();
-}
-
-window.addEventListener('load',()=>{
-  if(window.LX)LX.visitDesk('momentum-trainer');
-  resetManual();
-  new ResizeObserver(renderCharts).observe(document.querySelector('.manual-body'));
-});
 </script>
+
+<script src="lexie-core.js"></script>
 </body>
 </html>
