@@ -405,6 +405,7 @@ summary.rules-sum{font-size:.78rem;color:var(--dim);cursor:pointer;padding:6px 0
       </div>
     </details>
     <button class="btn-primary" id="btn-start">Start Game →</button>
+    <button class="btn-primary" id="btn-codelab" style="margin-top:8px;background:rgba(102,126,234,.15);border-color:rgba(102,126,234,.4);color:#a5b4fc">💻 Code Lab Mode</button>
   </div>
 </div>
 
@@ -1127,7 +1128,292 @@ document.addEventListener('DOMContentLoaded',()=>{
   setTheme(localStorage.getItem('imc-theme')||'system', false);
 })();
 </script>
-<script src="lexie-core.js"></script>
+<script src="lexie-core.js">
+/* ── Options Outcry Code Lab ── */
+const OO_TEMPLATES = {
+  delta: `function hedge(ctx) {
+  // Delta-neutral hedging: sell/buy stock to zero net delta
+  // Delta > 0 = net long delta (will gain if price rises)
+  // We hedge by shorting stock to eliminate directional exposure
+  
+  const TARGET_DELTA = 0;
+  const HEDGE_THRESHOLD = 0.05; // only re-hedge if delta off by > 0.05
+  
+  const deltaError = ctx.delta - TARGET_DELTA;
+  
+  if(Math.abs(deltaError) < HEDGE_THRESHOLD) {
+    return { stock_delta: 0 }; // delta within tolerance, no action
+  }
+  
+  // Hedge by trading stock (delta 1.0 per share)
+  return { stock_delta: -deltaError };
+}`,
+  gamma: `function hedge(ctx) {
+  // Gamma scalping: delta hedge + exploit gamma
+  // Gamma long positions benefit from large spot moves
+  // Theta eats into P&L — we need moves to overcome time decay
+  
+  const REHEDGE_THRESHOLD = 0.1; // only re-hedge on meaningful delta drift
+  const deltaError = ctx.delta;
+  
+  // Tighter hedging when gamma is high (near expiry / ATM)
+  const threshold = ctx.gamma > 0.02 ? 0.05 : REHEDGE_THRESHOLD;
+  
+  if(Math.abs(deltaError) > threshold) {
+    return { stock_delta: -deltaError };
+  }
+  return { stock_delta: 0 };
+}`,
+  vega: `function hedge(ctx) {
+  // Vega-aware hedging: hedge delta, but adjust based on vol environment
+  // High IV → be aggressive (short gamma hedges are expensive)  
+  // Low IV → be patient (let delta run, collect more gamma)
+  
+  const volBand = ctx.iv < 0.20 ? 0.15 : ctx.iv < 0.35 ? 0.08 : 0.04;
+  
+  if(Math.abs(ctx.delta) > volBand) {
+    // Partial hedge: leave some delta on for gamma
+    const targetDelta = ctx.delta > 0 ? volBand/2 : -volBand/2;
+    return { stock_delta: -(ctx.delta - targetDelta) };
+  }
+  return { stock_delta: 0 };
+}`
+};
+
+function ooSetTpl(name) {
+  document.getElementById('oo-code').value = OO_TEMPLATES[name] || '';
+}
+
+function runOOCodeLab() {
+  const code = document.getElementById('oo-code').value.trim();
+  const errEl = document.getElementById('oo-error');
+  errEl.style.display = 'none';
+  
+  let hedgeFn;
+  try {
+    hedgeFn = (new Function(code + '\nreturn hedge;'))();
+    if(typeof hedgeFn !== 'function') throw new Error('hedge function not found');
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  // Simulation params
+  const BARS = 200;
+  const S0 = 100, K = 100, T0 = 30/365, r = 0.05, sig0 = 0.25;
+  const NOTIONAL = 100; // 1 contract = 100 shares
+  
+  // GBM spot path
+  let lcg = 42;
+  function rng() {
+    lcg = (lcg * 1664525 + 1013904223) | 0;
+    const u = ((lcg>>>0)/4294967296)+1e-10;
+    lcg = (lcg * 1664525 + 1013904223) | 0;
+    const v = ((lcg>>>0)/4294967296)+1e-10;
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+  }
+  
+  // Vol regime switching
+  let spotPrices = [S0];
+  let ivPath = [sig0];
+  let vol = sig0;
+  for(let i=1; i<BARS; i++) {
+    const dt = T0/BARS;
+    if(Math.random()<0.02) vol = vol > 0.25 ? 0.18 : 0.32; // regime switch
+    vol = Math.max(0.12, Math.min(0.6, vol + 0.005*rng()));
+    ivPath.push(vol);
+    spotPrices.push(spotPrices[i-1] * Math.exp((r-0.5*vol*vol)*dt + vol*Math.sqrt(dt)*rng()));
+  }
+  
+  let pnl = 0, thetaPnl = 0, gammaPnl = 0;
+  let stockPos = 0, residuals = [];
+  const equityCurve = [0];
+  const logEntries = [];
+  
+  for(let i=0; i<BARS; i++) {
+    const S = spotPrices[i];
+    const T = Math.max(1e-6, T0 - i*T0/BARS);
+    const iv = ivPath[i];
+    const dt = T0/BARS;
+    
+    const delta = bsDelta(S,K,T,r,iv,'C') * NOTIONAL;
+    const gamma = bsGamma(S,K,T,r,iv) * NOTIONAL;
+    const vega = bsVega(S,K,T,r,iv) / 100 * NOTIONAL;
+    const theta = bsTheta(S,K,T,r,iv,'C') * NOTIONAL;
+    
+    const netDelta = delta + stockPos; // option delta + stock hedge
+    residuals.push(Math.abs(netDelta));
+    
+    const ctx = {
+      spot: S, delta: netDelta, gamma, vega, theta,
+      iv, bar: i, stock_pos: stockPos
+    };
+    
+    let action = {stock_delta: 0};
+    try { action = hedgeFn(ctx) || {stock_delta:0}; } catch(e) {}
+    
+    const stockTrade = action.stock_delta || 0;
+    
+    // P&L from gamma (spot move effect) + theta decay
+    if(i > 0) {
+      const dS = S - spotPrices[i-1];
+      const gammaPnlThisBar = 0.5 * gamma * dS * dS / S; // gamma P&L
+      const thetaThisBar = theta * dt * 365; // theta in $/day * days
+      thetaPnl += thetaThisBar;
+      gammaPnl += gammaPnlThisBar;
+      pnl += gammaPnlThisBar + thetaThisBar;
+      
+      // Hedge cost (transaction cost ~ 0.01% per trade)
+      if(Math.abs(stockTrade) > 0.01) {
+        pnl -= Math.abs(stockTrade) * S * 0.001;
+        logEntries.push({bar:i, trade:stockTrade, spot:S, delta:netDelta, pnl});
+      }
+    }
+    
+    stockPos += stockTrade;
+    equityCurve.push(pnl);
+  }
+  
+  // Display results
+  const avgResidual = residuals.reduce((s,v)=>s+v,0)/residuals.length;
+  
+  const pnlEl = document.getElementById('oo-pnl');
+  pnlEl.textContent = (pnl>=0?'+$':'-$') + Math.abs(pnl).toFixed(2);
+  pnlEl.style.color = pnl>=0 ? '#4dba88' : '#c45868';
+  document.getElementById('oo-residual').textContent = avgResidual.toFixed(3);
+  document.getElementById('oo-theta-pnl').textContent = (thetaPnl>=0?'+$':'-$')+Math.abs(thetaPnl).toFixed(2);
+  document.getElementById('oo-gamma-pnl').textContent = (gammaPnl>=0?'+$':'-$')+Math.abs(gammaPnl).toFixed(2);
+  
+  // Draw chart
+  const canvas = document.getElementById('oo-chart');
+  if(canvas && canvas.getContext) {
+    const ctx2 = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth || 340;
+    canvas.height = 120;
+    const W2=canvas.width, H2=canvas.height;
+    ctx2.clearRect(0,0,W2,H2);
+    ctx2.fillStyle='rgba(5,8,16,.5)'; ctx2.fillRect(0,0,W2,H2);
+    const mn=Math.min(...equityCurve), mx=Math.max(...equityCurve);
+    const range=mx-mn||1;
+    const pts=equityCurve.map((v,i)=>({x:i/(equityCurve.length-1)*W2, y:H2-((v-mn)/range)*(H2-10)-5}));
+    ctx2.beginPath();
+    ctx2.strokeStyle=pnl>=0?'#9d60ff':'#c45868'; ctx2.lineWidth=2;
+    pts.forEach((p,i)=>i===0?ctx2.moveTo(p.x,p.y):ctx2.lineTo(p.x,p.y));
+    ctx2.stroke();
+    const zeroY=H2-((0-mn)/range)*(H2-10)-5;
+    ctx2.beginPath(); ctx2.strokeStyle='rgba(255,255,255,.2)'; ctx2.setLineDash([4,4]); ctx2.lineWidth=1;
+    ctx2.moveTo(0,zeroY); ctx2.lineTo(W2,zeroY); ctx2.stroke(); ctx2.setLineDash([]);
+  }
+  
+  // Animate log
+  const log = document.getElementById('oo-log');
+  log.innerHTML = '';
+  let li = 0;
+  function addLog() {
+    if(li >= logEntries.length) {
+      const xp = Math.max(20, Math.min(150, Math.round(50 + pnl/10)));
+      if(window.LX) {
+        LX.visitDesk('options-outcry');
+        LX.addXP(xp, 'Options Code Lab');
+        LX.recordRun({sharpe: pnl/50, desk:'options-outcry', isBacktest:true});
+      }
+      return;
+    }
+    const e = logEntries[li++];
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;';
+    div.style.color = e.trade>0 ? '#4dba88' : '#c45868';
+    div.textContent = '[bar='+e.bar+'] '+(e.trade>0?'BUY ':'SELL ')+Math.abs(e.trade).toFixed(2)+
+      ' shares @ $'+e.spot.toFixed(2)+' | Δ='+e.delta.toFixed(3)+' | P&L: '+(e.pnl>=0?'+$':'-$')+Math.abs(e.pnl).toFixed(2);
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    setTimeout(addLog, 40);
+  }
+  addLog();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-codelab').addEventListener('click', () => {
+    showScreen('codelab');
+    if(!document.getElementById('oo-code').value) {
+      document.getElementById('oo-code').value = OO_TEMPLATES.delta;
+    }
+  });
+});
+</script>
+
+
+<!-- ══════════════════ DELTA HEDGER CODE LAB ══════════════════ -->
+<div id="screen-codelab" class="screen" style="flex-direction:column;padding:0;min-height:100vh">
+  <nav class="suite-nav" style="position:sticky;top:0;z-index:10">
+    <button onclick="showScreen('setup')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px">← Back</button>
+    <span class="cur" style="margin-left:auto">Options Outcry — Code Lab: Delta Hedger</span>
+  </nav>
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;max-width:1200px;margin:0 auto;padding:24px 32px;width:100%">
+    <!-- Editor -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)">
+          <span style="font-size:11px;color:var(--dim)">📄 hedge.js</span>
+          <div style="flex:1"></div>
+          <button onclick="ooSetTpl('delta')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--dim);font-size:11px;cursor:pointer">Delta Neutral</button>
+          <button onclick="ooSetTpl('gamma')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--dim);font-size:11px;cursor:pointer">Gamma Scalp</button>
+          <button onclick="ooSetTpl('vega')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--dim);font-size:11px;cursor:pointer">Vega Hedge</button>
+          <button onclick="runOOCodeLab()" style="margin-left:8px;padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#9d60ff,#7c4dff);color:#fff;font-size:13px;font-weight:700;cursor:pointer">▶ Run Backtest</button>
+        </div>
+        <textarea id="oo-code" spellcheck="false" style="width:100%;min-height:320px;background:rgba(5,8,16,.9);color:#c9b8ff;border:none;padding:16px;font-family:'DM Mono','JetBrains Mono',monospace;font-size:13px;line-height:1.65;resize:vertical;outline:none;tab-size:2"></textarea>
+      </div>
+      <div id="oo-error" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px;font-size:12px;color:#f87171;font-family:monospace;display:none"></div>
+      <!-- API -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">hedge(ctx) API — called each bar</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:11px">
+          <code style="color:#c9b8ff">ctx.spot</code><span style="color:var(--dim)">current underlying price</span>
+          <code style="color:#c9b8ff">ctx.delta</code><span style="color:var(--dim)">portfolio net delta (sensitivity to spot)</span>
+          <code style="color:#c9b8ff">ctx.gamma</code><span style="color:var(--dim)">portfolio net gamma (delta acceleration)</span>
+          <code style="color:#c9b8ff">ctx.vega</code><span style="color:var(--dim)">portfolio net vega (vol sensitivity × 1%)</span>
+          <code style="color:#c9b8ff">ctx.theta</code><span style="color:var(--dim)">portfolio theta (daily time decay in $)</span>
+          <code style="color:#c9b8ff">ctx.iv</code><span style="color:var(--dim)">implied vol (annualised, e.g. 0.25 = 25%)</span>
+          <code style="color:#c9b8ff">ctx.bar</code><span style="color:var(--dim)">current bar index (0–199)</span>
+          <code style="color:#c9b8ff">ctx.stock_pos</code><span style="color:var(--dim)">current stock hedge position (shares)</span>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--dim)">↩ Return: <code style="color:#c9b8ff">{ stock_delta: number }</code> — how many shares to add/sell to hedge delta</div>
+      </div>
+    </div>
+    <!-- Results -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:10px">📊 Hedging Performance</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="oo-pnl" style="font-size:22px;font-weight:800;color:#9d60ff">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Total P&L ($)</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="oo-residual" style="font-size:22px;font-weight:800;color:#e8f0fe">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Avg |Δ| Residual</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="oo-theta-pnl" style="font-size:22px;font-weight:800;color:#cc9438">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Theta Collected</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="oo-gamma-pnl" style="font-size:22px;font-weight:800;color:#4dba88">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Gamma P&L</div>
+          </div>
+        </div>
+        <canvas id="oo-chart" height="120" style="width:100%;border-radius:8px"></canvas>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:8px">📝 Hedge Log</div>
+        <div id="oo-log" style="background:rgba(5,8,16,.9);border:1px solid var(--border);border-radius:10px;padding:12px;height:220px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:11px">
+          <span style="color:var(--dim)">// Run backtest to see hedge actions…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
