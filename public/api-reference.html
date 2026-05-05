@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>!function(){var t=localStorage.getItem('lx_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeXie API Reference</title>
+<link rel="stylesheet" href="lx-design.css">
+<style>
+html, body { height:100%; margin:0; }
+body { display:flex; flex-direction:column; background:var(--bg-base); color:var(--fg-primary); }
+
+.api-header { height:52px; flex-shrink:0; display:flex; align-items:center; gap:12px; padding:0 18px; background:var(--bg-header-glass); backdrop-filter:blur(14px); border-bottom:1.5px solid var(--border-dim); z-index:100; }
+.api-logo { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--fg-bright); font-weight:800; font-size:15px; }
+.api-logo:hover { color:var(--teal); }
+
+.api-main { flex:1; display:flex; overflow:hidden; }
+.api-sidebar { width:200px; flex-shrink:0; background:var(--bg-panel); border-right:1.5px solid var(--border-dim); overflow-y:auto; position:sticky; top:0; }
+.api-sidebar-item { display:block; padding:10px 14px; color:var(--fg-secondary); text-decoration:none; font-size:12px; border-left:2px solid transparent; transition:all var(--t-fast); }
+.api-sidebar-item:hover { background:var(--bg-raised); color:var(--fg-primary); }
+.api-sidebar-item.active { border-left-color:var(--teal); color:var(--teal); background:rgba(77,186,136,0.1); }
+
+.api-content { flex:1; overflow-y:auto; padding:24px; max-width:900px; }
+.api-section { margin-bottom:40px; scroll-margin-top:80px; }
+.api-section-title { font-size:24px; font-weight:800; color:var(--fg-bright); margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid var(--border-dim); }
+.api-subsection { margin-bottom:24px; }
+.api-subsection-title { font-size:15px; font-weight:700; color:var(--fg-primary); margin-bottom:10px; }
+.api-code-block { background:var(--bg-elevated); border:1.5px solid var(--border-dim); border-radius:var(--r-md); padding:14px; margin:12px 0; overflow-x:auto; font-family:var(--font-mono); font-size:11px; color:var(--fg-secondary); line-height:1.6; }
+.api-code-keyword { color:var(--teal); font-weight:700; }
+.api-code-string { color:var(--amber); }
+.api-code-comment { color:var(--fg-subtle); font-style:italic; }
+.api-desc { font-size:13px; color:var(--fg-secondary); line-height:1.7; margin-bottom:12px; }
+.api-props { background:var(--bg-panel); border:1.5px solid var(--border-dim); border-radius:var(--r-md); padding:14px; margin:12px 0; }
+.api-prop { margin-bottom:12px; }
+.api-prop:last-child { margin-bottom:0; }
+.api-prop-name { color:var(--teal); font-family:var(--font-mono); font-weight:700; font-size:12px; }
+.api-prop-type { color:var(--coral); font-size:11px; }
+.api-prop-desc { color:var(--fg-secondary); font-size:12px; margin-top:4px; }
+
+.api-back { display:inline-block; margin-bottom:24px; padding:8px 12px; background:var(--bg-raised); border:1.5px solid var(--border-dim); border-radius:var(--r-md); color:var(--fg-primary); text-decoration:none; font-size:12px; transition:all var(--t-fast); }
+.api-back:hover { background:var(--teal); color:white; border-color:var(--teal); }
+</style>
+</head>
+<body>
+
+<div class="api-header">
+  <a href="index.html" class="api-logo">📖 LeXie API Reference</a>
+</div>
+
+<div class="api-main">
+  <div class="api-sidebar">
+    <a href="#spread-trader" class="api-sidebar-item active">Spread Trader</a>
+    <a href="#momentum-trainer" class="api-sidebar-item">Momentum Trainer</a>
+    <a href="#price-war" class="api-sidebar-item">Price War</a>
+    <a href="#regime-rider" class="api-sidebar-item">Regime Rider</a>
+    <a href="#bot-builder" class="api-sidebar-item">Bot Builder</a>
+    <a href="#arbitrage-sprint" class="api-sidebar-item">Arbitrage Sprint</a>
+    <a href="#basket-blitz" class="api-sidebar-item">Basket Blitz</a>
+    <a href="#options-outcry" class="api-sidebar-item">Options Outcry</a>
+    <a href="#cmi-challenge" class="api-sidebar-item">CMI Challenge</a>
+    <a href="#quant-relay" class="api-sidebar-item">Quant Relay</a>
+    <a href="#alpha-factory" class="api-sidebar-item">Alpha Factory</a>
+  </div>
+
+  <div class="api-content">
+    <a href="index.html" class="api-back">← Back to Lobby</a>
+
+    <!-- SPREAD TRADER -->
+    <div id="spread-trader" class="api-section">
+      <div class="api-section-title">⚖️ Spread Trader</div>
+      <div class="api-subsection">
+        <div class="api-subsection-title">signal(ctx) → string</div>
+        <div class="api-desc">Entry/exit decisions for co-integrated pair trading. Called each bar to determine position.</div>
+        
+        <div class="api-subsection-title">Context Object (ctx)</div>
+        <div class="api-props">
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.zscore</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">30-bar rolling z-score of the spread. Values > 2 mean overvalued, < -2 mean undervalued.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.spread</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Raw spread (log price difference) between pair A and B.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.priceA, ctx.priceB</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Current prices of both legs in the pair.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.pos</div>
+            <div class="api-prop-type">number (1/-1/0)</div>
+            <div class="api-prop-desc">Current position: 1=LONG, -1=SHORT, 0=FLAT.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.bar</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Current bar index (0 to 299).</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.beta, ctx.pairA, ctx.pairB</div>
+            <div class="api-prop-type">number / string</div>
+            <div class="api-prop-desc">Hedge ratio (beta) and pair names.</div>
+          </div>
+        </div>
+
+        <div class="api-subsection-title">Return Values</div>
+        <div class="api-props">
+          <div class="api-prop">
+            <div class="api-prop-name">'LONG_SPREAD'</div>
+            <div class="api-prop-desc">Enter long: buy spread A, short spread B.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">'SHORT_SPREAD'</div>
+            <div class="api-prop-desc">Enter short: sell spread A, buy spread B.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">'FLAT'</div>
+            <div class="api-prop-desc">Close any open position.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">'HOLD'</div>
+            <div class="api-prop-desc">Maintain current position.</div>
+          </div>
+        </div>
+
+        <div class="api-subsection-title">Example</div>
+        <div class="api-code-block"><span class="api-code-keyword">function</span> signal(ctx) {
+  <span class="api-code-keyword">if</span> (ctx.zscore &lt; -2 &amp;&amp; ctx.pos === 0) <span class="api-code-keyword">return</span> <span class="api-code-string">'LONG_SPREAD'</span>;
+  <span class="api-code-keyword">if</span> (ctx.zscore &gt; 2 &amp;&amp; ctx.pos === 0) <span class="api-code-keyword">return</span> <span class="api-code-string">'SHORT_SPREAD'</span>;
+  <span class="api-code-keyword">if</span> (ctx.pos === 1 &amp;&amp; ctx.zscore &gt; 0.5) <span class="api-code-keyword">return</span> <span class="api-code-string">'FLAT'</span>;
+  <span class="api-code-keyword">return</span> <span class="api-code-string">'HOLD'</span>;
+}</div>
+      </div>
+    </div>
+
+    <!-- MOMENTUM TRAINER -->
+    <div id="momentum-trainer" class="api-section">
+      <div class="api-section-title">🚀 Momentum Trainer</div>
+      <div class="api-subsection">
+        <div class="api-subsection-title">signal(ctx) → string</div>
+        <div class="api-desc">Trend-following decisions based on SMA crossover and momentum confirmation.</div>
+        
+        <div class="api-subsection-title">Context Object (ctx)</div>
+        <div class="api-props">
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.price</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Current price.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.sma_fast (SMA10), ctx.sma_slow (SMA30)</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">10 and 30-period simple moving averages.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.mom_20, ctx.mom_5</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">20-bar and 5-bar momentum percentages.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.atr</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">20-bar average true range as % of price.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.high, ctx.low</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">20-bar high and low prices.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.pos, ctx.bar</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Position (1=LONG, 0=FLAT) and bar index.</div>
+          </div>
+        </div>
+
+        <div class="api-subsection-title">Return Values</div>
+        <div class="api-props">
+          <div class="api-prop">
+            <div class="api-prop-name">'LONG'</div>
+            <div class="api-prop-desc">Enter long position.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">'FLAT'</div>
+            <div class="api-prop-desc">Exit position.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">'HOLD'</div>
+            <div class="api-prop-desc">Maintain current position.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICE WAR -->
+    <div id="price-war" class="api-section">
+      <div class="api-section-title">🎯 Price War</div>
+      <div class="api-subsection">
+        <div class="api-subsection-title">quote(ctx) → { bid, ask } | { half_spread_bps, skew_factor }</div>
+        <div class="api-desc">Quote two-sided prices in a market-making simulation. Called each bar.</div>
+        
+        <div class="api-subsection-title">Context Object (ctx)</div>
+        <div class="api-props">
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.mid</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Current mid price.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.vol</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">20-bar realized volatility (%).</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.inventory</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Current net position (units). Max 100.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.inventory_limit</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Max allowed inventory (100).</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.bar</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Current bar index (0-199).</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.last_buy_vol, ctx.last_sell_vol</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Recent order flow (units).</div>
+          </div>
+        </div>
+
+        <div class="api-subsection-title">Return Values</div>
+        <div class="api-props">
+          <div class="api-prop">
+            <div class="api-prop-name">{ bid: 99.95, ask: 100.05 }</div>
+            <div class="api-prop-desc">Explicit bid/ask prices.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">{ half_spread_bps: 5, skew_factor: 0.8 }</div>
+            <div class="api-prop-desc">Shorthand: spread in basis points, skew left (skew &lt; 1) or right.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGIME RIDER -->
+    <div id="regime-rider" class="api-section">
+      <div class="api-section-title">🌐 Regime Rider</div>
+      <div class="api-subsection">
+        <div class="api-subsection-title">allocate(ctx) → { SPX: %, NDX: %, BONDS: %, CASH: % }</div>
+        <div class="api-desc">Allocate portfolio based on regime detection. Allocation should sum to 100%.</div>
+        
+        <div class="api-subsection-title">Context Object (ctx)</div>
+        <div class="api-props">
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.regime</div>
+            <div class="api-prop-type">string</div>
+            <div class="api-prop-desc">'BULL' | 'NEUTRAL' | 'BEAR' based on market signals.</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.equity_returns, ctx.bond_returns</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Recent period returns (%).</div>
+          </div>
+          <div class="api-prop">
+            <div class="api-prop-name">ctx.vix</div>
+            <div class="api-prop-type">number</div>
+            <div class="api-prop-desc">Volatility index approximation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOT BUILDER -->
+    <div id="bot-builder" class="api-section">
+      <div class="api-section-title">🤖 Bot Builder</div>
+      <div class="api-subsection">
+        <div class="api-desc">In Bot Builder, you design trading bots by selecting strategy types (Momentum, Mean-Reversion, Market-Making, Adaptive) and configuring parameters (entry threshold, exit threshold, position size, stop loss). The system then evaluates your bot's performance across 3 synthetic markets in a tournament setting.</div>
+      </div>
+    </div>
+
+    <!-- ARBITRAGE SPRINT -->
+    <div id="arbitrage-sprint" class="api-section">
+      <div class="api-section-title">🔗 Arbitrage Sprint</div>
+      <div class="api-subsection">
+        <div class="api-desc">Arbitrage Sprint is a timed trading challenge where you identify and exploit mispricings across linked instruments (spot-futures, index arbitrage, convertible arbs). The game presents price mismatches and you decide whether to trade and at what size.</div>
+      </div>
+    </div>
+
+    <!-- BASKET BLITZ -->
+    <div id="basket-blitz" class="api-section">
+      <div class="api-section-title">🧺 Basket Blitz</div>
+      <div class="api-subsection">
+        <div class="api-desc">Basket Blitz challenges you to decompose factor exposure in multi-asset portfolios and hedge residual risk. You analyze correlations and manage tail risk across equities, bonds, and alternatives.</div>
+      </div>
+    </div>
+
+    <!-- OPTIONS OUTCRY -->
+    <div id="options-outcry" class="api-section">
+      <div class="api-section-title">📣 Options Outcry</div>
+      <div class="api-subsection">
+        <div class="api-desc">Options Outcry is a derivatives market simulation where you price and trade vanilla options with live Greeks. Quote bid/ask prices, manage Greeks (delta, gamma, vega), and navigate implied volatility changes.</div>
+      </div>
+    </div>
+
+    <!-- CMI CHALLENGE -->
+    <div id="cmi-challenge" class="api-section">
+      <div class="api-section-title">📂 CMI Challenge</div>
+      <div class="api-subsection">
+        <div class="api-desc">CMI Challenge is a multi-asset book management game. You manage exposures across equities, commodities, and rates with risk limits. Track VaR, notional exposure, and Greeks. Optimize PnL within constraints.</div>
+      </div>
+    </div>
+
+    <!-- QUANT RELAY -->
+    <div id="quant-relay" class="api-section">
+      <div class="api-section-title">🏃 Quant Relay</div>
+      <div class="api-subsection">
+        <div class="api-desc">Quant Relay is a time-boxed research challenge. You work through factor families (value, momentum, quality, low-volatility) and compute alpha signals, information coefficients, and decay rates under time pressure.</div>
+      </div>
+    </div>
+
+    <!-- ALPHA FACTORY -->
+    <div id="alpha-factory" class="api-section">
+      <div class="api-section-title">🧪 Alpha Factory</div>
+      <div class="api-subsection">
+        <div class="api-desc">Alpha Factory lets you mine alternative data signals (sentiment, web traffic, corporate actions) and backtest their predictive power. Measure IC decay and optimize holding periods to maximize information value.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.api-sidebar-item').forEach(link => {
+  link.addEventListener('click', function() {
+    document.querySelectorAll('.api-sidebar-item').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+<script src="lexie-core.js"></script>
+</body>
+</html>
