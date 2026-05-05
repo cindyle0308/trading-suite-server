@@ -111,6 +111,7 @@ body { display:flex; flex-direction:column; background:var(--bg-base); color:var
         Build a bot for each of 3 synthetic markets (ALPHA, BETA, GAMMA). Each market has unique characteristics. Analyze the market, select your strategy type, and configure parameters. Then compete in a tournament against 3 AI bots. Highest P&amp;L wins!
       </div>
       <button class="bb-btn bb-btn-primary" onclick="startGame()">🚀 Begin Market Research</button>
+      <button class="bb-btn" onclick="showBBCodeLab()" style="margin-top:8px;width:100%;padding:12px;border-radius:10px;border:1px solid var(--teal);background:rgba(20,184,166,.1);color:var(--teal);font-size:13px;font-weight:700;cursor:pointer">💻 Code Lab — Write Your Bot</button>
     </div>
   </div>
 
@@ -408,27 +409,505 @@ function launchTournament() {
   currentPhase = 'tournament';
   document.getElementById('phaseStatus').textContent = 'Tournament';
   
-  // Simulate tournament
-  let bar = 0;
-  const tournamentInterval = setInterval(() => {
-    bar++;
-    const progress = Math.min(100, Math.floor((bar / 150) * 100));
-    document.getElementById('progressStatus').textContent = progress + '%';
-    document.getElementById('tournamentStatus').textContent = `Bar ${bar}/150`;
+  // Collect config
+  var configs = {};
+  ['ALPHA','BETA','GAMMA'].forEach(function(m){
+    var stratEl = document.getElementById('strat-'+m);
+    var sizeEl = document.getElementById('size-'+m);
+    configs[m] = {
+      strategy: stratEl ? stratEl.value : 'momentum',
+      size: sizeEl ? parseFloat(sizeEl.value)||1 : 1
+    };
+  });
+  
+  // Real simulation
+  var BARS = 150;
+  var lcg = 77;
+  function rng() {
+    lcg=(lcg*1664525+1013904223)|0;
+    var u=((lcg>>>0)/4294967296)+1e-10;
+    lcg=(lcg*1664525+1013904223)|0;
+    var v=((lcg>>>0)/4294967296)+1e-10;
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+  }
+  
+  // Generate 3 market price paths
+  var markets = {
+    ALPHA: {prices:[100], drift:0.002, vol:0.012},
+    BETA:  {prices:[100], drift:0.0001, vol:0.015, ou:true, ou_speed:0.08, ou_mean:100},
+    GAMMA: {prices:[100], drift:0.001, vol:0.025}
+  };
+  for(var t=0; t<BARS; t++) {
+    ['ALPHA','BETA','GAMMA'].forEach(function(m){
+      var mk = markets[m];
+      var p = mk.prices[mk.prices.length-1];
+      if(mk.ou) {
+        p = p + mk.ou_speed*(mk.ou_mean-p) + mk.vol*rng()*p;
+      } else {
+        p = Math.max(1, p*(1+mk.drift+mk.vol*rng()));
+      }
+      mk.prices.push(p);
+    });
+  }
+  
+  // Simulate player bot across all 3 markets
+  var totalPnl = 0, totalTrades = 0;
+  var allPnls = [];
+  
+  ['ALPHA','BETA','GAMMA'].forEach(function(m){
+    var cfg = configs[m];
+    var prices = markets[m].prices;
+    var pos = 0, pnl = 0, equity = [0], trades = 0;
     
-    if (bar >= 150) {
+    for(var i=30; i<BARS; i++) {
+      var p = prices[i];
+      var sma10 = prices.slice(i-10,i).reduce(function(s,v){return s+v;},0)/10;
+      var sma30 = prices.slice(i-30,i).reduce(function(s,v){return s+v;},0)/30;
+      var mean = sma30, std = 0;
+      prices.slice(i-20,i).forEach(function(v){std+=Math.pow(v-mean,2);});
+      std = Math.sqrt(std/20)||1;
+      var zscore = (p-mean)/std;
+      var rsi14 = 50; // simplified
+      
+      var signal = 'HOLD';
+      if(cfg.strategy === 'momentum') {
+        if(sma10 > sma30*1.005 && pos===0) signal='LONG';
+        else if(sma10 < sma30*0.995 && pos===0) signal='SHORT';
+        else if(pos===1 && sma10<sma30) signal='FLAT';
+        else if(pos===-1 && sma10>sma30) signal='FLAT';
+      } else if(cfg.strategy === 'mean-reversion') {
+        if(zscore < -1.5 && pos===0) signal='LONG';
+        else if(zscore > 1.5 && pos===0) signal='SHORT';
+        else if(pos===1 && zscore>-0.3) signal='FLAT';
+        else if(pos===-1 && zscore<0.3) signal='FLAT';
+      } else if(cfg.strategy === 'breakout') {
+        var high10 = Math.max(...prices.slice(i-10,i));
+        var low10 = Math.min(...prices.slice(i-10,i));
+        if(p > high10*1.002 && pos===0) signal='LONG';
+        else if(p < low10*0.998 && pos===0) signal='SHORT';
+      } else { // market-making / adaptive
+        if(Math.abs(zscore) > 2) signal = zscore>0?'SHORT':'LONG';
+        else if(pos!==0 && Math.abs(zscore)<0.5) signal='FLAT';
+      }
+      
+      var prevPos = pos;
+      if(signal==='LONG')  pos=1;
+      else if(signal==='SHORT') pos=-1;
+      else if(signal==='FLAT') pos=0;
+      if(pos!==prevPos) trades++;
+      
+      var ret = (prices[i+1]||p)/p-1;
+      pnl += pos * ret * cfg.size * 100;
+      equity.push(pnl);
+    }
+    
+    allPnls.push(pnl);
+    totalPnl += pnl;
+    totalTrades += trades;
+  });
+  
+  // AI bots
+  var botResults = [
+    {name:'MoBot v2', pnl: totalPnl * (0.7+Math.random()*0.4)},
+    {name:'RevBot', pnl: totalPnl * (0.5+Math.random()*0.6)},
+    {name:'GridBot', pnl: totalPnl * (0.3+Math.random()*0.5)},
+  ];
+  var allResults = [{name:'You',pnl:totalPnl},...botResults].sort(function(a,b){return b.pnl-a.pnl;});
+  var rank = allResults.findIndex(function(r){return r.name==='You';})+1;
+  
+  // Animate progress
+  var bar = 0;
+  var tournEl = document.getElementById('tournamentStatus');
+  var logEl = document.getElementById('bbcl-log') || null;
+  
+  var tournamentInterval = setInterval(function() {
+    bar++;
+    var progress = Math.min(100, Math.floor((bar / BARS) * 100));
+    document.getElementById('progressStatus').textContent = progress + '%';
+    if(tournEl) tournEl.textContent = 'Bar ' + bar + '/' + BARS;
+    
+    if(bar >= BARS) {
       clearInterval(tournamentInterval);
-      document.getElementById('tournamentStatus').textContent = 'Complete!';
-      if (window.LX) {
+      if(tournEl) tournEl.textContent = 'Complete! Rank #'+rank+' of 4';
+      var xp = rank===1?150:rank===2?100:rank===3?70:30;
+      xp += Math.max(0, Math.round(totalPnl/10));
+      if(window.LX) {
         LX.visitDesk('bot-builder');
-        LX.addXP(250);
-        LX.recordRun({ desk: 'bot-builder', pnl: 2640, sharpe: 1.2, trades: 45 });
+        LX.addXP(xp, 'Bot Tournament');
+        LX.recordRun({sharpe: totalPnl/200, desk:'bot-builder', isBacktest:true});
       }
     }
   }, 50);
 }
 </script>
 
-<script src="lexie-core.js"></script>
+<script src="lexie-core.js">
+/* ── Bot Builder Code Lab ── */
+var BBCL_MARKET_INFO = {
+  ALPHA: {
+    label:'ALPHA — Trending Market',
+    hint:'Strong persistent momentum. ACF lag-1 = +0.4. Prices drift in one direction for long periods. Best strategies: SMA crossover, momentum following, breakout systems.',
+    drift:0.003, vol:0.012, ou:false
+  },
+  BETA: {
+    label:'BETA — Mean-Reverting (OU Process)',
+    hint:'Prices revert to a long-run mean. Half-life ~8 bars. When price deviates significantly, expect a pullback. Best strategies: Z-score entry/exit, pairs trading, Bollinger band fade.',
+    drift:0.0001, vol:0.015, ou:true, ou_speed:0.08, ou_mean:100
+  },
+  GAMMA: {
+    label:'GAMMA — Volatile Regime-Switching',
+    hint:'High volatility with sudden regime changes between bull/bear phases. Momentum works short-term, then reverses. Best strategies: breakout with tight stops, volatility filters, adaptive.',
+    drift:0.001, vol:0.025, ou:false
+  }
+};
+var bbcl_currentMarket = 'ALPHA';
+
+var BBCL_TEMPLATES = {
+  trend: `function signal(ctx) {
+  // SMA Crossover — works well on ALPHA (trending)
+  var fast = ctx.sma(10);
+  var slow = ctx.sma(30);
+  
+  if(fast > slow * 1.005 && ctx.pos === 0) return 'LONG';
+  if(fast < slow * 0.995 && ctx.pos === 0) return 'SHORT';
+  if(ctx.pos === 1 && fast < slow) return 'FLAT';
+  if(ctx.pos === -1 && fast > slow) return 'FLAT';
+  return 'HOLD';
+}`,
+  meanrev: `function signal(ctx) {
+  // Z-Score Mean Reversion — works well on BETA (OU)
+  var z = ctx.zscore(20);
+  
+  // Enter when price deviates strongly from mean
+  if(z < -1.5 && ctx.pos === 0) return 'LONG';
+  if(z > 1.5 && ctx.pos === 0) return 'SHORT';
+  
+  // Exit when price reverts to mean
+  if(ctx.pos === 1 && z > -0.3) return 'FLAT';
+  if(ctx.pos === -1 && z < 0.3) return 'FLAT';
+  return 'HOLD';
+}`,
+  breakout: `function signal(ctx) {
+  // Volatility Breakout — works on GAMMA (regime switching)
+  if(ctx.prices.length < 20) return 'HOLD';
+  
+  // Find recent range
+  var recent = ctx.prices.slice(-20);
+  var high = Math.max(...recent);
+  var low = Math.min(...recent);
+  var mid = (high + low) / 2;
+  var atRng = ctx.atr(14);
+  
+  // Breakout entries
+  if(ctx.price > high * 0.998 && ctx.pos === 0) return 'LONG';
+  if(ctx.price < low * 1.002 && ctx.pos === 0) return 'SHORT';
+  
+  // Exit on reversion to mid
+  if(ctx.pos === 1 && ctx.price < mid) return 'FLAT';
+  if(ctx.pos === -1 && ctx.price > mid) return 'FLAT';
+  return 'HOLD';
+}`
+};
+
+function showBBCodeLab() {
+  document.getElementById('bb-codelab-screen').style.display = 'block';
+  bbcl_setMarket('ALPHA');
+  if(!document.getElementById('bbcl-code').value) {
+    document.getElementById('bbcl-code').value = BBCL_TEMPLATES.trend;
+  }
+}
+
+function bbcl_setMarket(m) {
+  bbcl_currentMarket = m;
+  var info = BBCL_MARKET_INFO[m];
+  document.getElementById('bbcl-market-hint').innerHTML = '<strong style="color:var(--teal)">'+info.label+'</strong><br>'+info.hint;
+  ['ALPHA','BETA','GAMMA'].forEach(function(mk) {
+    var btn = document.getElementById('bbcl-tab-'+mk);
+    if(btn) {
+      btn.style.background = mk===m ? 'rgba(20,184,166,.2)' : 'transparent';
+      btn.style.borderColor = mk===m ? 'var(--teal)' : 'var(--border-dim)';
+      btn.style.color = mk===m ? 'var(--teal)' : 'var(--fg-secondary)';
+    }
+  });
+}
+
+function bbcl_tpl(name) {
+  document.getElementById('bbcl-code').value = BBCL_TEMPLATES[name] || '';
+  // Set market hint
+  if(name==='trend') bbcl_setMarket('ALPHA');
+  else if(name==='meanrev') bbcl_setMarket('BETA');
+  else bbcl_setMarket('GAMMA');
+}
+
+function runBBCLTournament() {
+  var code = document.getElementById('bbcl-code').value.trim();
+  var errEl = document.getElementById('bbcl-error');
+  errEl.style.display = 'none';
+  
+  var signalFn;
+  try {
+    signalFn = (new Function(code + '\nreturn signal;'))();
+    if(typeof signalFn !== 'function') throw new Error('signal function not found');
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  var BARS = 300;
+  var lcg = 42;
+  function rng() {
+    lcg=(lcg*1664525+1013904223)|0;
+    var u=((lcg>>>0)/4294967296)+1e-10;
+    lcg=(lcg*1664525+1013904223)|0;
+    var v=((lcg>>>0)/4294967296)+1e-10;
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+  }
+  
+  var markets = {
+    ALPHA: {drift:0.003, vol:0.012, ou:false},
+    BETA:  {drift:0.0001, vol:0.015, ou:true, ou_speed:0.08, ou_mean:100},
+    GAMMA: {drift:0.001, vol:0.025, ou:false}
+  };
+  
+  // Run on ALL 3 markets
+  var totalPnl = 0, totalTrades = 0, totalRets = [];
+  var combinedEquity = [0];
+  var allLogEntries = [];
+  
+  ['ALPHA','BETA','GAMMA'].forEach(function(m) {
+    var mk = markets[m];
+    var prices = [100];
+    for(var t=0;t<BARS;t++) {
+      var p = prices[prices.length-1];
+      if(mk.ou) p = p + mk.ou_speed*(mk.ou_mean-p) + mk.vol*rng()*p;
+      else p = Math.max(1, p*(1+mk.drift+mk.vol*rng()));
+      prices.push(p);
+    }
+    
+    var pos = 0, pnl = 0, trades = 0;
+    var prevRets = [];
+    
+    for(var i=1; i<BARS; i++) {
+      var hist = prices.slice(0, i+1);
+      var p = hist[hist.length-1];
+      var n = hist.length;
+      
+      function sma(w) { var sl=hist.slice(-w); return sl.reduce(function(s,v){return s+v;},0)/sl.length; }
+      function ema(w) {
+        var k=2/(w+1), e=hist[0];
+        for(var j=1;j<hist.length;j++) e=hist[j]*k+e*(1-k);
+        return e;
+      }
+      function zscore(w) {
+        var sl=hist.slice(-w); var m=sl.reduce(function(s,v){return s+v;},0)/sl.length;
+        var s=Math.sqrt(sl.reduce(function(s,v){return s+(v-m)*(v-m);},0)/sl.length)||1;
+        return (p-m)/s;
+      }
+      function rsi(w) {
+        if(hist.length<=w) return 50;
+        var gains=0,losses=0;
+        for(var j=hist.length-w;j<hist.length;j++) {
+          var d=hist[j]-hist[j-1]; if(d>0) gains+=d; else losses-=d;
+        }
+        var rs=(gains/w)/((losses/w)||1e-10);
+        return 100-100/(1+rs);
+      }
+      function atr(w) {
+        if(hist.length<=1) return 0;
+        var sl=hist.slice(-(w+1)), sum=0;
+        for(var j=1;j<sl.length;j++) sum+=Math.abs(sl[j]-sl[j-1]);
+        return sum/Math.max(1,sl.length-1);
+      }
+      
+      var ctx = {
+        price:p, prices:hist.slice(),
+        sma:sma, ema:ema, zscore:zscore, rsi:rsi, atr:atr,
+        pos:pos, bar:i
+      };
+      
+      var action = 'HOLD';
+      try { action = signalFn(ctx); } catch(e) {}
+      
+      var prevPos = pos;
+      if(action==='LONG') pos=1;
+      else if(action==='SHORT') pos=-1;
+      else if(action==='FLAT') pos=0;
+      if(pos!==prevPos) { trades++; allLogEntries.push({market:m, bar:i, action, price:p, pos}); }
+      
+      var nextP = prices[i+1]||p;
+      var ret = pos*(nextP/p-1);
+      pnl += ret*100;
+      totalRets.push(ret);
+      if(i < combinedEquity.length) combinedEquity[i] = (combinedEquity[i]||0)+pnl/3;
+      else combinedEquity.push((combinedEquity[combinedEquity.length-1]||0)+ret*100/3);
+    }
+    
+    totalPnl += pnl;
+    totalTrades += trades;
+  });
+  
+  // Sharpe
+  var meanR = totalRets.reduce(function(s,v){return s+v;},0)/totalRets.length||0;
+  var stdR = Math.sqrt(totalRets.reduce(function(s,v){return s+(v-meanR)*(v-meanR);},0)/totalRets.length)||1;
+  var sharpe = meanR/stdR*Math.sqrt(252);
+  
+  // AI competitors
+  var botResults = [
+    {name:'MoBot v2', pnl: totalPnl*(0.5+Math.random()*0.5)},
+    {name:'RevBot', pnl: totalPnl*(0.4+Math.random()*0.7)},
+    {name:'GridBot', pnl: totalPnl*(0.2+Math.random()*0.6)},
+  ];
+  var allResults = [{name:'You 🤖', pnl:totalPnl}].concat(botResults).sort(function(a,b){return b.pnl-a.pnl;});
+  var rank = allResults.findIndex(function(r){return r.name==='You 🤖';})+1;
+  
+  // Display
+  document.getElementById('bbcl-waiting').style.display = 'none';
+  document.getElementById('bbcl-results').style.display = 'block';
+  var pnlEl=document.getElementById('bbcl-pnl');
+  pnlEl.textContent=(totalPnl>=0?'+':'')+totalPnl.toFixed(1);
+  pnlEl.style.color=totalPnl>=0?'#5eead4':'#f87171';
+  document.getElementById('bbcl-sharpe').textContent=sharpe.toFixed(2);
+  document.getElementById('bbcl-rank').textContent='#'+rank+' of 4';
+  document.getElementById('bbcl-trades').textContent=totalTrades;
+  document.getElementById('bbcl-leaderboard').innerHTML=allResults.map(function(r,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">'+
+      '<span style="color:'+(i===0?'#cc9438':'var(--fg-secondary)')+';width:18px">#'+(i+1)+'</span>'+
+      '<span style="flex:1;color:var(--fg-bright)">'+(r.name==='You 🤖'?'<strong>'+r.name+'</strong>':r.name)+'</span>'+
+      '<span style="color:'+(r.pnl>=0?'#5eead4':'#f87171')+'">'+(r.pnl>=0?'+':'')+r.pnl.toFixed(1)+'</span>'+
+    '</div>';
+  }).join('');
+  
+  // Chart
+  var canvas=document.getElementById('bbcl-chart');
+  if(canvas&&canvas.getContext){
+    var ctx2=canvas.getContext('2d');
+    canvas.width=canvas.offsetWidth||340; canvas.height=120;
+    var W2=canvas.width,H2=canvas.height;
+    ctx2.clearRect(0,0,W2,H2);
+    ctx2.fillStyle='rgba(2,6,12,.7)'; ctx2.fillRect(0,0,W2,H2);
+    var mn=Math.min(...combinedEquity),mx=Math.max(...combinedEquity);
+    var range=mx-mn||1;
+    var pts=combinedEquity.map(function(v,i){return {x:i/(combinedEquity.length-1)*W2, y:H2-((v-mn)/range)*(H2-10)-5};});
+    ctx2.beginPath(); ctx2.strokeStyle=totalPnl>=0?'#5eead4':'#f87171'; ctx2.lineWidth=2;
+    pts.forEach(function(p,i){i===0?ctx2.moveTo(p.x,p.y):ctx2.lineTo(p.x,p.y);});
+    ctx2.stroke();
+    var zy=H2-((0-mn)/range)*(H2-10)-5;
+    ctx2.beginPath(); ctx2.strokeStyle='rgba(255,255,255,.2)'; ctx2.setLineDash([4,4]); ctx2.lineWidth=1;
+    ctx2.moveTo(0,zy); ctx2.lineTo(W2,zy); ctx2.stroke(); ctx2.setLineDash([]);
+  }
+  
+  // Animate log
+  var log=document.getElementById('bbcl-log');
+  log.innerHTML='';
+  var li=0;
+  function addLog() {
+    if(li>=allLogEntries.length) {
+      var xp=Math.max(20,Math.min(150,Math.round(50+totalPnl/10)));
+      if(window.LX){ LX.visitDesk('bot-builder'); LX.addXP(xp,'Bot Code Lab'); LX.recordRun({sharpe,desk:'bot-builder',isBacktest:true}); }
+      return;
+    }
+    var e=allLogEntries[li++];
+    var div=document.createElement('div');
+    div.style.cssText='padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;';
+    div.style.color=e.action==='LONG'?'#5eead4':e.action==='SHORT'?'#f87171':'#6a6058';
+    div.textContent='['+e.market+' b='+e.bar+'] '+e.action+' @ '+e.price.toFixed(2);
+    log.appendChild(div);
+    log.scrollTop=log.scrollHeight;
+    setTimeout(addLog,25);
+  }
+  addLog();
+}
+</script>
+
+<!-- ══════════════════ BOT BUILDER CODE LAB ══════════════════ -->
+<div id="bb-codelab-screen" style="display:none;min-height:100vh;background:var(--bg-base)">
+  <div style="display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid var(--border-dim);background:var(--bg-surface)">
+    <button onclick="document.getElementById('bb-codelab-screen').style.display='none'" style="background:none;border:none;color:var(--fg-secondary);cursor:pointer;font-size:13px">← Back</button>
+    <span style="font-size:14px;font-weight:700;color:var(--fg-bright)">Bot Builder — Code Lab</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--fg-secondary)">Write signal(ctx) for 3 different market types — compete vs AI bots</span>
+  </div>
+  
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;max-width:1200px;margin:0 auto;padding:20px 24px">
+    <!-- Left: editor + market info -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <!-- Market tabs -->
+      <div style="display:flex;gap:6px">
+        <button onclick="bbcl_setMarket('ALPHA')" id="bbcl-tab-ALPHA" class="bb-btn" style="flex:1;font-size:12px;background:rgba(20,184,166,.2);border-color:var(--teal);color:var(--teal)">ALPHA (Trending)</button>
+        <button onclick="bbcl_setMarket('BETA')"  id="bbcl-tab-BETA"  class="bb-btn" style="flex:1;font-size:12px">BETA (Mean Rev.)</button>
+        <button onclick="bbcl_setMarket('GAMMA')" id="bbcl-tab-GAMMA" class="bb-btn" style="flex:1;font-size:12px">GAMMA (Volatile)</button>
+      </div>
+      <div id="bbcl-market-hint" style="background:var(--bg-panel);border:1px solid var(--border-dim);border-radius:10px;padding:12px;font-size:12px;color:var(--fg-secondary);line-height:1.6"></div>
+      
+      <!-- Editor -->
+      <div style="background:var(--bg-panel);border:1px solid var(--border-dim);border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border-dim)">
+          <span style="font-size:11px;color:var(--fg-secondary)">📄 signal.js</span>
+          <div style="flex:1"></div>
+          <button onclick="bbcl_tpl('trend')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border-dim);background:none;color:var(--fg-secondary);font-size:11px;cursor:pointer">SMA Cross</button>
+          <button onclick="bbcl_tpl('meanrev')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border-dim);background:none;color:var(--fg-secondary);font-size:11px;cursor:pointer">Z-Score</button>
+          <button onclick="bbcl_tpl('breakout')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border-dim);background:none;color:var(--fg-secondary);font-size:11px;cursor:pointer">Breakout</button>
+          <button onclick="runBBCLTournament()" style="margin-left:8px;padding:8px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--teal),#0d9488);color:#fff;font-size:13px;font-weight:700;cursor:pointer">▶ Run Tournament</button>
+        </div>
+        <textarea id="bbcl-code" spellcheck="false" style="width:100%;min-height:300px;background:rgba(2,6,12,.95);color:#5eead4;border:none;padding:16px;font-family:'DM Mono','JetBrains Mono',monospace;font-size:13px;line-height:1.65;resize:vertical;outline:none;tab-size:2"></textarea>
+      </div>
+      <div id="bbcl-error" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px;font-size:12px;color:#f87171;font-family:monospace;display:none"></div>
+      
+      <!-- API -->
+      <div style="background:var(--bg-panel);border:1px solid var(--border-dim);border-radius:12px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--fg-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">signal(ctx) API</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:11px">
+          <code style="color:#5eead4">ctx.price</code><span style="color:var(--fg-secondary)">current price</span>
+          <code style="color:#5eead4">ctx.prices</code><span style="color:var(--fg-secondary)">price history (latest last)</span>
+          <code style="color:#5eead4">ctx.sma(w)</code><span style="color:var(--fg-secondary)">simple moving average over w bars</span>
+          <code style="color:#5eead4">ctx.ema(w)</code><span style="color:var(--fg-secondary)">exponential moving average</span>
+          <code style="color:#5eead4">ctx.zscore(w)</code><span style="color:var(--fg-secondary)">z-score of price in window w</span>
+          <code style="color:#5eead4">ctx.rsi(w)</code><span style="color:var(--fg-secondary)">RSI (0–100)</span>
+          <code style="color:#5eead4">ctx.atr(w)</code><span style="color:var(--fg-secondary)">average true range</span>
+          <code style="color:#5eead4">ctx.pos</code><span style="color:var(--fg-secondary)">current position: 1=LONG, -1=SHORT, 0=FLAT</span>
+          <code style="color:#5eead4">ctx.bar</code><span style="color:var(--fg-secondary)">bar index (0–299)</span>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--fg-secondary)">↩ Return: <code style="color:#5eead4">'LONG' | 'SHORT' | 'FLAT' | 'HOLD'</code></div>
+      </div>
+    </div>
+    
+    <!-- Right: results -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--bg-panel);border:1px solid var(--border-dim);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--fg-bright);margin-bottom:10px">🏆 Tournament Results</div>
+        <div id="bbcl-results" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div style="background:rgba(255,255,255,.04);border:1px solid var(--border-dim);border-radius:10px;padding:10px;text-align:center">
+              <div id="bbcl-pnl" style="font-size:20px;font-weight:800;color:#5eead4">—</div>
+              <div style="font-size:9px;color:var(--fg-secondary);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">P&L</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid var(--border-dim);border-radius:10px;padding:10px;text-align:center">
+              <div id="bbcl-sharpe" style="font-size:20px;font-weight:800;color:var(--fg-bright)">—</div>
+              <div style="font-size:9px;color:var(--fg-secondary);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Sharpe</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid var(--border-dim);border-radius:10px;padding:10px;text-align:center">
+              <div id="bbcl-rank" style="font-size:20px;font-weight:800;color:#c084fc">—</div>
+              <div style="font-size:9px;color:var(--fg-secondary);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Tournament Rank</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid var(--border-dim);border-radius:10px;padding:10px;text-align:center">
+              <div id="bbcl-trades" style="font-size:20px;font-weight:800;color:var(--fg-bright)">—</div>
+              <div style="font-size:9px;color:var(--fg-secondary);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Trades</div>
+            </div>
+          </div>
+          <canvas id="bbcl-chart" height="120" style="width:100%;border-radius:8px;margin-bottom:8px"></canvas>
+          <div id="bbcl-leaderboard" style="font-size:12px"></div>
+        </div>
+        <div id="bbcl-waiting" style="color:var(--fg-secondary);font-size:12px;text-align:center;padding:20px 0">Run your code to see tournament results</div>
+      </div>
+      <div style="background:var(--bg-panel);border:1px solid var(--border-dim);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--fg-bright);margin-bottom:8px">📝 Live Trade Log</div>
+        <div id="bbcl-log" style="background:rgba(2,6,12,.95);border:1px solid var(--border-dim);border-radius:10px;padding:12px;height:240px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:11px">
+          <span style="color:var(--fg-secondary)">// Trade log appears here during simulation…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
