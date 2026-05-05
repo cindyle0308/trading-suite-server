@@ -865,16 +865,116 @@ function runBacktest() {
     output.innerHTML = '<span class="out-err">✗ ' + escHtml(e.message) + '</span>';
     return;
   }
-  output.innerHTML = '<span style="color:var(--dim);">Running backtest on 600 ticks…</span>';
 
-  try {
-    var result = backtestRun(stratFn);
-    var code2 = relayEditor.getValue();
-    var fid = calcFidelity(code2, SPEC);
-    showResults(result, fid);
-  } catch(e) {
-    output.innerHTML = '<span class="out-err">✗ Runtime error: ' + escHtml(e.message) + '</span>';
+  // --- Real-time animated backtest ---
+  var prices = PRICES, volumes = VOLUMES;
+  var cash = 10000, position = 0;
+  var equity = [cash];
+  var trades = 0, wins = 0;
+  var slPct = SPEC.stoploss / 100;
+  var entryPrice = null;
+  var BARS = prices.length;
+  var START_I = 20;
+  var currentI = START_I;
+  var animCanvas = document.getElementById('relay-anim-canvas');
+  var animLog = document.getElementById('relay-anim-log');
+
+  // Show animation area above run-output
+  if (!animCanvas) {
+    var animDiv = document.createElement('div');
+    animDiv.id = 'relay-anim-wrap';
+    animDiv.style.cssText = 'margin:8px 0;border-radius:10px;overflow:hidden;border:1px solid rgba(102,126,234,.3)';
+    animDiv.innerHTML = '<canvas id="relay-anim-canvas" height="80" style="width:100%;display:block;background:rgba(10,22,40,.9)"></canvas>'
+      + '<div id="relay-anim-log" style="background:rgba(5,8,16,.9);padding:8px 10px;height:80px;overflow-y:auto;font-family:monospace;font-size:10px;color:#6a7a90"></div>';
+    output.parentNode.insertBefore(animDiv, output);
+    animCanvas = document.getElementById('relay-anim-canvas');
+    animLog = document.getElementById('relay-anim-log');
+  } else {
+    animLog.innerHTML = '';
   }
+
+  output.innerHTML = '<span style="color:var(--dim);">⏳ Running live…</span>';
+
+  function drawAnimChart() {
+    var W = animCanvas.offsetWidth || 340;
+    animCanvas.width = W; animCanvas.height = 80;
+    var ctx2 = animCanvas.getContext('2d');
+    ctx2.fillStyle='rgba(10,22,40,.9)'; ctx2.fillRect(0,0,W,80);
+    if(equity.length<2) return;
+    var mn=Math.min(...equity), mx=Math.max(...equity), range=mx-mn||1;
+    var col = equity[equity.length-1] >= 10000 ? '#667eea' : '#ef4444';
+    ctx2.beginPath(); ctx2.strokeStyle=col; ctx2.lineWidth=1.5;
+    equity.forEach(function(v,i){
+      var x=i/(BARS-START_I)*W, y=8+(1-(v-mn)/range)*64;
+      i===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+    });
+    ctx2.stroke();
+    // baseline
+    var zy=8+(1-(10000-mn)/range)*64;
+    ctx2.beginPath(); ctx2.strokeStyle='rgba(255,255,255,.15)'; ctx2.setLineDash([3,3]); ctx2.lineWidth=1;
+    ctx2.moveTo(0,zy); ctx2.lineTo(W,zy); ctx2.stroke(); ctx2.setLineDash([]);
+  }
+
+  var animInterval = setInterval(function() {
+    // Process 10 bars per tick for speed
+    for(var step=0; step<10 && currentI < BARS; step++, currentI++) {
+      var ctx3 = makeCtx(prices.slice(0, currentI+1), volumes.slice(0, currentI+1), position, currentI);
+      var sig;
+      try { sig = stratFn(ctx3); } catch(e) { sig = {action:'hold',qty:0}; }
+      if(!sig) sig={action:'hold',qty:0};
+      var qty = Math.min(Math.abs(sig.qty||0),100);
+      var price = prices[currentI];
+
+      if(position!==0 && entryPrice!==null) {
+        var pnlPct=position>0?(price-entryPrice)/entryPrice:(entryPrice-price)/entryPrice;
+        if(pnlPct<-slPct){cash+=position*price;position=0;entryPrice=null;trades++;}
+      }
+      if(sig.action==='buy' && qty>0){
+        var canBuy=Math.min(qty,Math.floor(cash/price));
+        if(canBuy>0&&position+canBuy<=100){
+          var pp=position; cash-=canBuy*price*1.001; position+=canBuy;
+          if(pp<=0&&position>0)entryPrice=price;
+          if(pp<0){wins+=(entryPrice-price)>0?1:0;trades++;entryPrice=position>0?price:null;}
+          // Log entry
+          var ld=document.createElement('div');
+          ld.style.cssText='color:#667eea;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.04)';
+          ld.textContent='[t='+currentI+'] BUY '+canBuy+' @ '+price.toFixed(2)+' | Pos: '+position;
+          animLog.appendChild(ld); animLog.scrollTop=animLog.scrollHeight;
+        }
+      } else if(sig.action==='sell' && qty>0){
+        var canSell=Math.min(qty,position+100);
+        if(canSell>0&&position-canSell>=-100){
+          var pp2=position; cash+=canSell*price*0.999; position-=canSell;
+          if(pp2>0&&position<=0){wins+=(price-entryPrice)>0?1:0;trades++;entryPrice=position<0?price:null;}
+          else if(pp2===0)entryPrice=price;
+          var ld2=document.createElement('div');
+          ld2.style.cssText='color:#ef4444;padding:1px 0;border-bottom:1px solid rgba(255,255,255,.04)';
+          ld2.textContent='[t='+currentI+'] SELL '+canSell+' @ '+price.toFixed(2)+' | Pos: '+position;
+          animLog.appendChild(ld2); animLog.scrollTop=animLog.scrollHeight;
+        }
+      }
+      equity.push(cash+position*price);
+    }
+
+    drawAnimChart();
+    output.innerHTML='<span style="color:var(--dim);">⏳ Bar '+currentI+'/'+BARS+'  Equity: '+(cash+position*(prices[currentI-1]||prices[prices.length-1])).toFixed(0)+'</span>';
+
+    if(currentI >= BARS) {
+      clearInterval(animInterval);
+      if(position!==0) cash+=position*prices[prices.length-1];
+      equity[equity.length-1]=cash;
+
+      var rets=[];
+      for(var j=1;j<equity.length;j++) rets.push((equity[j]-equity[j-1])/equity[j-1]);
+      var sharpe=calcSharpe(rets), maxDD=calcMaxDD(equity);
+      var winRate=trades>0?wins/trades:0, finalPnL=equity[equity.length-1]-10000;
+      var result={equity,sharpe,maxDD,trades,winRate,finalPnL};
+
+      var code2 = relayEditor ? relayEditor.getValue() : '';
+      var fid = calcFidelity(code2, SPEC);
+      setTimeout(function(){ showResults(result, fid); }, 500);
+    }
+  }, 25);
 }
 
 function backtestRun(stratFn) {
