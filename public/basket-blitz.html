@@ -419,6 +419,7 @@ summary.rules-sum::marker{display:none}
       </div>
     </details>
     <button class="btn-primary" id="btn-start">Start Game →</button>
+    <button class="btn-primary" id="btn-codelab" style="margin-top:8px;background:linear-gradient(135deg,#667eea,#5a67d8)">💻 Code Lab Mode</button>
   </div>
 </div>
 
@@ -961,7 +962,301 @@ document.addEventListener('DOMContentLoaded',()=>{
   setTheme(localStorage.getItem('imc-theme')||'system', false);
 })();
 </script>
-<script src="lexie-core.js"></script>
+<script src="lexie-core.js">
+/* ── Basket Blitz Code Lab ── */
+const BB_TEMPLATES = {
+  reactive: `function arbitrage(ctx) {
+  // Reactive: capture when premium crosses threshold
+  const THRESHOLD_BPS = 8; // minimum arb size to capture
+  
+  if(ctx.premium_bps > THRESHOLD_BPS) {
+    return 'SELL_ETF';  // ETF overpriced → sell ETF, buy basket
+  }
+  if(ctx.premium_bps < -THRESHOLD_BPS) {
+    return 'BUY_ETF';   // ETF underpriced → buy ETF, sell basket
+  }
+  return 'HOLD';
+}`,
+  threshold: `function arbitrage(ctx) {
+  // Adaptive threshold: capture only large dislocations
+  const BASE_THRESH = 6;
+  const HIGH_THRESH = 15;
+  
+  // Small premium: wait for it to widen
+  if(Math.abs(ctx.premium_bps) < BASE_THRESH) return 'HOLD';
+  
+  // Large premium: immediate capture
+  if(ctx.premium_bps > HIGH_THRESH) return 'SELL_ETF';
+  if(ctx.premium_bps < -HIGH_THRESH) return 'BUY_ETF';
+  
+  // Medium premium: capture with inventory limit
+  if(ctx.inventory > 0 && ctx.premium_bps < 5) return 'HOLD'; // already long, wait
+  if(ctx.premium_bps > BASE_THRESH) return 'SELL_ETF';
+  if(ctx.premium_bps < -BASE_THRESH) return 'BUY_ETF';
+  return 'HOLD';
+}`,
+  predictive: `function arbitrage(ctx) {
+  // Predictive: use premium momentum to anticipate convergence
+  // Premium > 0 means ETF expensive vs NAV
+  const ENTRY = 7;
+  const EXIT  = 2;
+  
+  // If we have a position, close when premium converges
+  if(ctx.inventory > 0 && ctx.premium_bps < EXIT) return 'BUY_ETF'; // close short
+  if(ctx.inventory < 0 && ctx.premium_bps > -EXIT) return 'SELL_ETF'; // close long
+  
+  // No position: enter on dislocation
+  if(!ctx.inventory) {
+    if(ctx.premium_bps > ENTRY) return 'SELL_ETF';
+    if(ctx.premium_bps < -ENTRY) return 'BUY_ETF';
+  }
+  return 'HOLD';
+}`
+};
+
+function bbSetTpl(name) {
+  document.getElementById('bb-code').value = BB_TEMPLATES[name] || '';
+}
+
+function runBBCodeLab() {
+  const code = document.getElementById('bb-code').value.trim();
+  const errEl = document.getElementById('bb-error');
+  errEl.style.display = 'none';
+  
+  let arbFn;
+  try {
+    arbFn = (new Function(code + '\nreturn arbitrage;'))();
+    if(typeof arbFn !== 'function') throw new Error('arbitrage function not found');
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  // Simulate 300 ticks
+  const TICKS = 300;
+  const W = {APXT:0.4, BLTN:0.35, CREX:0.25};
+  let prices = {APXT:40, BLTN:55, CREX:30};
+  let etfP = 44; // ETF price
+  const seed = Date.now();
+  let lcg = seed;
+  function rng() {
+    lcg = (lcg * 1664525 + 1013904223) | 0;
+    const u = ((lcg >>> 0) / 4294967296);
+    lcg = (lcg * 1664525 + 1013904223) | 0;
+    const v = ((lcg >>> 0) / 4294967296);
+    return Math.sqrt(-2*Math.log(u+1e-10))*Math.cos(2*Math.PI*v);
+  }
+  
+  let pnl = 0, inventory = 0, trades = 0, wins = 0;
+  const equityCurve = [0];
+  const log = document.getElementById('bb-log');
+  const logEntries = [];
+  
+  // Bot competitors (reaction speed in bps threshold)
+  const BOTS = [{name:'SpeedBot', thresh:5}, {name:'ArbiBot', thresh:8}, {name:'LazyBot', thresh:12}];
+  const botPnl = [0,0,0];
+  let botInv = [0,0,0];
+  
+  for(let t=0; t<TICKS; t++) {
+    // Update stocks with GBM
+    for(const s of ['APXT','BLTN','CREX']) {
+      prices[s] = Math.max(5, prices[s] * (1 + 0.0015*rng()));
+    }
+    const nav = W.APXT*prices.APXT + W.BLTN*prices.BLTN + W.CREX*prices.CREX;
+    
+    // ETF price: occasionally dislocates then reverts
+    const dislocation = 0.8*rng(); // random premium
+    etfP = nav * (1 + dislocation*0.012); // up to ~1.2% premium
+    
+    const premiumBps = Math.round((etfP/nav - 1)*10000);
+    
+    const ctx = {
+      nav, etf_price: etfP, premium_bps: premiumBps,
+      inventory, tick: t
+    };
+    
+    let action = 'HOLD';
+    try { action = arbFn(ctx); } catch(e) {}
+    
+    let tradePnl = 0;
+    if(action === 'SELL_ETF' && premiumBps > 0) {
+      // Capture premium: sell overpriced ETF, pnl ~ premium
+      tradePnl = (premiumBps/10000) * nav * 100; // per $100 notional
+      pnl += tradePnl;
+      inventory++;
+      trades++;
+      if(tradePnl > 0) wins++;
+      logEntries.push({t, type:'sell', premiumBps, pnl:tradePnl});
+    } else if(action === 'BUY_ETF' && premiumBps < 0) {
+      tradePnl = Math.abs(premiumBps/10000) * nav * 100;
+      pnl += tradePnl;
+      inventory--;
+      trades++;
+      wins++;
+      logEntries.push({t, type:'buy', premiumBps, pnl:tradePnl});
+    } else if(action !== 'HOLD' && ((action==='SELL_ETF'&&premiumBps<0)||(action==='BUY_ETF'&&premiumBps>0))) {
+      // Wrong direction
+      tradePnl = -0.15 * 100;
+      pnl += tradePnl;
+      trades++;
+      logEntries.push({t, type:'wrong', premiumBps, pnl:tradePnl});
+    }
+    
+    // Bots
+    for(let b=0;b<BOTS.length;b++) {
+      const bot = BOTS[b];
+      if(Math.abs(premiumBps) > bot.thresh && Math.random() < 0.7) {
+        botPnl[b] += Math.abs(premiumBps/10000) * nav * 100 * 0.8;
+      }
+    }
+    
+    equityCurve.push(pnl);
+  }
+  
+  // Render stats
+  const pnlEl = document.getElementById('bb-pnl');
+  pnlEl.textContent = (pnl>=0?'+$':'-$') + Math.abs(pnl).toFixed(2);
+  pnlEl.style.color = pnl>=0 ? '#4dba88' : '#c45868';
+  document.getElementById('bb-trades').textContent = trades;
+  document.getElementById('bb-winrate').textContent = trades>0 ? Math.round(wins/trades*100)+'%' : '—';
+  
+  const allPnls = [pnl, ...botPnl].sort((a,b)=>b-a);
+  const rank = allPnls.indexOf(pnl)+1;
+  document.getElementById('bb-rank').textContent = '#'+rank+' of '+(1+BOTS.length);
+  
+  // Draw equity chart
+  const canvas = document.getElementById('bb-equity-chart');
+  if(canvas && canvas.getContext) {
+    const ctx2 = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth || 340;
+    canvas.height = 120;
+    const W2=canvas.width, H2=canvas.height;
+    ctx2.clearRect(0,0,W2,H2);
+    ctx2.fillStyle='rgba(5,8,16,.5)';
+    ctx2.fillRect(0,0,W2,H2);
+    const mn=Math.min(...equityCurve), mx=Math.max(...equityCurve);
+    const range=mx-mn||1;
+    const pts=equityCurve.map((v,i)=>({x:i/(equityCurve.length-1)*W2, y:H2-((v-mn)/range)*(H2-10)-5}));
+    ctx2.beginPath();
+    ctx2.strokeStyle=pnl>=0?'#4dba88':'#c45868';
+    ctx2.lineWidth=2;
+    pts.forEach((p,i)=>i===0?ctx2.moveTo(p.x,p.y):ctx2.lineTo(p.x,p.y));
+    ctx2.stroke();
+    // Zero line
+    const zeroY=H2-((0-mn)/range)*(H2-10)-5;
+    ctx2.beginPath();
+    ctx2.strokeStyle='rgba(255,255,255,.2)';
+    ctx2.setLineDash([4,4]);
+    ctx2.lineWidth=1;
+    ctx2.moveTo(0,zeroY); ctx2.lineTo(W2,zeroY);
+    ctx2.stroke();
+    ctx2.setLineDash([]);
+  }
+  
+  // Animate log
+  log.innerHTML = '';
+  let li = 0;
+  function addLog() {
+    if(li >= logEntries.length) {
+      // XP
+      const xp = Math.max(20, Math.min(150, Math.round(pnl/2)));
+      if(window.LX) {
+        LX.visitDesk('basket-blitz');
+        LX.addXP(xp, 'Basket Code Lab');
+        LX.recordRun({sharpe: pnl/100, desk:'basket-blitz', isBacktest:true});
+      }
+      return;
+    }
+    const e = logEntries[li++];
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);font-family:'DM Mono',monospace;font-size:11px;';
+    div.style.color = e.type==='sell'?'#4dba88':e.type==='buy'?'#4dba88':e.type==='wrong'?'#c45868':'#6a6058';
+    div.textContent = '[t='+e.t+'] '+(e.type==='sell'?'SELL_ETF':'BUY_ETF')+
+      ' | Premium: '+(e.premiumBps>=0?'+':'')+e.premiumBps+'bps | P&L: '+(e.pnl>=0?'+$':'-$')+Math.abs(e.pnl).toFixed(2);
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    setTimeout(addLog, 30);
+  }
+  addLog();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-codelab').addEventListener('click', () => {
+    showScreen('codelab');
+    if(!document.getElementById('bb-code').value) {
+      document.getElementById('bb-code').value = BB_TEMPLATES.reactive;
+    }
+  });
+});
+</script>
+
+
+<!-- ══════════════════ CODE LAB ══════════════════ -->
+<div id="screen-codelab" class="screen" style="flex-direction:column;padding:0">
+  <nav class="suite-nav" style="position:sticky;top:0;z-index:10">
+    <button onclick="showScreen('setup')" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px">← Back to Setup</button>
+    <span class="cur" style="margin-left:auto">Basket Blitz — Code Lab</span>
+  </nav>
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;max-width:1200px;margin:0 auto;padding:24px 32px;width:100%">
+    <!-- Editor pane -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)">
+          <span style="font-size:11px;color:var(--dim)">📄 arbitrage.js</span>
+          <div style="flex:1"></div>
+          <button onclick="bbSetTpl('reactive')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--dim);font-size:11px;cursor:pointer">Reactive</button>
+          <button onclick="bbSetTpl('threshold')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--dim);font-size:11px;cursor:pointer">Threshold</button>
+          <button onclick="bbSetTpl('predictive')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--dim);font-size:11px;cursor:pointer">Predictive</button>
+          <button onclick="runBBCodeLab()" style="margin-left:8px;padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--green),#37966c);color:#fff;font-size:13px;font-weight:700;cursor:pointer">▶ Run Simulation</button>
+        </div>
+        <textarea id="bb-code" spellcheck="false" style="width:100%;min-height:300px;background:rgba(5,8,16,.9);color:#a8d8a8;border:none;padding:16px;font-family:'DM Mono','JetBrains Mono',monospace;font-size:13px;line-height:1.65;resize:vertical;outline:none;tab-size:2"></textarea>
+      </div>
+      <div id="bb-error" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px;font-size:12px;color:#f87171;font-family:monospace;display:none"></div>
+      <!-- API Reference -->
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">arbitrage(ctx) API</div>
+        <div style="display:flex;gap:8px;margin-bottom:5px"><code style="font-size:11px;color:var(--green);white-space:nowrap">ctx.nav</code><span style="font-size:11px;color:var(--dim)">number — NAV of the basket (APXT×w + BLTN×w + CREX×w)</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:5px"><code style="font-size:11px;color:var(--green);white-space:nowrap">ctx.etf_price</code><span style="font-size:11px;color:var(--dim)">number — current ETF market price (BLX)</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:5px"><code style="font-size:11px;color:var(--green);white-space:nowrap">ctx.premium_bps</code><span style="font-size:11px;color:var(--dim)">number — ETF premium in basis points (+ve = overpriced)</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:5px"><code style="font-size:11px;color:var(--green);white-space:nowrap">ctx.inventory</code><span style="font-size:11px;color:var(--dim)">number — current basket position</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:5px"><code style="font-size:11px;color:var(--green);white-space:nowrap">ctx.tick</code><span style="font-size:11px;color:var(--dim)">number — current bar index</span></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--dim)">↩ Return: <code style="color:var(--green)">'SELL_ETF'</code> | <code style="color:var(--red)">'BUY_ETF'</code> | <code style="color:var(--dim)">'HOLD'</code></div>
+      </div>
+    </div>
+    <!-- Results pane -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:10px">📊 Simulation Results</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="bb-pnl" style="font-size:22px;font-weight:800;color:#4dba88">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">P&L ($)</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="bb-trades" style="font-size:22px;font-weight:800;color:#e8f0fe">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Trades</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="bb-winrate" style="font-size:22px;font-weight:800;color:#cc9438">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Win Rate</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="bb-rank" style="font-size:22px;font-weight:800;color:#667eea">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">vs Bots</div>
+          </div>
+        </div>
+        <canvas id="bb-equity-chart" height="120" style="width:100%;border-radius:8px"></canvas>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:8px">📝 Trade Log</div>
+        <div id="bb-log" style="background:rgba(5,8,16,.9);border:1px solid var(--border);border-radius:10px;padding:12px;height:220px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:11px">
+          <span style="color:var(--dim)">// Run simulation to see trades…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
