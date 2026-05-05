@@ -412,6 +412,7 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:8px 18p
   </div>
   <div style="text-align:center;">
     <button class="btn btn-primary" onclick="beginRound(0)">Start Sprint 🚀</button>
+    <button class="btn btn-secondary" onclick="showArbCodeLab()" style="margin-left:10px">💻 Code Lab</button>
   </div>
 </div>
 
@@ -1102,7 +1103,299 @@ function finalizeR5() {
   setTheme(localStorage.getItem('imc-theme')||'system', false);
 })();
 </script>
-<script src="lexie-core.js"></script>
+<script src="lexie-core.js">
+/* ── Arbitrage Sprint Code Lab ── */
+const ARB_TEMPLATES = {
+  spread: `function captureArb(ctx) {
+  // Fixed spread market making
+  // Buy at bid, sell at ask — capture the spread
+  const SPREAD_THRESHOLD = 5; // min spread in bps to capture
+  const MAX_INV = 10;
+  
+  if(ctx.spread > SPREAD_THRESHOLD) {
+    // Wide spread — take the other side of flow
+    if(ctx.inventory < MAX_INV) return 'BUY';
+    if(ctx.inventory > -MAX_INV) return 'SELL';
+  }
+  
+  // Close out inventory if spread narrows
+  if(ctx.inventory > 3 && ctx.spread < 2) return 'SELL';
+  if(ctx.inventory < -3 && ctx.spread < 2) return 'BUY';
+  return 'HOLD';
+}`,
+  skew: `function captureArb(ctx) {
+  // Inventory-skewed market making
+  // When long, lean ask (sell more); when short, lean bid (buy more)
+  const MAX_INV = 8;
+  const BASE_THRESH = 4;
+  
+  // Adjust aggressiveness based on inventory
+  const invSkew = ctx.inventory / MAX_INV; // -1 to +1
+  
+  // If positive inventory (long), prefer selling
+  if(invSkew > 0.5 && ctx.spread > BASE_THRESH * 0.5) return 'SELL';
+  if(invSkew < -0.5 && ctx.spread > BASE_THRESH * 0.5) return 'BUY';
+  
+  // Normal operation
+  if(ctx.spread > BASE_THRESH) {
+    return ctx.inventory > 0 ? 'SELL' : 'BUY';
+  }
+  return 'HOLD';
+}`,
+  momentum: `function captureArb(ctx) {
+  // Momentum-aware: trade with trend, exit against it
+  const MAX_INV = 10;
+  
+  // Use momentum to pick direction
+  if(ctx.momentum > 0.001 && ctx.inventory < MAX_INV) {
+    return 'BUY';  // uptrend — buy dips
+  }
+  if(ctx.momentum < -0.001 && ctx.inventory > -MAX_INV) {
+    return 'SELL'; // downtrend — sell rallies
+  }
+  
+  // Exit when momentum reverses
+  if(ctx.inventory > 0 && ctx.momentum < -0.0005) return 'SELL';
+  if(ctx.inventory < 0 && ctx.momentum > 0.0005) return 'BUY';
+  return 'HOLD';
+}`
+};
+
+function showArbCodeLab() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('arb-codelab').style.display = 'block';
+  if(!document.getElementById('arb-code').value) {
+    document.getElementById('arb-code').value = ARB_TEMPLATES.spread;
+  }
+}
+
+function arbcl_tpl(name) {
+  document.getElementById('arb-code').value = ARB_TEMPLATES[name] || '';
+}
+
+function runArbCodeLab() {
+  const code = document.getElementById('arb-code').value.trim();
+  const errEl = document.getElementById('arb-error');
+  errEl.style.display = 'none';
+  
+  let arbFn;
+  try {
+    arbFn = (new Function(code + '\nreturn captureArb;'))();
+    if(typeof arbFn !== 'function') throw new Error('captureArb function not found');
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  // Simulate R5-style order book market
+  const TICKS = 120; // 2 min × 1 tick/sec
+  let lcg = 54321;
+  function rng() {
+    lcg=(lcg*1664525+1013904223)|0;
+    const u=((lcg>>>0)/4294967296)+1e-10;
+    lcg=(lcg*1664525+1013904223)|0;
+    const v=((lcg>>>0)/4294967296)+1e-10;
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+  }
+  
+  // Generate mid price path (GBM with occasional jumps)
+  const mids = [100];
+  for(let i=1; i<TICKS; i++) {
+    let dm = 0.0005*rng();
+    // Occasional jump
+    if(Math.random() < 0.05) dm += 0.003*(Math.random()>0.5?1:-1);
+    mids.push(Math.max(90, mids[i-1]*(1+dm)));
+  }
+  
+  let inventory = 0, pnl = 0, fills = 0;
+  const equityCurve = [0];
+  const logEntries = [];
+  const priceHist = [mids[0]];
+  
+  for(let t=0; t<TICKS; t++) {
+    const mid = mids[t];
+    // Generate order book
+    const naturalSpread = 3 + Math.abs(rng()*2); // 3-7 bps
+    const bid = mid * (1 - naturalSpread/20000);
+    const ask = mid * (1 + naturalSpread/20000);
+    const spreadBps = Math.round((ask/bid - 1) * 10000);
+    
+    // Price momentum (last 10 bars)
+    const lookback = Math.min(10, priceHist.length);
+    const momentum = lookback > 1 ? (priceHist[priceHist.length-1] - priceHist[priceHist.length-lookback]) / priceHist[priceHist.length-lookback] : 0;
+    
+    const ctx = {
+      mid, bid, ask, spread: spreadBps,
+      inventory, pnl, tick: t, momentum
+    };
+    
+    let action = 'HOLD';
+    try { action = arbFn(ctx); } catch(e) {}
+    
+    // Execute action
+    let filled = false;
+    if(action === 'BUY') {
+      // Buy at ask (market order)
+      const cost = ask;
+      pnl -= cost;
+      inventory++;
+      fills++;
+      filled = true;
+      logEntries.push({t, action:'BUY', price:ask, inventory, pnl: pnl + inventory*mid});
+    } else if(action === 'SELL') {
+      const proceeds = bid;
+      pnl += proceeds;
+      inventory--;
+      fills++;
+      filled = true;
+      logEntries.push({t, action:'SELL', price:bid, inventory, pnl: pnl + inventory*mid});
+    }
+    
+    // Mark-to-market P&L
+    const mtmPnl = pnl + inventory * mid;
+    equityCurve.push(mtmPnl);
+    priceHist.push(mid);
+  }
+  
+  const finalMid = mids[TICKS-1];
+  const finalPnl = pnl + inventory * finalMid;
+  
+  // Score calculation (R5 style): 
+  // Max 100pts, penalise inventory and reward PnL
+  const invPenalty = Math.abs(inventory) * 3;
+  const score = Math.max(0, Math.min(100, Math.round(50 + finalPnl/2 - invPenalty)));
+  
+  // Display
+  const pnlEl = document.getElementById('arb-pnl');
+  pnlEl.textContent = (finalPnl>=0?'+':'')+finalPnl.toFixed(2);
+  pnlEl.style.color = finalPnl>=0?'#67e8f9':'#f87171';
+  document.getElementById('arb-inv').textContent = (inventory>=0?'+':'')+inventory;
+  document.getElementById('arb-fills').textContent = fills;
+  document.getElementById('arb-score-cl').textContent = score+'/100';
+  
+  // Chart
+  const canvas = document.getElementById('arb-chart');
+  if(canvas && canvas.getContext) {
+    const ctx2 = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth||340; canvas.height=120;
+    const W2=canvas.width,H2=canvas.height;
+    ctx2.clearRect(0,0,W2,H2);
+    ctx2.fillStyle='rgba(5,8,16,.7)'; ctx2.fillRect(0,0,W2,H2);
+    const mn=Math.min(...equityCurve),mx=Math.max(...equityCurve);
+    const range=mx-mn||1;
+    const pts=equityCurve.map((v,i)=>({x:i/(equityCurve.length-1)*W2,y:H2-((v-mn)/range)*(H2-10)-5}));
+    ctx2.beginPath(); ctx2.strokeStyle=finalPnl>=0?'#67e8f9':'#f87171'; ctx2.lineWidth=2;
+    pts.forEach((p,i)=>i===0?ctx2.moveTo(p.x,p.y):ctx2.lineTo(p.x,p.y));
+    ctx2.stroke();
+    const zy=H2-((0-mn)/range)*(H2-10)-5;
+    ctx2.beginPath(); ctx2.strokeStyle='rgba(255,255,255,.2)'; ctx2.setLineDash([4,4]); ctx2.lineWidth=1;
+    ctx2.moveTo(0,zy); ctx2.lineTo(W2,zy); ctx2.stroke(); ctx2.setLineDash([]);
+  }
+  
+  // Animate log
+  const log = document.getElementById('arb-log');
+  log.innerHTML = '';
+  let li = 0;
+  function addLog() {
+    if(li >= logEntries.length) {
+      const xp = Math.max(20, Math.min(150, score*1.5));
+      if(window.LX) {
+        LX.visitDesk('arbitrage-sprint');
+        LX.addXP(Math.round(xp), 'Arb Code Lab');
+        LX.recordRun({sharpe: finalPnl/50, desk:'arbitrage-sprint', isBacktest:true});
+      }
+      return;
+    }
+    const e = logEntries[li++];
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;';
+    div.style.color = e.action==='BUY'?'#67e8f9':'#f87171';
+    div.textContent = '[t='+e.t+'] '+e.action+' @ '+e.price.toFixed(3)+
+      ' | Inv: '+(e.inventory>=0?'+':'')+e.inventory+
+      ' | MtM: '+(e.pnl>=0?'+':'')+e.pnl.toFixed(2);
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    setTimeout(addLog, 30);
+  }
+  addLog();
+}
+</script>
+
+
+<!-- ══════════════════ ARB SPRINT CODE LAB ══════════════════ -->
+<div id="arb-codelab" style="display:none;min-height:100vh;padding:0">
+  <div style="display:flex;align-items:center;gap:12px;padding:12px 28px;border-bottom:1px solid var(--border);background:var(--panel)">
+    <button onclick="document.getElementById('arb-codelab').style.display='none';document.getElementById('setup').style.display=''" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px">← Back to Setup</button>
+    <span style="font-size:14px;font-weight:700;color:var(--text)">Arbitrage Sprint — Code Lab: Live Order Book Bot</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--dim)">Write <code style="color:var(--cyan)">captureArb(ctx)</code> to automate Round 5 market making</span>
+  </div>
+  
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;max-width:1200px;margin:0 auto;padding:20px 28px">
+    <!-- Editor -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--panel);border:1px solid var(--border2);border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border)">
+          <span style="font-size:11px;color:var(--dim)">📄 captureArb.js — R5 Order Book Bot</span>
+          <div style="flex:1"></div>
+          <button onclick="arbcl_tpl('spread')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--dim);font-size:11px;cursor:pointer">Fixed Spread</button>
+          <button onclick="arbcl_tpl('skew')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--dim);font-size:11px;cursor:pointer">Skewed MM</button>
+          <button onclick="arbcl_tpl('momentum')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--dim);font-size:11px;cursor:pointer">Momentum</button>
+          <button onclick="runArbCodeLab()" style="margin-left:8px;padding:8px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--cyan,#06b6d4),#0891b2);color:#fff;font-size:13px;font-weight:700;cursor:pointer">▶ Run Simulation</button>
+        </div>
+        <textarea id="arb-code" spellcheck="false" style="width:100%;min-height:320px;background:rgba(5,8,16,.95);color:#67e8f9;border:none;padding:16px;font-family:'DM Mono','JetBrains Mono',monospace;font-size:13px;line-height:1.65;resize:vertical;outline:none;tab-size:2"></textarea>
+      </div>
+      <div id="arb-error" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px;font-size:12px;color:#f87171;font-family:monospace;display:none"></div>
+      <!-- API box -->
+      <div style="background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">captureArb(ctx) API — called each tick</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:11px">
+          <code style="color:#67e8f9">ctx.mid</code><span style="color:var(--dim)">current mid price</span>
+          <code style="color:#67e8f9">ctx.bid</code><span style="color:var(--dim)">best bid in order book</span>
+          <code style="color:#67e8f9">ctx.ask</code><span style="color:var(--dim)">best ask in order book</span>
+          <code style="color:#67e8f9">ctx.spread</code><span style="color:var(--dim)">current bid-ask spread (bps)</span>
+          <code style="color:#67e8f9">ctx.inventory</code><span style="color:var(--dim)">current net position (shares)</span>
+          <code style="color:#67e8f9">ctx.pnl</code><span style="color:var(--dim)">current unrealised P&L</span>
+          <code style="color:#67e8f9">ctx.tick</code><span style="color:var(--dim)">current tick index</span>
+          <code style="color:#67e8f9">ctx.momentum</code><span style="color:var(--dim)">price momentum (last 10 ticks)</span>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--dim)">↩ Return: <code style="color:#67e8f9">'BUY'</code> | <code style="color:#67e8f9">'SELL'</code> | <code style="color:#67e8f9">'HOLD'</code></div>
+        <div style="margin-top:6px;font-size:11px;color:var(--dim)">Or a quote object: <code style="color:#67e8f9">{ bid_offset: N, ask_offset: N }</code> to place limit orders ±N bps from mid</div>
+      </div>
+    </div>
+    <!-- Results -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">📊 Live Performance</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+            <div id="arb-pnl" style="font-size:20px;font-weight:800;color:#67e8f9">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">P&L</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+            <div id="arb-inv" style="font-size:20px;font-weight:800;color:var(--text)">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Final Inv.</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+            <div id="arb-fills" style="font-size:20px;font-weight:800;color:var(--text)">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Fills</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+            <div id="arb-score-cl" style="font-size:20px;font-weight:800;color:#f59e0b">—</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Score</div>
+          </div>
+        </div>
+        <canvas id="arb-chart" height="120" style="width:100%;border-radius:8px"></canvas>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">📝 Order Flow Log</div>
+        <div id="arb-log" style="background:rgba(5,8,16,.95);border:1px solid var(--border);border-radius:10px;padding:12px;height:240px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:11px">
+          <span style="color:var(--dim)">// Run simulation to see order flow…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
