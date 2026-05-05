@@ -84,6 +84,44 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .alloc-pct{font-size:11px;color:var(--dim);width:38px;text-align:right;flex-shrink:0;}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px;}
+
+/* ── Mode Bar ── */
+.mode-bar{display:flex;align-items:center;gap:6px;padding:10px 32px;background:rgba(6,10,18,.8);border-bottom:1px solid var(--border);position:relative;z-index:5;}
+.mode-tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid transparent;color:var(--dim);transition:all .2s;}
+.mode-tab:hover{color:var(--text);}
+.mode-tab.active{background:rgba(77,186,136,0.15);border-color:rgba(77,186,136,0.35);color:var(--accent);}
+/* Code Lab layout */
+.cl-wrap{display:grid;grid-template-columns:1fr 380px;gap:16px;max-width:1300px;margin:0 auto;padding:24px 32px;}
+.cl-editor-pane{display:flex;flex-direction:column;gap:12px;}
+.cl-editor-box{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.cl-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);}
+.cl-toolbar span{font-size:11px;color:var(--dim);}
+.cl-textarea{width:100%;min-height:320px;background:rgba(5,8,16,.9);color:#a8d8a8;border:none;padding:16px;font-family:'DM Mono','JetBrains Mono',monospace;font-size:13px;line-height:1.65;resize:vertical;outline:none;tab-size:2;}
+.cl-templates{display:flex;gap:6px;flex-wrap:wrap;}
+.cl-tpl-btn{padding:4px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--dim);font-size:11px;cursor:pointer;transition:all .2s;}
+.cl-tpl-btn:hover{background:var(--card2);color:var(--text);}
+.cl-api-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.cl-api-title{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.cl-api-row{display:flex;gap:8px;margin-bottom:6px;align-items:flex-start;}
+.cl-api-key{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);white-space:nowrap;}
+.cl-api-desc{font-size:11px;color:var(--dim);line-height:1.4;}
+.cl-results-pane{display:flex;flex-direction:column;gap:12px;}
+.cl-run-btn{padding:10px 24px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.cl-run-btn:hover{opacity:.9;transform:translateY(-1px);}
+.cl-result-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.cl-result-title{font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:10px;}
+.cl-regime-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.cl-regime-row:last-child{border:none;}
+.cl-regime-name{font-size:12px;color:var(--dim);width:130px;flex-shrink:0;}
+.cl-regime-score{font-size:14px;font-weight:800;width:50px;}
+.cl-regime-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+.cl-regime-bar{height:100%;border-radius:4px;transition:width .6s;}
+.cl-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px;font-size:12px;color:#f87171;font-family:monospace;white-space:pre-wrap;display:none;}
+.cl-trade-log{background:rgba(5,8,16,.9);border:1px solid var(--border);border-radius:10px;padding:12px;height:200px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:11px;}
+.cl-log-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.cl-log-entry.long{color:#4dba88;}
+.cl-log-entry.short{color:#c45868;}
+.cl-log-entry.flat{color:#6a6058;}
 </style>
 </head>
 <body data-desk="regime-rider">
@@ -109,6 +147,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
   <div class="pipe-step" id="step-5">5 Attribution</div>
 </div>
 
+
+<!-- Mode Bar -->
+<div class="mode-bar">
+  <button class="mode-tab active" id="tab-manual" onclick="switchRRMode('manual')">🖱 Manual</button>
+  <button class="mode-tab" id="tab-codelab" onclick="switchRRMode('codelab')">💻 Code Lab</button>
+  <span style="margin-left:auto;font-size:11px;color:var(--dim)">Regime Rider — Code Lab: write <code style="color:var(--accent)">allocate(ctx)</code> to auto-allocate across all regimes</span>
+</div>
+<div id="rr-manual-content">
 <div class="main">
 
 <!-- Step 1: Scenario selection -->
@@ -552,7 +598,298 @@ document.addEventListener('DOMContentLoaded',function(){
   buildScenarioGrid();
   if(window.LX)LX.visitDesk('regime-rider');
 });
+
+/* ── Regime Rider Code Lab ── */
+var RR_TEMPLATES = {
+  momentum: `function allocate(ctx) {
+  // Momentum: chase the best expected returns
+  var returns = ctx.expected_returns;
+  var keys = ctx.instruments;
+  
+  // Sort instruments by expected drift multiplier (higher = better)
+  var sorted = keys.slice().sort(function(a,b){
+    return (ctx.driftMult[b]||1) - (ctx.driftMult[a]||1);
+  });
+  
+  // Top 3 get lion's share, rest minimal
+  var weights = {};
+  keys.forEach(function(k){ weights[k] = 5; });
+  if(sorted[0]) weights[sorted[0]] = 50;
+  if(sorted[1]) weights[sorted[1]] = 30;
+  if(sorted[2]) weights[sorted[2]] = 15;
+  return weights;
+}`,
+  safe: `function allocate(ctx) {
+  // Safe Haven: regime-aware allocation
+  var weights = {};
+  var keys = ctx.instruments;
+  
+  if(ctx.regime === 'RISKOFF') {
+    // Max defensive: bonds + gold
+    keys.forEach(function(k){
+      if(k==='TLT'||k==='US10Y'||k==='BUND') weights[k] = 25;
+      else if(k==='GOLD'||k==='GLD') weights[k] = 20;
+      else weights[k] = 5;
+    });
+  } else if(ctx.regime === 'INFLATION') {
+    // Real assets
+    keys.forEach(function(k){
+      if(k==='GOLD'||k==='OIL'||k==='BRENT') weights[k] = 25;
+      else if(k==='SILVER'||k==='WHEAT') weights[k] = 15;
+      else weights[k] = 5;
+    });
+  } else if(ctx.regime === 'GROWTH') {
+    // Risk-on equities
+    keys.forEach(function(k){
+      if(k==='NDX'||k==='NVDA') weights[k] = 25;
+      else if(k==='SPX'||k==='AAPL') weights[k] = 20;
+      else weights[k] = 10;
+    });
+  } else {
+    // Deflation: bonds + tech
+    keys.forEach(function(k){
+      if(k==='NDX') weights[k] = 30;
+      else if(k==='TLT'||k==='US10Y') weights[k] = 22;
+      else weights[k] = 8;
+    });
+  }
+  
+  // Normalise to 100
+  var total = Object.values(weights).reduce(function(s,v){return s+v;},0);
+  keys.forEach(function(k){ weights[k] = Math.round(weights[k]/total*100); });
+  return weights;
+}`,
+  smart: `function allocate(ctx) {
+  // Smart Beta: weight by drift multiplier squared (convex)
+  var keys = ctx.instruments;
+  var weights = {};
+  
+  // Only go long assets with positive drift
+  var scores = {};
+  var total = 0;
+  keys.forEach(function(k){
+    var dm = ctx.driftMult[k] || 0;
+    scores[k] = dm > 0 ? dm * dm : 0.01; // small floor
+    total += scores[k];
+  });
+  
+  keys.forEach(function(k){
+    weights[k] = Math.round(scores[k]/total * 100);
+  });
+  return weights;
+}`
+};
+
+function switchRRMode(mode) {
+  document.getElementById('rr-manual-content').style.display = mode==='manual' ? '' : 'none';
+  document.getElementById('rr-codelab-content').style.display = mode==='codelab' ? '' : 'none';
+  document.getElementById('tab-manual').className = 'mode-tab' + (mode==='manual'?' active':'');
+  document.getElementById('tab-codelab').className = 'mode-tab' + (mode==='codelab'?' active':'');
+  if(mode==='codelab' && !document.getElementById('rr-code').value) {
+    document.getElementById('rr-code').value = RR_TEMPLATES.safe;
+  }
+}
+
+function rrSetTemplate(name) {
+  document.getElementById('rr-code').value = RR_TEMPLATES[name] || '';
+}
+
+function runRRCodeLab() {
+  var code = document.getElementById('rr-code').value.trim();
+  var errEl = document.getElementById('rr-error');
+  errEl.style.display = 'none';
+  var log = document.getElementById('rr-log');
+  log.innerHTML = '';
+  
+  // Compile allocate function
+  var allocFn;
+  try {
+    allocFn = (new Function(code + '\nreturn allocate;'))();
+    if(typeof allocFn !== 'function') throw new Error('allocate function not found');
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  var regimeResults = [];
+  var allLogs = [];
+  
+  SCENARIOS.forEach(function(scenario) {
+    var ctx = {
+      regime: scenario.id.toUpperCase(),
+      instruments: scenario.instruments,
+      expected_returns: scenario.regimeReturns,
+      driftMult: scenario.driftMult,
+      optimalWeights: scenario.optimalWeights
+    };
+    
+    var weights;
+    try {
+      weights = allocFn(ctx);
+    } catch(e) {
+      errEl.textContent = 'Runtime error in ' + scenario.name + ': ' + e.message;
+      errEl.style.display = 'block';
+      return;
+    }
+    
+    if(!weights) weights = {};
+    
+    // Normalise weights
+    var total = Object.values(weights).reduce(function(s,v){return s+(+v||0);},0);
+    if(total>0) {
+      scenario.instruments.forEach(function(k){ weights[k] = ((weights[k]||0)/total)*100; });
+    }
+    
+    // Compute performance vs optimal (regime fit score)
+    var opt = scenario.optimalWeights;
+    var fitScore = 100 - scenario.instruments.reduce(function(sum,k){
+      return sum + Math.abs((weights[k]||0)-(opt[k]||0));
+    },0)/2;
+    fitScore = Math.max(0, Math.min(100, Math.round(fitScore)));
+    
+    // Simulate portfolio performance
+    var seed = 12345 + SCENARIOS.indexOf(scenario) * 999;
+    var portEq = [100], ewEq = [100];
+    var portRet = 0, ewRet = 0;
+    var n = 200;
+    var lcg = seed;
+    function randN() {
+      lcg = (lcg * 1664525 + 1013904223) & 0xFFFFFFFF;
+      var u = (lcg >>> 0) / 4294967296;
+      lcg = (lcg * 1664525 + 1013904223) & 0xFFFFFFFF;
+      var v = (lcg >>> 0) / 4294967296;
+      return Math.sqrt(-2*Math.log(u+1e-10))*Math.cos(2*Math.PI*v);
+    }
+    
+    for(var t=0;t<n;t++) {
+      var portR = 0, ewR = 0;
+      var nInst = scenario.instruments.length;
+      scenario.instruments.forEach(function(k){
+        var drift = (scenario.driftMult[k]||1) * 0.0006;
+        var vol = 0.012;
+        var r = drift + vol*randN();
+        portR += ((weights[k]||0)/100) * r;
+        ewR += (1/nInst) * r;
+      });
+      portEq.push(portEq[portEq.length-1] * (1+portR));
+      ewEq.push(ewEq[ewEq.length-1] * (1+ewR));
+    }
+    
+    var portTotal = (portEq[portEq.length-1]/portEq[0]-1)*100;
+    var ewTotal = (ewEq[ewEq.length-1]/ewEq[0]-1)*100;
+    var alpha = portTotal - ewTotal;
+    
+    regimeResults.push({name: scenario.name, emoji: scenario.emoji, fitScore, alpha, portTotal});
+    
+    // Log
+    allLogs.push({regime: scenario.id.toUpperCase(), name: scenario.name, emoji: scenario.emoji, weights, fitScore, alpha});
+  });
+  
+  // Render results
+  var resEl = document.getElementById('rr-regime-results');
+  var maxAlpha = Math.max(...regimeResults.map(r=>Math.abs(r.alpha)));
+  resEl.innerHTML = regimeResults.map(function(r){
+    var color = r.fitScore >= 70 ? '#4dba88' : r.fitScore >= 40 ? '#cc9438' : '#c45868';
+    var barW = Math.round(r.fitScore);
+    return '<div class="cl-regime-row">'+
+      '<div class="cl-regime-name">'+r.emoji+' '+r.name.split('/')[0].trim()+'</div>'+
+      '<div class="cl-regime-score" style="color:'+color+'">'+r.fitScore+'</div>'+
+      '<div class="cl-regime-bar-wrap"><div class="cl-regime-bar" style="width:'+barW+'%;background:'+color+'"></div></div>'+
+      '<div style="font-size:11px;color:'+(r.alpha>=0?'#4dba88':'#c45868');width:60px;text-align:right">'+
+        (r.alpha>=0?'+':'')+r.alpha.toFixed(1)+'%</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('rr-cl-overview').style.display = 'block';
+  
+  // Animate log entries
+  var logEl = document.getElementById('rr-log');
+  logEl.innerHTML = '';
+  var logIdx = 0;
+  function addNextLog() {
+    if(logIdx >= allLogs.length) {
+      // Show summary
+      var avgFit = Math.round(allLogs.reduce(function(s,l){return s+l.fitScore;},0)/allLogs.length);
+      var totalAlpha = allLogs.reduce(function(s,l){return s+l.alpha;},0);
+      var scoreEl = document.getElementById('rr-overall-score');
+      var descEl = document.getElementById('rr-overall-desc');
+      scoreEl.textContent = avgFit + ' / 100';
+      descEl.textContent = (avgFit>=80?'Elite macro strategist! You know your regimes.':avgFit>=60?'Solid regime awareness. Keep studying macro relationships.':'Keep practicing — try the Safe Haven or Smart Beta templates.') +
+        ' Cumulative alpha: ' + (totalAlpha>=0?'+':'')+totalAlpha.toFixed(1)+'%';
+      document.getElementById('rr-cl-summary').style.display = 'block';
+      
+      // Award XP
+      var xp = Math.round(avgFit * 2);
+      if(window.LX) {
+        LX.visitDesk('regime-rider');
+        LX.addXP(xp, 'Regime Code Lab');
+        LX.recordRun({sharpe: totalAlpha/20, desk:'regime-rider', isBacktest:true});
+      }
+      return;
+    }
+    var l = allLogs[logIdx++];
+    var div = document.createElement('div');
+    div.className = 'cl-log-entry';
+    div.style.color = l.fitScore>=70?'#4dba88':l.fitScore>=40?'#cc9438':'#c45868';
+    var topWeights = l.weights ? Object.entries(l.weights).sort(function(a,b){return b[1]-a[1];}).slice(0,3) : [];
+    div.textContent = '['+l.regime+'] Fit:'+l.fitScore+'/100 | '+topWeights.map(function(kv){return kv[0]+':'+Math.round(kv[1])+'%';}).join(', ');
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+    setTimeout(addNextLog, 400);
+  }
+  addNextLog();
+}
 </script>
 
+
+</div><!-- /rr-manual-content -->
+
+<!-- Code Lab Content -->
+<div id="rr-codelab-content" style="display:none">
+<div class="cl-wrap">
+  <!-- Left: editor -->
+  <div class="cl-editor-pane">
+    <div class="cl-editor-box">
+      <div class="cl-toolbar">
+        <span>📄 allocate.js</span>
+        <div style="flex:1"></div>
+        <div class="cl-templates">
+          <button class="cl-tpl-btn" onclick="rrSetTemplate('momentum')">Momentum</button>
+          <button class="cl-tpl-btn" onclick="rrSetTemplate('safe')">Safe Haven</button>
+          <button class="cl-tpl-btn" onclick="rrSetTemplate('smart')">Smart Beta</button>
+        </div>
+        <button class="cl-run-btn" onclick="runRRCodeLab()" style="margin-left:8px">▶ Run All Regimes</button>
+      </div>
+      <textarea class="cl-textarea" id="rr-code" spellcheck="false"></textarea>
+    </div>
+    <div class="cl-error" id="rr-error"></div>
+    <div class="cl-api-box">
+      <div class="cl-api-title">allocate(ctx) API</div>
+      <div class="cl-api-row"><span class="cl-api-key">ctx.regime</span><span class="cl-api-desc">string — 'GROWTH' | 'INFLATION' | 'RISKOFF' | 'DEFLATION'</span></div>
+      <div class="cl-api-row"><span class="cl-api-key">ctx.instruments</span><span class="cl-api-desc">string[] — instrument keys available in this regime</span></div>
+      <div class="cl-api-row"><span class="cl-api-key">ctx.expected_returns</span><span class="cl-api-desc">object — {key: annualExpectedReturn%} for asset classes</span></div>
+      <div class="cl-api-row"><span class="cl-api-key">ctx.driftMult</span><span class="cl-api-desc">object — {key: driftMultiplier} per instrument</span></div>
+      <div class="cl-api-row"><span class="cl-api-key">ctx.optimalWeights</span><span class="cl-api-desc">object — reference optimal weights (cheat sheet!)</span></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--dim)">↩ Return: <code style="color:var(--accent)">{instrumentKey: weight, ...}</code> — weights should sum to 100</div>
+    </div>
+  </div>
+  <!-- Right: results -->
+  <div class="cl-results-pane">
+    <div class="cl-result-card" id="rr-cl-overview" style="display:none">
+      <div class="cl-result-title">📊 Strategy Across All 4 Regimes</div>
+      <div id="rr-regime-results"></div>
+    </div>
+    <div class="cl-result-card" style="min-height:120px">
+      <div class="cl-result-title">📝 Allocation Log</div>
+      <div class="cl-trade-log" id="rr-log"><span style="color:var(--dim)">// Run your code to see allocations…</span></div>
+    </div>
+    <div class="cl-result-card" id="rr-cl-summary" style="display:none">
+      <div class="cl-result-title">🏆 Overall Score</div>
+      <div id="rr-overall-score" style="font-size:32px;font-weight:900;color:var(--accent);text-align:center;padding:12px 0"></div>
+      <div id="rr-overall-desc" style="font-size:12px;color:var(--dim);text-align:center;line-height:1.5"></div>
+    </div>
+  </div>
+</div>
+</div><!-- /rr-codelab-content -->
 </body>
 </html>
