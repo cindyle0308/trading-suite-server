@@ -138,25 +138,26 @@ body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index
   height:100%; display:grid;
   grid-template-columns:repeat(5,1fr);
   grid-template-rows:repeat(3,1fr);
-  gap:12px;
+  gap:16px;
+  padding:4px;
 }
-.desk-card { background:var(--bg-surface); border:1.5px solid var(--border-dim); border-radius:10px;
-  padding:18px; cursor:pointer; text-decoration:none;
-  display:flex; flex-direction:column; gap:4px; overflow:hidden;
+.desk-card { background:var(--bg-surface); border:1.5px solid var(--border-dim); border-radius:12px;
+  padding:20px 18px; cursor:pointer; text-decoration:none;
+  display:flex; flex-direction:column; gap:6px; overflow:hidden;
   transition:border-color var(--t-normal),box-shadow var(--t-normal),transform var(--t-normal); }
 .desk-card:hover { border-color:var(--border-mid); transform:translateY(-2px); box-shadow:var(--shadow-card-hover); }
 .desk-card.locked { opacity:0.35; cursor:not-allowed; pointer-events:none; }
 .desk-card.featured { border-color:rgba(77,186,136,0.25); }
-.dc-icon { font-size:22px; line-height:1; }
-.dc-name { font-family:var(--font-sans); font-size:11px; font-weight:700; color:var(--fg-bright); line-height:1.25; }
-.dc-desc { font-size:10px; color:var(--fg-subtle); line-height:1.4; flex:1;
+.dc-icon { font-size:26px; line-height:1; }
+.dc-name { font-family:var(--font-sans); font-size:12px; font-weight:700; color:var(--fg-bright); line-height:1.25; }
+.dc-desc { font-size:10px; color:var(--fg-subtle); line-height:1.45; flex:1;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.dc-footer { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:4px; }
+.dc-footer { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:6px; }
 .dc-chip { font-family:var(--font-sans); font-size:9px; font-weight:700;
-  padding:2px 6px; border-radius:var(--r-pill); }
+  padding:3px 7px; border-radius:var(--r-pill); }
 .dc-chip.open { background:var(--green-bg); color:var(--green); border:1px solid rgba(77,186,136,0.22); }
 .dc-chip.lock { background:var(--bg-elevated); color:var(--fg-muted); border:1px solid var(--border-dim); }
-.dc-xp { font-family:var(--font-mono); font-size:9px; font-weight:600; color:var(--fg-muted); }
+.dc-xp { font-family:var(--font-mono); font-size:10px; font-weight:600; color:var(--fg-muted); }
 .dc-xp.lit { color:var(--green); }
 
 /* ── MISSION GRID — near-square cards filling visible area ── */
@@ -164,20 +165,21 @@ body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index
   height:100%; display:grid;
   grid-template-columns:repeat(7,1fr);
   grid-template-rows:repeat(3,1fr);
-  gap:7px;
+  gap:12px;
+  padding:4px;
 }
 .mc-card {
-  background:var(--bg-surface); border:1.5px solid var(--border-dim); border-radius:10px;
-  padding:10px; display:flex; flex-direction:column; align-items:center;
-  text-align:center; gap:3px; overflow:hidden; transition:border-color var(--t-fast);
+  background:var(--bg-surface); border:1.5px solid var(--border-dim); border-radius:12px;
+  padding:14px 10px; display:flex; flex-direction:column; align-items:center;
+  text-align:center; gap:5px; overflow:hidden; transition:border-color var(--t-fast);
 }
 .mc-card.done { opacity:0.5; background:rgba(77,186,136,0.03); border-color:rgba(77,186,136,0.18); }
-.mc-icon { font-size:20px; line-height:1; flex-shrink:0; }
-.mc-title { font-family:var(--font-sans); font-size:10px; font-weight:700; color:var(--fg-bright); line-height:1.3; }
-.mc-desc { font-size:9px; color:var(--fg-subtle); line-height:1.4; flex:1;
+.mc-icon { font-size:24px; line-height:1; flex-shrink:0; }
+.mc-title { font-family:var(--font-sans); font-size:11px; font-weight:700; color:var(--fg-bright); line-height:1.3; }
+.mc-desc { font-size:9.5px; color:var(--fg-subtle); line-height:1.4; flex:1;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.mc-xp { font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--green); margin-top:auto; }
-.mc-prog { width:100%; height:3px; background:var(--bg-elevated); border-radius:var(--r-pill); overflow:hidden; margin-top:2px; }
+.mc-xp { font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--green); margin-top:auto; }
+.mc-prog { width:100%; height:4px; background:var(--bg-elevated); border-radius:var(--r-pill); overflow:hidden; margin-top:2px; }
 .mc-prog-fill { height:100%; background:var(--green); border-radius:var(--r-pill); }
 
 /* ── LEADERBOARD ── */
