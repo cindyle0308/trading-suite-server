@@ -417,6 +417,7 @@ nav{background:var(--bg2);border-bottom:1px solid var(--border2);padding:6px 14p
   </div>
   <div style="text-align:center;margin-top:12px;">
     <button class="btn btn-primary" onclick="startAssetMgr()">Enter the Market 🏦</button>
+    <button class="btn btn-primary" onclick="showCMICodeLab()" style="margin-top:8px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);color:#60a5fa">💻 Code Lab Mode</button>
   </div>
 </div>
 
@@ -1058,7 +1059,355 @@ function restartAssetMgr() {
   setTheme(localStorage.getItem('imc-theme')||'system', false);
 })();
 </script>
-<script src="lexie-core.js"></script>
+<script src="lexie-core.js">
+/* ── CMI Challenge Code Lab ── */
+const CMI_TEMPLATES = {
+  momentum: `function trade(ctx) {
+  // Momentum: buy stocks that have risen most, sell laggards
+  const tickers = ['TECH','ENRG','FINC','PHMA','LOGX'];
+  const sorted = tickers.slice().sort((a,b) => (ctx.returns[b]||0) - (ctx.returns[a]||0));
+  const orders = [];
+  
+  // Buy top 2 performers
+  for(let i=0;i<2;i++) {
+    const t = sorted[i];
+    if((ctx.returns[t]||0) > 0.02 && ctx.cash > ctx.prices[t] * 10) {
+      orders.push({ticker:t, action:'BUY', qty:10});
+    }
+  }
+  // Sell bottom 2
+  for(let i=sorted.length-2;i<sorted.length;i++) {
+    const t = sorted[i];
+    if((ctx.positions[t]||0) > 0 && (ctx.returns[t]||0) < -0.02) {
+      orders.push({ticker:t, action:'SELL', qty:ctx.positions[t]});
+    }
+  }
+  return orders;
+}`,
+  news: `function trade(ctx) {
+  // News-driven: react to headlines by reading ticker mentions
+  if(!ctx.headline) return [];
+  const hl = ctx.headline.toUpperCase();
+  const orders = [];
+  const TICKERS = ['TECH','ENRG','FINC','PHMA','LOGX'];
+  
+  TICKERS.forEach(t => {
+    const nameMap = {TECH:'TECHCO',ENRG:'ENERGY',FINC:'FINANCE',PHMA:'PHARMA',LOGX:'LOGX'};
+    const mentioned = hl.includes(t) || hl.includes(nameMap[t]||t);
+    if(!mentioned) return;
+    
+    const positive = hl.includes('BEAT') || hl.includes('SURGE') || hl.includes('UPGRADE') || hl.includes('SUCCESS');
+    const negative = hl.includes('MISS') || hl.includes('CUT') || hl.includes('DOWN') || hl.includes('SELL');
+    
+    if(positive && ctx.cash > ctx.prices[t]*20) {
+      orders.push({ticker:t, action:'BUY', qty:20});
+    } else if(negative && ctx.positions[t]>0) {
+      orders.push({ticker:t, action:'SELL', qty:ctx.positions[t]});
+    }
+  });
+  return orders;
+}`,
+  sector: `function trade(ctx) {
+  // Sector rotation: always hold equal weight in top 3 by momentum
+  const TICKERS = ['TECH','ENRG','FINC','PHMA','LOGX'];
+  const TARGET_VALUE = 500; // €500 per position
+  const orders = [];
+  
+  // Sort by 5-bar momentum
+  const sorted = TICKERS.slice().sort((a,b) => {
+    const hA = ctx.history[a] || [];
+    const hB = ctx.history[b] || [];
+    const momA = hA.length>5 ? (hA[hA.length-1]/hA[hA.length-6]-1) : 0;
+    const momB = hB.length>5 ? (hB[hB.length-1]/hB[hB.length-6]-1) : 0;
+    return momB - momA;
+  });
+  
+  const topSet = new Set(sorted.slice(0,3));
+  
+  TICKERS.forEach(t => {
+    const currentPos = ctx.positions[t] || 0;
+    const targetQty = topSet.has(t) ? Math.floor(TARGET_VALUE/ctx.prices[t]) : 0;
+    const diff = targetQty - currentPos;
+    if(diff > 0 && ctx.cash >= diff*ctx.prices[t]) {
+      orders.push({ticker:t, action:'BUY', qty:diff});
+    } else if(diff < 0 && currentPos > 0) {
+      orders.push({ticker:t, action:'SELL', qty:Math.abs(diff)});
+    }
+  });
+  return orders;
+}`
+};
+
+function showCMICodeLab() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('screen-cmi-codelab').style.display = 'flex';
+  if(!document.getElementById('cmi-code').value) {
+    document.getElementById('cmi-code').value = CMI_TEMPLATES.news;
+  }
+}
+
+function cmiSetTpl(name) {
+  document.getElementById('cmi-code').value = CMI_TEMPLATES[name] || '';
+}
+
+function runCMICodeLab() {
+  const code = document.getElementById('cmi-code').value.trim();
+  const errEl = document.getElementById('cmi-error');
+  errEl.style.display = 'none';
+  
+  let tradeFn;
+  try {
+    tradeFn = (new Function(code + '\nreturn trade;'))();
+    if(typeof tradeFn !== 'function') throw new Error('trade function not found');
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  // Pick scenario 0 (Bull Run) for backtest
+  const scenario = SCENARIOS[0];
+  const PHASES = scenario.phases;
+  const TICKS_PER_PHASE = 20;
+  const TICKERS = ['TECH','ENRG','FINC','PHMA','LOGX'];
+  
+  let stocks = {};
+  STOCKS_INIT.forEach(s => { stocks[s.ticker] = s.price; });
+  let initPrices = {...stocks};
+  let positions = {};
+  TICKERS.forEach(t => { positions[t] = 0; });
+  let cash = 10000;
+  let trades = 0;
+  const history = {};
+  TICKERS.forEach(t => { history[t] = [stocks[t]]; });
+  
+  let lcg = 99;
+  function rng() {
+    lcg = (lcg*1664525+1013904223)|0;
+    const u=((lcg>>>0)/4294967296)+1e-10;
+    lcg=(lcg*1664525+1013904223)|0;
+    const v=((lcg>>>0)/4294967296)+1e-10;
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+  }
+  
+  const equityCurve = [];
+  const ewCurve = [];
+  const logEntries = [];
+  let dailyRets = [];
+  
+  for(let phase=1; phase<=PHASES; phase++) {
+    // Find news event for this phase
+    const newsEvent = scenario.news.find(n => n.phase === phase);
+    const headline = newsEvent ? newsEvent.headline : null;
+    
+    for(let tick=0; tick<TICKS_PER_PHASE; tick++) {
+      // Apply news shock at start of phase
+      if(tick === 0 && newsEvent) {
+        TICKERS.forEach(t => {
+          const impact = newsEvent.impacts[t] || 0;
+          stocks[t] *= (1 + impact);
+        });
+      }
+      
+      // GBM price updates
+      TICKERS.forEach(t => {
+        const vol = STOCKS_INIT.find(s=>s.ticker===t)?.vol || 0.012;
+        const drift = scenario.drift[t] || 0;
+        stocks[t] = Math.max(1, stocks[t] * (1 + drift + vol*rng()));
+        history[t].push(stocks[t]);
+      });
+      
+      // Portfolio value
+      const portfolioVal = cash + TICKERS.reduce((s,t) => s + (positions[t]||0)*stocks[t], 0);
+      const ewVal = 10000 * TICKERS.reduce((s,t) => s + stocks[t]/initPrices[t], 0) / TICKERS.length;
+      const prevEq = equityCurve.length > 0 ? equityCurve[equityCurve.length-1] : 10000;
+      equityCurve.push(portfolioVal);
+      ewCurve.push(ewVal);
+      
+      if(equityCurve.length > 1) {
+        dailyRets.push((portfolioVal - prevEq) / prevEq);
+      }
+      
+      // Call strategy
+      const returns = {};
+      TICKERS.forEach(t => { returns[t] = (stocks[t]/initPrices[t]-1)*100; });
+      
+      const ctx = {
+        prices: {...stocks},
+        returns,
+        positions: {...positions},
+        cash,
+        phase,
+        headline: tick===0 ? headline : null,
+        history: {...history}
+      };
+      
+      let orders = [];
+      try { orders = tradeFn(ctx) || []; } catch(e) {}
+      
+      orders.forEach(order => {
+        if(!order || !order.ticker || !order.action) return;
+        const t = order.ticker;
+        const qty = Math.floor(order.qty || 0);
+        if(qty <= 0) return;
+        if(order.action === 'BUY') {
+          const cost = qty * stocks[t];
+          if(cost <= cash) {
+            cash -= cost;
+            positions[t] = (positions[t]||0) + qty;
+            trades++;
+            logEntries.push({phase, tick, action:'BUY', ticker:t, qty, price:stocks[t]});
+          }
+        } else if(order.action === 'SELL') {
+          const sellQty = Math.min(qty, positions[t]||0);
+          if(sellQty > 0) {
+            cash += sellQty * stocks[t];
+            positions[t] -= sellQty;
+            trades++;
+            logEntries.push({phase, tick, action:'SELL', ticker:t, qty:sellQty, price:stocks[t]});
+          }
+        }
+      });
+    }
+  }
+  
+  // Final portfolio value
+  const finalPortfolio = cash + TICKERS.reduce((s,t) => s + (positions[t]||0)*stocks[t], 0);
+  const finalEW = ewCurve[ewCurve.length-1];
+  const pnl = finalPortfolio - 10000;
+  const ewPnl = finalEW - 10000;
+  const alpha = pnl - ewPnl;
+  const mean = dailyRets.reduce((s,v)=>s+v,0)/dailyRets.length || 0;
+  const std = Math.sqrt(dailyRets.reduce((s,v)=>s+(v-mean)*(v-mean),0)/dailyRets.length) || 1;
+  const sharpe = mean/std * Math.sqrt(240);
+  
+  // Display
+  const pnlEl = document.getElementById('cmi-pnl');
+  pnlEl.textContent = (pnl>=0?'+€':'-€')+Math.abs(pnl).toFixed(0);
+  pnlEl.style.color = pnl>=0?'#22c55e':'#ef4444';
+  const alphaEl = document.getElementById('cmi-alpha');
+  alphaEl.textContent = (alpha>=0?'+€':'-€')+Math.abs(alpha).toFixed(0);
+  alphaEl.style.color = alpha>=0?'#22c55e':'#ef4444';
+  document.getElementById('cmi-trades-count').textContent = trades;
+  document.getElementById('cmi-sharpe').textContent = sharpe.toFixed(2);
+  
+  // Chart
+  const canvas = document.getElementById('cmi-chart');
+  if(canvas && canvas.getContext) {
+    const ctx2 = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth||340; canvas.height=120;
+    const W2=canvas.width, H2=canvas.height;
+    ctx2.clearRect(0,0,W2,H2);
+    ctx2.fillStyle='rgba(5,8,18,.5)'; ctx2.fillRect(0,0,W2,H2);
+    const allVals=[...equityCurve,...ewCurve];
+    const mn=Math.min(...allVals), mx=Math.max(...allVals);
+    const range=mx-mn||1;
+    function drawLine(data, color) {
+      const pts=data.map((v,i)=>({x:i/(data.length-1)*W2, y:H2-((v-mn)/range)*(H2-10)-5}));
+      ctx2.beginPath(); ctx2.strokeStyle=color; ctx2.lineWidth=2;
+      pts.forEach((p,i)=>i===0?ctx2.moveTo(p.x,p.y):ctx2.lineTo(p.x,p.y));
+      ctx2.stroke();
+    }
+    drawLine(equityCurve,'#3b82f6');
+    drawLine(ewCurve,'rgba(255,255,255,.2)');
+  }
+  
+  // Animate log
+  const log = document.getElementById('cmi-log');
+  log.innerHTML = '';
+  let li = 0;
+  function addLog() {
+    if(li >= logEntries.length) {
+      const xp = Math.max(20, Math.min(200, Math.round(50 + pnl/20)));
+      if(window.LX) {
+        LX.visitDesk('cmi-challenge');
+        LX.addXP(xp, 'CMI Code Lab');
+        LX.recordRun({sharpe, desk:'cmi-challenge', isBacktest:true});
+      }
+      return;
+    }
+    const e = logEntries[li++];
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;';
+    div.style.color = e.action==='BUY'?'#22c55e':'#ef4444';
+    div.textContent = '[P'+e.phase+'] '+e.action+' '+e.qty+'×'+e.ticker+' @ €'+e.price.toFixed(2);
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    setTimeout(addLog, 30);
+  }
+  addLog();
+}
+</script>
+
+
+<!-- ══════════════════ CMI CODE LAB ══════════════════ -->
+<div id="screen-cmi-codelab" style="display:none;flex-direction:column;padding:0;min-height:100vh">
+  <nav class="suite-nav" style="position:sticky;top:0;z-index:10;padding:10px 24px">
+    <button onclick="document.getElementById('screen-cmi-codelab').style.display='none';document.getElementById('setup').style.display=''" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px">← Back to Setup</button>
+    <span style="margin-left:auto;font-size:13px;color:var(--dim2)">CMI Challenge — Code Lab</span>
+  </nav>
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;max-width:1200px;margin:0 auto;padding:20px 32px;width:100%">
+    <!-- Editor -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:#151a28;border:1px solid #2a3347;border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #2a3347">
+          <span style="font-size:11px;color:#5a6a8a">📄 strategy.js</span>
+          <div style="flex:1"></div>
+          <button onclick="cmiSetTpl('momentum')" style="padding:3px 10px;border-radius:6px;border:1px solid #2a3347;background:none;color:#5a6a8a;font-size:11px;cursor:pointer">Momentum</button>
+          <button onclick="cmiSetTpl('news')" style="padding:3px 10px;border-radius:6px;border:1px solid #2a3347;background:none;color:#5a6a8a;font-size:11px;cursor:pointer">News Driven</button>
+          <button onclick="cmiSetTpl('sector')" style="padding:3px 10px;border-radius:6px;border:1px solid #2a3347;background:none;color:#5a6a8a;font-size:11px;cursor:pointer">Sector Rotation</button>
+          <button onclick="runCMICodeLab()" style="margin-left:8px;padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:13px;font-weight:700;cursor:pointer">▶ Run Backtest</button>
+        </div>
+        <textarea id="cmi-code" spellcheck="false" style="width:100%;min-height:320px;background:rgba(5,8,18,.9);color:#93c5fd;border:none;padding:16px;font-family:'DM Mono','JetBrains Mono',monospace;font-size:13px;line-height:1.65;resize:vertical;outline:none;tab-size:2"></textarea>
+      </div>
+      <div id="cmi-error" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px;font-size:12px;color:#f87171;font-family:monospace;display:none"></div>
+      <div style="background:#151a28;border:1px solid #2a3347;border-radius:14px;padding:16px">
+        <div style="font-size:11px;font-weight:700;color:#5a6a8a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">trade(ctx) API</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:11px">
+          <code style="color:#60a5fa">ctx.prices</code><span style="color:#5a6a8a">{ticker: price} — current prices all 5 stocks</span>
+          <code style="color:#60a5fa">ctx.returns</code><span style="color:#5a6a8a">{ticker: return%} — since-start return for each stock</span>
+          <code style="color:#60a5fa">ctx.positions</code><span style="color:#5a6a8a">{ticker: shares} — current holdings</span>
+          <code style="color:#60a5fa">ctx.cash</code><span style="color:#5a6a8a">number — available cash (€)</span>
+          <code style="color:#60a5fa">ctx.phase</code><span style="color:#5a6a8a">number — current scenario phase (1–12)</span>
+          <code style="color:#60a5fa">ctx.headline</code><span style="color:#5a6a8a">string — latest news headline (or null)</span>
+          <code style="color:#60a5fa">ctx.history</code><span style="color:#5a6a8a">{ticker: number[]} — price history arrays</span>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#5a6a8a">↩ Return: array of <code style="color:#60a5fa">{ticker, action:'BUY'|'SELL'|'HOLD', qty}</code></div>
+      </div>
+    </div>
+    <!-- Results -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:#151a28;border:1px solid #2a3347;border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:10px">📊 Backtest Results</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid #2a3347;border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="cmi-pnl" style="font-size:20px;font-weight:800;color:#3b82f6">—</div>
+            <div style="font-size:9px;color:#5a6a8a;margin-top:2px;text-transform:uppercase;letter-spacing:.4px">P&L (€)</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid #2a3347;border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="cmi-alpha" style="font-size:20px;font-weight:800;color:#22c55e">—</div>
+            <div style="font-size:9px;color:#5a6a8a;margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Alpha vs EW</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid #2a3347;border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="cmi-trades-count" style="font-size:20px;font-weight:800;color:#e8f0fe">—</div>
+            <div style="font-size:9px;color:#5a6a8a;margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Trades</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid #2a3347;border-radius:10px;padding:11px 12px;text-align:center">
+            <div id="cmi-sharpe" style="font-size:20px;font-weight:800;color:#cc9438">—</div>
+            <div style="font-size:9px;color:#5a6a8a;margin-top:2px;text-transform:uppercase;letter-spacing:.4px">Sharpe</div>
+          </div>
+        </div>
+        <canvas id="cmi-chart" height="120" style="width:100%;border-radius:8px"></canvas>
+      </div>
+      <div style="background:#151a28;border:1px solid #2a3347;border-radius:14px;padding:16px">
+        <div style="font-size:12px;font-weight:700;color:#e8f0fe;margin-bottom:8px">📝 Trade Log</div>
+        <div id="cmi-log" style="background:rgba(5,8,18,.9);border:1px solid #2a3347;border-radius:10px;padding:12px;height:220px;overflow-y:auto;font-family:'DM Mono',monospace;font-size:11px">
+          <span style="color:#5a6a8a">// Run backtest to see trades…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
