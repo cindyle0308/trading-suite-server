@@ -25,6 +25,64 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <style>
+/* ─── EXPLICIT DARK / LIGHT THEME TOKENS (self-contained, no lx-design.css dependency) ─── */
+html[data-theme="dark"], html:not([data-theme]) {
+  --bg-base:         #0e0c0b;
+  --bg-surface:      #141210;
+  --bg-panel:        #1a1714;
+  --bg-raised:       #211e1a;
+  --bg-elevated:     #282420;
+  --bg-overlay:      #302b26;
+  --bg-header-glass: rgba(20,18,16,0.92);
+  --border-dim:      #332e28;
+  --border-mid:      #484038;
+  --border-bright:   #605650;
+  --fg-muted:        #4a4238;
+  --fg-subtle:       #6a6058;
+  --fg-secondary:    #b8b0a8;
+  --fg-primary:      #d4cdc6;
+  --fg-bright:       #f0ebe4;
+  --fg-white:        #faf7f3;
+  --green:           #4dba88;
+  --green-dim:       #37966c;
+  --green-bg:        rgba(77,186,136,0.08);
+  --coral:           #d4728a;
+  --coral-dim:       #b05670;
+  --coral-bg:        rgba(212,114,138,0.08);
+  --amber:           #cc9438;
+  --amber-bg:        rgba(204,148,56,0.10);
+  --blue:            #6a9fd4;
+  --shadow-1:        0 1px 0 rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.45);
+}
+html[data-theme="light"] {
+  --bg-base:         #faf7f3;
+  --bg-surface:      #f4efe8;
+  --bg-panel:        #ede7de;
+  --bg-raised:       #e6dfd5;
+  --bg-elevated:     #ddd6cb;
+  --bg-overlay:      #d4ccc0;
+  --bg-header-glass: rgba(244,239,232,0.92);
+  --border-dim:      #cdc5b8;
+  --border-mid:      #b8afa0;
+  --border-bright:   #a09080;
+  --fg-muted:        #c0b8ae;
+  --fg-subtle:       #8a7e72;
+  --fg-secondary:    #5c5048;
+  --fg-primary:      #38302a;
+  --fg-bright:       #1e1814;
+  --fg-white:        #0e0c0b;
+  --green:           #2a9466;
+  --green-dim:       #1c7650;
+  --green-bg:        rgba(42,148,102,0.09);
+  --coral:           #b85570;
+  --coral-dim:       #964460;
+  --coral-bg:        rgba(184,85,112,0.09);
+  --amber:           #a87828;
+  --amber-bg:        rgba(168,120,40,0.10);
+  --blue:            #4878b0;
+  --shadow-1:        0 1px 0 rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.09);
+}
+
 /* ─── EDITORIAL FONT ALIASES ─── */
 :root {
   --ef-display: 'Fraunces', Georgia, serif;
@@ -38,10 +96,6 @@
   --ink-mute:  var(--fg-subtle);
   --rule:      var(--border-dim);
   --pill-bg:   var(--bg-header-glass);
-  --shadow-1:  0 1px 0 rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.45);
-}
-[data-theme="light"] {
-  --shadow-1: 0 1px 0 rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.09);
 }
 
 html, body { margin:0; padding:0; background:var(--bg-base); color:var(--fg-primary);
@@ -67,11 +121,12 @@ body { overflow-x:hidden; padding-bottom:80px; }
   flex-shrink:0; line-height:1; }
 .pn-logo .le,.pn-logo .ie { font-family:var(--ef-display); font-weight:800;
   font-size:22px; color:var(--fg-bright); letter-spacing:-0.02em; }
-.pn-logo .lx { font-family:var(--ef-display); font-weight:900; font-style:italic;
-  font-size:30px; color:var(--green); line-height:0.85;
-  margin:0 -1px; display:inline-block; transform:translateY(2px); }
+.pn-logo .x { font-family:var(--ef-display); font-weight:900; font-style:italic;
+  font-size:36px; color:var(--green); line-height:0.8;
+  margin:0 -2px; display:inline-block; transform:translateY(2px); }
 .pn-sub { font-family:var(--font-mono); font-size:9px; color:var(--fg-subtle);
-  letter-spacing:0.14em; text-transform:uppercase; margin-left:10px; flex-shrink:0; }
+  letter-spacing:0.14em; text-transform:uppercase;
+  margin-left:5px; flex-shrink:0; transform:translateY(4px); }
 
 .pn-spacer { flex:1; }
 
@@ -592,7 +647,7 @@ hr.dashed { border:none; border-top:1px dashed var(--border-dim); margin:0 24px;
 ══════════════════════════════════════════════════ -->
 <nav class="pillnav" id="pillnav">
   <a class="pn-logo" href="index.html">
-    <span class="le">le</span><span class="lx">X</span><span class="ie">ie</span>
+    <span class="le">le</span><span class="x">x</span><span class="ie">ie</span>
   </a>
   <span class="pn-sub">Capital</span>
   <div class="pn-spacer"></div>
