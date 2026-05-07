@@ -353,12 +353,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,800;0,9..144,900;1,9..144,900&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <!-- TOP NAV -->
 <nav class="topnav">
-  <span class="logo">LeXie <span>Research Terminal</span></span>
+  <a href="index.html" class="lx-wordmark" style="margin-right:8px;"><span class="le">le</span><span class="x">x</span><span class="ie">ie</span></a><span style="font-family:var(--font-mono,'DM Mono',monospace);font-size:11px;color:var(--bright,#e8e3da);margin-left:8px;letter-spacing:0.05em;">Research Terminal</span>
   <div class="nav-sep"></div>
   <button class="nav-tab active" onclick="switchMode('terminal')">⌨ Terminal</button>
   <button class="nav-tab" onclick="switchMode('manual')">🖱 Manual Trade</button>

@@ -7,6 +7,28 @@
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,800;0,9..144,900;1,9..144,900&display=swap');
+
+/* ── GLOBAL LEXIE WORDMARK ──────────────────────────────── */
+/* Usage: <a class="lx-wordmark" href="index.html">
+           <span class="le">le</span><span class="x">x</span><span class="ie">ie</span>
+         </a> */
+.lx-wordmark {
+  display:inline-flex; align-items:center; gap:0; text-decoration:none; flex-shrink:0; line-height:1;
+}
+.lx-wordmark .le, .lx-wordmark .ie {
+  font-family:'Fraunces', Georgia, serif; font-weight:800;
+  font-size:20px; color:var(--fg-bright); letter-spacing:-0.02em; line-height:1;
+}
+.lx-wordmark .x {
+  font-family:'Fraunces', Georgia, serif; font-weight:900; font-style:italic;
+  font-size:32px; color:var(--green); line-height:1;
+  margin:0 -2px; display:inline-block; transform:translateY(1px);
+}
+.lx-wordmark-sub {
+  font-family:var(--font-code,'DM Mono',monospace); font-size:9px; color:var(--fg-subtle);
+  letter-spacing:0.14em; text-transform:uppercase; margin-left:5px; transform:translateY(3px);
+}
 
 /* ── COLOR TOKENS — DARK (default) ───────────────── */
 :root {

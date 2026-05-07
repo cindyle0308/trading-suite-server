@@ -376,7 +376,8 @@ body { overflow-x:hidden; padding-bottom:80px; }
   font-size:16px; color:var(--ink-soft); margin-top:8px; }
 
 .fp-stage { background:var(--bg-paper); border:1.5px solid var(--fg-bright);
-  border-radius:4px; aspect-ratio:16/9; position:relative; overflow:hidden; }
+  border-radius:4px; aspect-ratio:16/9; position:relative; overflow:hidden;
+  width:100%; min-height:360px; display:block; }
 .fp-stage::before { content:""; position:absolute; inset:8px -8px -8px 8px;
   background:var(--border-mid); border:1.5px solid var(--fg-bright);
   border-radius:4px; z-index:-1; }
@@ -688,7 +689,7 @@ hr.dashed { border:none; border-top:1px dashed var(--border-dim); margin:0 24px;
       run them on synthetic markets, level up through thirteen specialised desks,
       and earn your way to the live competition floor.
     </div>
-    <a class="v1-cta" href="terminal.html">Start for free →</a>
+    <a class="v1-cta" href="floor.html">Start for free →</a>
   </div>
 
   <!-- Feature row 1: Write Real Signals -->
@@ -710,7 +711,7 @@ hr.dashed { border:none; border-top:1px dashed var(--border-dim); margin:0 24px;
           }
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:11px;">
-          <span style="font-family:var(--font-mono);color:var(--green)">Sharpe 0.71 · IC 0.14 · 200 bars</span>
+          <span style="font-family:var(--font-mono);color:var(--green)" id="code-lab-stats">Sharpe — · IC — · 0 runs</span>
           <span style="font-family:var(--ef-serif);font-style:italic;color:var(--ink-mute)">run →</span>
         </div>
       </div>
@@ -728,9 +729,9 @@ hr.dashed { border:none; border-top:1px dashed var(--border-dim); margin:0 24px;
       <div class="paper">
         <div class="mock-stats">
           <div class="lbl">Your Station</div>
-          <div class="lvl">Intern, lv. <em>3</em></div>
-          <div class="xpbar"><i></i></div>
-          <div class="xprow"><span id="ms-xp-val">247 / 500 XP</span><span id="ms-xp-next">253 to Junior</span></div>
+          <div class="lvl" id="ms-lvl-txt">Intern, lv. <em>0</em></div>
+          <div class="xpbar"><i id="ms-xp-bar" style="width:0%"></i></div>
+          <div class="xprow"><span id="ms-xp-val">0 / 500 XP</span><span id="ms-xp-next">500 to Junior</span></div>
           <div class="g4">
             <div><div class="k">Runs</div><div class="v" id="ms-runs">—</div></div>
             <div><div class="k">Best Sharpe</div><div class="v grn" id="ms-sharpe">—</div></div>
@@ -753,10 +754,9 @@ hr.dashed { border:none; border-top:1px dashed var(--border-dim); margin:0 24px;
       <div class="paper">
         <div class="mock-missions">
           <h4><em>Today's</em> Missions</h4>
-          <div class="mrow done"><span class="num">01</span><span class="ttl">First Signal</span><span class="xp">+50 XP</span></div>
-          <div class="mrow"><span class="num">02</span><span class="ttl">Sharpe Master · in progress</span><span class="xp">+100 XP</span></div>
-          <div class="mrow lock"><span class="num">03</span><span class="ttl">Overfit Slayer · locked</span><span class="xp">+150 XP</span></div>
-          <div class="mrow lock"><span class="num">04</span><span class="ttl">Flow Reader · locked</span><span class="xp">+200 XP</span></div>
+          <div id="missions-list">
+            <div class="mrow lock"><span class="num">01</span><span class="ttl" style="color:var(--ink-mute);font-style:italic;">Sign in to track missions</span><span class="xp" style="color:var(--green);cursor:pointer;" onclick="openModal()">→ Join</span></div>
+          </div>
         </div>
       </div>
     </div>
@@ -865,7 +865,7 @@ hr.dashed { border:none; border-top:1px dashed var(--border-dim); margin:0 24px;
   </div>
 
   <div class="fp-stage" id="fp-stage">
-    <div class="fp-floor-lbl">FLOOR PLAN · LeXie Capital · Level 1</div>
+    <div class="fp-floor-lbl" id="fp-floor-lbl">FLOOR PLAN · LeXie Capital · Level 1</div>
     <div class="fp-floor-title">— 13 active desks —</div>
     <!-- rooms injected by JS -->
   </div>
@@ -950,7 +950,7 @@ hr.dashed { border:none; border-top:1px dashed var(--border-dim); margin:0 24px;
 <div class="modal-bg" id="auth-modal" style="display:none" onclick="if(event.target===this&&!_authBusy)closeModal()">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div class="modal-logo">
-      <span style="font-family:var(--ef-display);font-weight:900;font-size:28px;letter-spacing:-0.02em;">le<span style="color:var(--green);font-style:italic;">X</span>ie</span>
+      <span style="font-family:var(--ef-display);font-weight:800;font-size:22px;letter-spacing:-0.02em;">le<span style="color:var(--green);font-style:italic;font-weight:900;font-size:34px;line-height:0.8;display:inline-block;transform:translateY(2px);margin:0 -2px;">x</span>ie</span>
     </div>
     <div class="modal-title">LeXie Capital</div>
     <div class="modal-sub" id="modal-sub">Sign in to save progress across all your devices</div>
@@ -1353,6 +1353,12 @@ function updateAllUI() {
   var info=LX.getLevelInfo();
   var st=LX.getState();
 
+  // Level display + XP bar
+  var lvlEl=document.getElementById('ms-lvl-txt');
+  if(lvlEl) lvlEl.innerHTML=info.badge+' '+info.title+', lv. <em>'+info.index+'</em>';
+  var xpBarEl=document.getElementById('ms-xp-bar');
+  if(xpBarEl) xpBarEl.style.width=info.pct+'%';
+
   // Stat boxes in editorial feature row
   _setTxt('ms-runs',  st.terminalRuns||0);
   _setTxt('ms-sharpe',st.bestSharpe>0?st.bestSharpe.toFixed(2):'—');
@@ -1362,6 +1368,21 @@ function updateAllUI() {
   _setTxt('ms-streak',(st.dailyStreak||0)+'🔥');
   _setTxt('ms-xp-val',info.xp.toLocaleString()+' / '+(info.next?info.next.minXP.toLocaleString():'MAX')+' XP');
   _setTxt('ms-xp-next',info.next?(info.next.minXP-info.xp).toLocaleString()+' to '+info.next.title:'✦ Max level');
+
+  // Code lab live stats
+  var sharpeStr=st.bestSharpe>0?st.bestSharpe.toFixed(2):'—';
+  var icStr=st.bestIC1>0?st.bestIC1.toFixed(3):'—';
+  _setTxt('code-lab-stats','Sharpe '+sharpeStr+' · IC '+icStr+' · '+(st.terminalRuns||0)+' runs');
+
+  // Floor plan label with user name
+  var fpLbl=document.getElementById('fp-floor-lbl');
+  if(fpLbl){
+    var floorUser=_fbUser?((_fbUser.displayName||_fbUser.email||'').split(' ')[0]||'Trader'):'Guest';
+    fpLbl.textContent='FLOOR PLAN · '+floorUser.toUpperCase()+' · LV. '+info.index;
+  }
+
+  // Missions list — live
+  _buildMissionsList();
 
   // Daily sidebar stats
   _setTxt('ds-rank',info.badge+' '+info.title+' · lv. '+info.index);
@@ -1388,6 +1409,31 @@ function updateAllUI() {
   updateNavAuth();
 }
 window.addEventListener('lx:update', updateAllUI);
+
+/* ══════════════════════════════════════════════════════════════
+   MISSIONS LIST (Test Your Might section)
+══════════════════════════════════════════════════════════════ */
+function _buildMissionsList() {
+  var el=document.getElementById('missions-list'); if(!el) return;
+  if(!window.LX_MISSIONS||!window.LX) {
+    el.innerHTML='<div class="mrow lock"><span class="num">01</span><span class="ttl" style="color:var(--ink-mute);font-style:italic;">Sign in to track missions</span><span class="xp" style="color:var(--green);cursor:pointer;" onclick="openModal()">→ Join</span></div>';
+    return;
+  }
+  var done=window.LX.getState().missionsCompleted||[];
+  var shown=LX_MISSIONS.slice(0,4); // show first 4
+  el.innerHTML=shown.map(function(m,i){
+    var isDone=done.indexOf(m.id)>=0;
+    var cls='mrow'+(isDone?' done':'');
+    var status=isDone?'✓ done':'pending';
+    return '<div class="'+cls+'"><span class="num">'+String(i+1).padStart(2,'0')+'</span>'
+      +'<span class="ttl">'+m.title+(isDone?'':' · '+status)+'</span>'
+      +'<span class="xp">+'+m.xp+' XP</span></div>';
+  }).join('');
+  if(!_fbUser){
+    el.innerHTML+='<div style="padding:8px 0 2px;font-family:var(--font-mono);font-size:10px;color:var(--ink-mute);">'
+      +'<a href="#" onclick="openModal();return false" style="color:var(--green);text-decoration:none;">↳ Sign in to save progress</a></div>';
+  }
+}
 
 /* ══════════════════════════════════════════════════════════════
    DESK TABLE (Daily section)
